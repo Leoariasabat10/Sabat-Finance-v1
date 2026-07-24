@@ -1,0 +1,484 @@
+// ─────────────────────────────────────────────────────────────────────
+// Sabat Finance — Esquema oficial (transcripción 1:1 del documento
+// 03-base-de-datos-modelo-er.md). Los CHECK constraints, RLS, triggers
+// de auditoría y seed de roles/permisos viven en prisma/sql/setup.sql
+// porque Prisma no los modela.
+// ─────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ── Enums ────────────────────────────────────────────────────────────
+
+enum OrigenOperacion {
+  prestamo
+  venta
+
+  @@map("origen_operacion")
+}
+
+enum TipoInteres {
+  mensual
+  diario
+  semanal
+  quincenal
+  personalizado
+
+  @@map("tipo_interes")
+}
+
+enum ModeloInteres {
+  fijo_sobre_capital
+  saldo_insoluto
+
+  @@map("modelo_interes")
+}
+
+enum FormaPago {
+  pago_unico
+  semanal
+  quincenal
+  mensual
+
+  @@map("forma_pago")
+}
+
+enum EstadoOperacion {
+  activo
+  pagado
+  vencido
+  refinanciado
+  anulado
+
+  @@map("estado_operacion")
+}
+
+enum EstadoCuota {
+  pendiente
+  parcial
+  pagada
+  vencida
+
+  @@map("estado_cuota")
+}
+
+enum MetodoPago {
+  efectivo
+  transferencia
+  otro
+
+  @@map("metodo_pago")
+}
+
+enum TipoAbono {
+  cuota_completa
+  abono_capital
+  abono_interes
+  mora
+
+  @@map("tipo_abono")
+}
+
+enum TipoMovimientoCaja {
+  ingreso
+  egreso
+
+  @@map("tipo_movimiento_caja")
+}
+
+enum TipoPagoVenta {
+  contado
+  credito
+
+  @@map("tipo_pago_venta")
+}
+
+enum EstadoVenta {
+  activa
+  anulada
+
+  @@map("estado_venta")
+}
+
+enum EstadoCliente {
+  activo
+  inactivo
+
+  @@map("estado_cliente")
+}
+
+enum TipoMora {
+  porcentaje_diario
+  fijo
+
+  @@map("tipo_mora")
+}
+
+enum OrdenAplicacionPago {
+  interes_primero
+  proporcional
+
+  @@map("orden_aplicacion_pago")
+}
+
+enum EventoWhatsapp {
+  bienvenida
+  nueva_venta
+  nuevo_prestamo
+  tres_dias_antes
+  un_dia_antes
+  mismo_dia
+  vencido
+  pago_recibido
+  paz_y_salvo
+  resumen_diario
+
+  @@map("evento_whatsapp")
+}
+
+enum EstadoEnvio {
+  pendiente
+  enviado
+  fallido
+  leido
+
+  @@map("estado_envio")
+}
+
+enum AccionAuditoria {
+  INSERT
+  UPDATE
+  DELETE
+
+  @@map("accion_auditoria")
+}
+
+// ── Núcleo: clientes y motor de crédito unificado ───────────────────
+
+model Cliente {
+  id          String        @id @default(uuid()) @db.Uuid
+  nombre      String
+  whatsapp    String
+  cedula      String?       @unique
+  telefono    String?
+  direccion   String?
+  barrio      String?
+  ciudad      String?
+  referencia  String?
+  notas       String?
+  fotoUrl     String?       @map("foto_url")
+  estado      EstadoCliente @default(activo)
+  scoreRiesgo Decimal?      @map("score_riesgo") @db.Decimal(5, 2)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?     @map("deleted_at") @db.Timestamptz(6)
+
+  operaciones OperacionCredito[]
+  ventas      Venta[]
+  etiquetas   ClienteEtiqueta[]
+  notasList   NotaCliente[]
+  mensajes    WhatsappMensaje[]
+
+  @@index([nombre])
+  @@index([whatsapp])
+  @@map("clientes")
+}
+
+model OperacionCredito {
+  id                 String          @id @default(uuid()) @db.Uuid
+  origen             OrigenOperacion
+  clienteId          String          @map("cliente_id") @db.Uuid
+  ventaId            String?         @unique @map("venta_id") @db.Uuid
+  montoCapital       Decimal         @map("monto_capital") @db.Decimal(14, 2)
+  fechaOperacion     DateTime        @map("fecha_operacion") @db.Date
+  plazoDias          Int             @map("plazo_dias")
+  tipoInteres        TipoInteres     @map("tipo_interes")
+  modeloInteres      ModeloInteres   @default(fijo_sobre_capital) @map("modelo_interes")
+  tasaInteres        Decimal         @default(0) @map("tasa_interes") @db.Decimal(7, 4)
+  formaPago          FormaPago       @map("forma_pago")
+  estado             EstadoOperacion @default(activo)
+  fechaVencimiento   DateTime        @map("fecha_vencimiento") @db.Date
+  interesTotalCalc   Decimal         @default(0) @map("interes_total_calc") @db.Decimal(14, 2)
+  totalAPagarCalc    Decimal         @default(0) @map("total_a_pagar_calc") @db.Decimal(14, 2)
+  saldoPendienteCalc Decimal         @default(0) @map("saldo_pendiente_calc") @db.Decimal(14, 2)
+  operacionPadreId   String?         @map("operacion_padre_id") @db.Uuid
+  creadoPor          String?         @map("creado_por") @db.Uuid
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt          DateTime?       @map("deleted_at") @db.Timestamptz(6)
+
+  cliente          Cliente            @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  venta            Venta?             @relation(fields: [ventaId], references: [id])
+  operacionPadre   OperacionCredito?  @relation("OperacionPadre", fields: [operacionPadreId], references: [id])
+  operacionesHijas OperacionCredito[] @relation("OperacionPadre")
+  cuotas           Cuota[]
+  pagos            Pago[]
+  refinOriginal    Refinanciacion[]   @relation("OperacionOriginal")
+  refinNueva       Refinanciacion[]   @relation("OperacionNueva")
+
+  @@index([origen])
+  @@index([clienteId, estado])
+  @@index([estado])
+  @@index([fechaVencimiento])
+  @@map("operaciones_credito")
+}
+
+model Cuota {
+  id                 String      @id @default(uuid()) @db.Uuid
+  operacionCreditoId String      @map("operacion_credito_id") @db.Uuid
+  numeroCuota        Int         @map("numero_cuota")
+  fechaVencimiento   DateTime    @map("fecha_vencimiento") @db.Date
+  capital            Decimal     @db.Decimal(14, 2)
+  interes            Decimal     @db.Decimal(14, 2)
+  moraAcumulada      Decimal     @default(0) @map("mora_acumulada") @db.Decimal(14, 2)
+  total              Decimal     @db.Decimal(14, 2)
+  saldoCalc          Decimal     @map("saldo_calc") @db.Decimal(14, 2)
+  estado             EstadoCuota @default(pendiente)
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  operacion OperacionCredito @relation(fields: [operacionCreditoId], references: [id], onDelete: Cascade)
+  pagos     Pago[]
+
+  @@unique([operacionCreditoId, numeroCuota])
+  @@index([operacionCreditoId, estado])
+  @@index([fechaVencimiento])
+  @@map("cuotas")
+}
+
+model Pago {
+  id                 String     @id @default(uuid()) @db.Uuid
+  operacionCreditoId String     @map("operacion_credito_id") @db.Uuid
+  cuotaId            String?    @map("cuota_id") @db.Uuid
+  fechaPago          DateTime   @map("fecha_pago") @db.Date
+  valor              Decimal    @db.Decimal(14, 2)
+  metodoPago         MetodoPago @default(efectivo) @map("metodo_pago")
+  tipoAbono          TipoAbono  @default(cuota_completa) @map("tipo_abono")
+  observaciones      String?
+  comprobanteUrl     String?    @map("comprobante_url")
+  registradoPor      String?    @map("registrado_por") @db.Uuid
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt          DateTime?  @map("deleted_at") @db.Timestamptz(6)
+
+  operacion OperacionCredito @relation(fields: [operacionCreditoId], references: [id], onDelete: Cascade)
+  cuota     Cuota?           @relation(fields: [cuotaId], references: [id])
+
+  @@index([operacionCreditoId])
+  @@index([fechaPago])
+  @@map("pagos")
+}
+
+// ── Comercial: ventas sin catálogo (decisión 8.7) ───────────────────
+
+model Venta {
+  id           String        @id @default(uuid()) @db.Uuid
+  clienteId    String        @map("cliente_id") @db.Uuid
+  tipoPago     TipoPagoVenta @map("tipo_pago")
+  fecha        DateTime      @db.Date
+  totalCalc    Decimal       @default(0) @map("total_calc") @db.Decimal(14, 2)
+  utilidadCalc Decimal       @default(0) @map("utilidad_calc") @db.Decimal(14, 2)
+  estado       EstadoVenta   @default(activa)
+  vendidoPor   String?       @map("vendido_por") @db.Uuid
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz(6)
+
+  cliente          Cliente           @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  items            VentaItem[]
+  operacionCredito OperacionCredito?
+
+  @@index([clienteId])
+  @@index([fecha])
+  @@map("ventas")
+}
+
+model VentaItem {
+  id                String  @id @default(uuid()) @db.Uuid
+  ventaId           String  @map("venta_id") @db.Uuid
+  nombreProducto    String  @map("nombre_producto")
+  descripcion       String?
+  costo             Decimal @db.Decimal(14, 2)
+  precioVenta       Decimal @map("precio_venta") @db.Decimal(14, 2)
+  utilidadLineaCalc Decimal @default(0) @map("utilidad_linea_calc") @db.Decimal(14, 2)
+
+  venta Venta @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+
+  @@index([ventaId])
+  @@map("venta_items")
+}
+
+// ── Caja y refinanciaciones ─────────────────────────────────────────
+
+model MovimientoCaja {
+  id                  String             @id @default(uuid()) @db.Uuid
+  tipo                TipoMovimientoCaja
+  categoria           String?
+  monto               Decimal            @db.Decimal(14, 2)
+  referenciaId        String?            @map("referencia_id") @db.Uuid
+  referenciaTipo      String?            @map("referencia_tipo")
+  fecha               DateTime           @db.Date
+  descripcion         String?
+  saldoResultanteCalc Decimal            @default(0) @map("saldo_resultante_calc") @db.Decimal(14, 2)
+  creadoPor           String?            @map("creado_por") @db.Uuid
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([fecha])
+  @@map("movimientos_caja")
+}
+
+model Refinanciacion {
+  id                  String   @id @default(uuid()) @db.Uuid
+  operacionOriginalId String   @map("operacion_original_id") @db.Uuid
+  operacionNuevaId    String   @map("operacion_nueva_id") @db.Uuid
+  fecha               DateTime @db.Date
+  saldoConsolidado    Decimal  @map("saldo_consolidado") @db.Decimal(14, 2)
+  motivo              String?
+
+  operacionOriginal OperacionCredito @relation("OperacionOriginal", fields: [operacionOriginalId], references: [id])
+  operacionNueva    OperacionCredito @relation("OperacionNueva", fields: [operacionNuevaId], references: [id])
+
+  @@map("refinanciaciones")
+}
+
+// ── Configuración (fila única) ──────────────────────────────────────
+
+model Configuracion {
+  id                    Int                 @id @default(1)
+  tasaInteresDefecto    Decimal             @default(10) @map("tasa_interes_defecto") @db.Decimal(7, 4)
+  moneda                String              @default("COP")
+  colorPrimario         String              @default("#0ea5e9") @map("color_primario")
+  logoUrl               String?             @map("logo_url")
+  nombreNegocio         String              @default("Sabat Finance") @map("nombre_negocio")
+  diasAlertaVencimiento Int                 @default(3) @map("dias_alerta_vencimiento")
+  tasaMoraDefecto       Decimal             @default(0) @map("tasa_mora_defecto") @db.Decimal(10, 4)
+  tipoMora              TipoMora            @default(porcentaje_diario) @map("tipo_mora")
+  capitalInicial        Decimal             @default(0) @map("capital_inicial") @db.Decimal(14, 2)
+  ordenAplicacionPago   OrdenAplicacionPago @default(interes_primero) @map("orden_aplicacion_pago")
+
+  @@map("configuracion")
+}
+
+// ── Transversales ───────────────────────────────────────────────────
+// Nota: no hay modelos de Usuario/Rol/Permiso — esta aplicación es de uso
+// privado (un solo negocio, sin multiusuario ni autenticación, ver
+// DECISIONS.md). Los campos `creado_por`/`usuario_id`/`vendido_por` que
+// quedan abajo son UUID sueltos sin relación real a ninguna tabla; siempre
+// quedan en null. Se conservan tal cual porque pertenecen a tablas de
+// negocio (Operaciones, Ventas, Caja, Notificaciones...) que no se tocan.
+
+model Auditoria {
+  id                BigInt          @id @default(autoincrement())
+  tabla             String
+  registroId        String?         @map("registro_id")
+  accion            AccionAuditoria
+  valoresAnteriores Json?           @map("valores_anteriores")
+  valoresNuevos     Json?           @map("valores_nuevos")
+  usuarioId         String?         @map("usuario_id") @db.Uuid
+  fecha             DateTime        @default(now()) @db.Timestamptz(6)
+  ip                String?
+
+  @@index([tabla, registroId])
+  @@index([fecha])
+  @@map("auditoria")
+}
+
+model Notificacion {
+  id             String   @id @default(uuid()) @db.Uuid
+  usuarioId      String?  @map("usuario_id") @db.Uuid
+  tipo           String
+  titulo         String
+  mensaje        String
+  leida          Boolean  @default(false)
+  referenciaId   String?  @map("referencia_id") @db.Uuid
+  referenciaTipo String?  @map("referencia_tipo")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([usuarioId, leida])
+  @@map("notificaciones")
+}
+
+model EventoCalendario {
+  id             String   @id @default(uuid()) @db.Uuid
+  tipo           String
+  titulo         String
+  fecha          DateTime @db.Date
+  referenciaId   String?  @map("referencia_id") @db.Uuid
+  referenciaTipo String?  @map("referencia_tipo")
+  creadoPor      String?  @map("creado_por") @db.Uuid
+
+  @@index([fecha])
+  @@map("eventos_calendario")
+}
+
+model Etiqueta {
+  id     String @id @default(uuid()) @db.Uuid
+  nombre String @unique
+  color  String
+
+  clientes ClienteEtiqueta[]
+
+  @@map("etiquetas")
+}
+
+model ClienteEtiqueta {
+  clienteId  String @map("cliente_id") @db.Uuid
+  etiquetaId String @map("etiqueta_id") @db.Uuid
+
+  cliente  Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  etiqueta Etiqueta @relation(fields: [etiquetaId], references: [id], onDelete: Cascade)
+
+  @@id([clienteId, etiquetaId])
+  @@map("clientes_etiquetas")
+}
+
+model NotaCliente {
+  id        String   @id @default(uuid()) @db.Uuid
+  clienteId String   @map("cliente_id") @db.Uuid
+  texto     String
+  creadoPor String?  @map("creado_por") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
+  @@map("notas_cliente")
+}
+
+// ── WhatsApp ────────────────────────────────────────────────────────
+
+model WhatsappPlantilla {
+  id     String         @id @default(uuid()) @db.Uuid
+  nombre String
+  evento EventoWhatsapp @unique
+  cuerpo String
+  activa Boolean        @default(true)
+
+  mensajes WhatsappMensaje[]
+
+  @@map("whatsapp_plantillas")
+}
+
+model WhatsappMensaje {
+  id             String      @id @default(uuid()) @db.Uuid
+  clienteId      String?     @map("cliente_id") @db.Uuid
+  usuarioId      String?     @map("usuario_id") @db.Uuid
+  plantillaId    String?     @map("plantilla_id") @db.Uuid
+  referenciaId   String?     @map("referencia_id") @db.Uuid
+  referenciaTipo String?     @map("referencia_tipo")
+  mensajeFinal   String      @map("mensaje_final")
+  estadoEnvio    EstadoEnvio @default(pendiente) @map("estado_envio")
+  proveedor      String?
+  enviadoAt      DateTime?   @map("enviado_at") @db.Timestamptz(6)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  cliente   Cliente?           @relation(fields: [clienteId], references: [id])
+  plantilla WhatsappPlantilla? @relation(fields: [plantillaId], references: [id])
+
+  @@index([clienteId, createdAt])
+  @@map("whatsapp_mensajes")
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Sabat Finance",
+  "short_name": "Sabat",
+  "description": "Tu asistente del negocio: préstamos, ventas y cobros.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#f8f9fb",
+  "theme_color": "#0a1628",
+  "icons": []
+}
