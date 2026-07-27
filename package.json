@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --experimental-loader ./scripts/ts-loader.mjs --test src/lib/calculos/*.test.ts",
