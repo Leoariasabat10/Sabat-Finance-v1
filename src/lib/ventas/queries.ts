@@ -15,7 +15,7 @@ export interface VentaListItem {
 /** Listado de ventas (contado y crédito). Regla dura #7: separado de préstamos. */
 export async function listVentas(): Promise<VentaListItem[]> {
   const ventas = await prisma.venta.findMany({
-    where: { deletedAt: null },
+    where: { deletedAt: null, cliente: { deletedAt: null } },
     include: { cliente: { select: { nombre: true, whatsapp: true } }, operacionCredito: true },
     orderBy: { fecha: "desc" },
   });

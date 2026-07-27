@@ -25,7 +25,7 @@ export async function listCobrar(diasAlerta = 3): Promise<CobroItem[]> {
   hoy.setHours(0, 0, 0, 0);
 
   const operaciones = await prisma.operacionCredito.findMany({
-    where: { deletedAt: null, estado: { in: ["activo", "vencido"] } },
+    where: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
     include: {
       cliente: { select: { nombre: true, whatsapp: true } },
       venta: { include: { items: { select: { nombreProducto: true } } } },

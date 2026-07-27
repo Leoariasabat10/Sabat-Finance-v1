@@ -9,7 +9,7 @@ function csvEscape(valor: string | number): string {
 /** Exporta la cartera activa (préstamos + ventas a crédito) como CSV. */
 export async function GET() {
   const operaciones = await prisma.operacionCredito.findMany({
-    where: { deletedAt: null, estado: { in: ["activo", "vencido"] } },
+    where: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
     include: { cliente: { select: { nombre: true, whatsapp: true } } },
     orderBy: { fechaVencimiento: "asc" },
   });

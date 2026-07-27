@@ -50,7 +50,7 @@ export async function getDashboardData() {
   ] = await Promise.all([
     obtenerSaldoActual(prisma),
     prisma.operacionCredito.findMany({
-      where: { deletedAt: null, estado: { in: ["activo", "vencido"] } },
+      where: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
       select: { origen: true, montoCapital: true, saldoPendienteCalc: true, fechaVencimiento: true, interesTotalCalc: true },
     }),
     prisma.venta.findMany({
@@ -58,19 +58,23 @@ export async function getDashboardData() {
       select: { totalCalc: true, utilidadCalc: true, tipoPago: true },
     }),
     prisma.operacionCredito.findMany({
-      where: { origen: "prestamo", deletedAt: null },
+      // Un cliente borrado (deletedAt) no debe seguir apareciendo en la
+      // Actividad reciente del dueño del negocio — encontrado simulando un
+      // día real de uso, 27 jul 2026: un cliente de prueba eliminado seguía
+      // saliendo en "Actividad reciente" con su préstamo y su pago.
+      where: { origen: "prestamo", deletedAt: null, cliente: { deletedAt: null } },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: { cliente: { select: { nombre: true } } },
     }),
     prisma.venta.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, cliente: { deletedAt: null } },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: { cliente: { select: { nombre: true } } },
     }),
     prisma.pago.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, operacion: { cliente: { deletedAt: null } } },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: { operacion: { include: { cliente: { select: { nombre: true } } } } },
@@ -80,7 +84,7 @@ export async function getDashboardData() {
       where: {
         estado: { in: ["pendiente", "parcial"] },
         fechaVencimiento: { lt: hoy },
-        operacion: { deletedAt: null, estado: { in: ["activo", "vencido"] } },
+        operacion: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
       },
       select: {
         fechaVencimiento: true,

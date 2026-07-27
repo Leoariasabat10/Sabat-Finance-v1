@@ -17,7 +17,10 @@ export async function listPrestamos(): Promise<PrestamoListItem[]> {
   hoy.setHours(0, 0, 0, 0);
 
   const operaciones = await prisma.operacionCredito.findMany({
-    where: { origen: "prestamo", deletedAt: null },
+    // Si el cliente fue eliminado, su historial de préstamos sale de este
+    // listado también — "el cliente se quitará de tus listados" debe
+    // aplicar de forma consistente en toda la app, no solo en Clientes.
+    where: { origen: "prestamo", deletedAt: null, cliente: { deletedAt: null } },
     include: { cliente: { select: { nombre: true, whatsapp: true } } },
     orderBy: [{ estado: "asc" }, { fechaVencimiento: "asc" }],
   });

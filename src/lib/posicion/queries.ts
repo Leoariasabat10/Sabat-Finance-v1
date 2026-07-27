@@ -49,14 +49,14 @@ export async function getPosicionActual(): Promise<PosicionDelNegocio> {
   const [config, prestamosActivos, ventaItemsCredito] = await Promise.all([
     prisma.configuracion.findUnique({ where: { id: 1 } }),
     prisma.operacionCredito.findMany({
-      where: { deletedAt: null, origen: "prestamo", estado: { in: ["activo", "vencido"] } },
+      where: { deletedAt: null, origen: "prestamo", estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
       include: { cliente: { select: { nombre: true } }, ...INCLUDE_OPERACION_DETALLE },
     }),
     prisma.ventaItem.findMany({
       where: {
         venta: {
           deletedAt: null,
-          operacionCredito: { deletedAt: null, estado: { in: ["activo", "vencido"] } },
+          operacionCredito: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
         },
       },
       select: { costo: true },

@@ -7,11 +7,11 @@ export async function getResumenReportes() {
     // anularPrestamo/anularVenta), un préstamo o venta anulada sigue
     // apareciendo en deletedAt:null pero nunca debe sumar como histórico.
     prisma.operacionCredito.findMany({
-      where: { origen: "prestamo", deletedAt: null, estado: { not: "anulado" } },
+      where: { origen: "prestamo", deletedAt: null, estado: { not: "anulado" }, cliente: { deletedAt: null } },
       select: { montoCapital: true, interesTotalCalc: true, saldoPendienteCalc: true, estado: true, fechaVencimiento: true },
     }),
     prisma.venta.findMany({
-      where: { deletedAt: null, estado: { not: "anulada" } },
+      where: { deletedAt: null, estado: { not: "anulada" }, cliente: { deletedAt: null } },
       select: { totalCalc: true, utilidadCalc: true, tipoPago: true },
     }),
   ]);
