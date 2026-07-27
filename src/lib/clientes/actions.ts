@@ -189,3 +189,44 @@ export async function quitarEtiqueta(
     return { ok: false, error: "No se pudo quitar la etiqueta" };
   }
 }
+
+/**
+ * Captura progresiva de contexto histórico (visión final, 26 jul 2026): no
+ * se toca `fecha_operacion` — ese campo sigue siendo el registro oficial del
+ * sistema. Esto guarda lo que el dueño del negocio recuerda por fuera de
+ * eso, para que el motor de inteligencia pueda usarlo con el nivel de
+ * confianza correcto (ver lib/clientes/metricas.ts).
+ */
+export async function actualizarContextoHistorico(
+  operacionId: string,
+  clienteId: string,
+  input: { anosAproximados: number | null; nota: string },
+): Promise<ActionResult> {
+  const nota = input.nota.trim();
+  if (input.anosAproximados === null && nota.length === 0) {
+    return { ok: false, error: "Agrega al menos una fecha aproximada o una nota" };
+  }
+
+  const fechaRealAproximada =
+    input.anosAproximados !== null
+      ? new Date(Date.now() - input.anosAproximados * 365 * 86_400_000)
+      : null;
+
+  try {
+    await prisma.operacionCredito.update({
+      where: { id: operacionId },
+      data: {
+        confianzaFecha: fechaRealAproximada ? "aproximada" : "desconocida",
+        fechaRealAproximada,
+        contextoHistorico: nota.length > 0 ? nota : null,
+      },
+    });
+    revalidatePath(`/clientes/${clienteId}`);
+    revalidatePath("/clientes");
+    revalidatePath("/dinero");
+    revalidatePath("/dashboard");
+    return { ok: true, data: undefined };
+  } catch {
+    return { ok: false, error: "No se pudo guardar el contexto. Intenta de nuevo." };
+  }
+}

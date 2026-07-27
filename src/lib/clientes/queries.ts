@@ -159,8 +159,12 @@ export async function getClienteById(id: string) {
 
   if (!cliente) return null;
 
-  const prestamos = cliente.operaciones.filter((o) => o.origen === "prestamo");
-  const ventasCredito = cliente.operaciones.filter((o) => o.origen === "venta");
+  // "anulado"/"anulada" ya no se ocultan con deletedAt (bug real de QA, 26
+  // jul 2026, ver anularPrestamo/anularVenta) — siguen en `cliente.operaciones`
+  // y `cliente.ventas` para que el historial las muestre, pero no deben
+  // sumar saldo ni contar como actividad real del cliente.
+  const prestamos = cliente.operaciones.filter((o) => o.origen === "prestamo" && o.estado !== "anulado");
+  const ventasCredito = cliente.operaciones.filter((o) => o.origen === "venta" && o.estado !== "anulado");
   const saldoPrestamos = prestamos.reduce(
     (acc, o) => acc + Number(o.saldoPendienteCalc),
     0,
@@ -175,7 +179,7 @@ export async function getClienteById(id: string) {
     resumen: {
       prestamosActivos: prestamos.filter((o) => o.estado === "activo").length,
       ventasActivas: ventasCredito.filter((o) => o.estado === "activo").length,
-      totalVentas: cliente.ventas.length,
+      totalVentas: cliente.ventas.filter((v) => v.estado !== "anulada").length,
       saldoPrestamos,
       saldoVentas,
     },

@@ -149,6 +149,7 @@ export async function crearVenta(input: VentaInput): Promise<ActionResult<{ id: 
     revalidatePath("/dashboard");
     revalidatePath("/cobrar");
     revalidatePath("/caja");
+    revalidatePath("/dinero");
     revalidatePath("/whatsapp");
     return { ok: true, data: { id: ventaId.ventaId } };
   } catch (e) {
@@ -168,10 +169,17 @@ export async function anularVenta(id: string): Promise<ActionResult> {
       });
       if (!venta || venta.deletedAt) throw new Error("No se encontró la venta.");
 
-      await tx.venta.update({ where: { id }, data: { estado: "anulada", deletedAt: new Date() } });
+      // Bug real encontrado en QA de producción (26 jul 2026): estado
+      // "anulada" y deletedAt son cosas distintas — deletedAt oculta el
+      // registro de TODA consulta con `deletedAt: null` (incluido el
+      // historial del cliente), contradiciendo el propio diálogo de
+      // confirmación ("no se borra del historial"). Anular solo cambia el
+      // estado; el borrado lógico es una acción aparte que esta app no
+      // expone desde la UI (ver CLAUDE.md, regla 8).
+      await tx.venta.update({ where: { id }, data: { estado: "anulada" } });
       await tx.operacionCredito.updateMany({
         where: { ventaId: id },
-        data: { estado: "anulado", deletedAt: new Date() },
+        data: { estado: "anulado" },
       });
 
       // Si fue de contado, el dinero había entrado a caja — se registra el
@@ -192,6 +200,7 @@ export async function anularVenta(id: string): Promise<ActionResult> {
     revalidatePath("/cartera");
     revalidatePath("/dashboard");
     revalidatePath("/caja");
+    revalidatePath("/dinero");
     revalidatePath("/cobrar");
     return { ok: true, data: undefined };
   } catch (e) {

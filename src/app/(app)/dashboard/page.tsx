@@ -7,6 +7,9 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { BarrasMensuales } from "@/components/shared/barras-mensuales";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { listCobrar } from "@/lib/cobrar/queries";
+import { getPosicionActual } from "@/lib/posicion/queries";
+import { construirColaDecisiones } from "@/lib/dashboard/colaDecisiones";
+import { ColaDecisiones } from "./_components/cola-decisiones";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
 
 export const metadata: Metadata = { title: "Dashboard · Sabat Finance" };
@@ -23,27 +26,20 @@ function fechaLarga(): string {
 }
 
 export default async function DashboardPage() {
-  const [data, cobrarHoy] = await Promise.all([getDashboardData(), listCobrar(0)]);
+  const [data, cobrarHoy, posicion] = await Promise.all([getDashboardData(), listCobrar(0), getPosicionActual()]);
   const agendaHoy = cobrarHoy.filter((c) => c.semaforo === "hoy" || c.semaforo === "vencido").slice(0, 5);
 
-  const alertas =
-    agendaHoy.length > 0
-      ? [
-          ...data.alertas,
-          {
-            nivel: "info" as const,
-            icono: "🗓",
-            mensaje: `${agendaHoy.length} cobro${agendaHoy.length === 1 ? "" : "s"} programado${agendaHoy.length === 1 ? "" : "s"} para hoy`,
-            href: "/cobrar",
-          },
-        ]
-      : data.alertas;
-
-  const colorAlerta: Record<string, string> = {
-    danger: "border-danger/25 bg-danger-bg/60 text-danger",
-    warning: "border-warning/25 bg-warning-bg/60 text-warning",
-    info: "border-accent/25 bg-accent-light/60 text-accent-dark",
-  };
+  // Visión final del producto, sección 2: "Hoy" entrega un cupo fijo de
+  // máximo 4 decisiones ya priorizadas — reemplaza la lista de alertas
+  // sueltas y las dos tarjetas de dinero que había antes en este mismo
+  // lugar. El resto de las tarjetas de abajo quedan como evidencia de
+  // apoyo, no como el mensaje principal.
+  const colaDecisiones = construirColaDecisiones({
+    clientesAtencion: data.clientesAtencion,
+    cobrarHoy,
+    clientesRetenidos: posicion.clientesRetenidos,
+    dineroDisponible: data.dineroDisponible,
+  });
 
   return (
     <div className="animate-fade-up flex flex-col gap-6">
@@ -57,36 +53,15 @@ export default async function DashboardPage() {
         }
       />
 
-      {alertas.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {alertas.map((a, i) => (
-            <Link
-              key={i}
-              href={a.href ?? "#"}
-              className={`flex items-center gap-2.5 rounded-md border px-4 py-2.5 text-[13px] font-medium transition-colors ${colorAlerta[a.nivel]}`}
-            >
-              <span>{a.icono}</span>
-              <span>{a.mensaje}</span>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Card className="p-5">
-          <p className="text-[11px] font-semibold text-muted">Dinero disponible (caja)</p>
-          <p
-            className={`mt-1 font-mono text-2xl font-bold tabular-nums ${
-              data.dineroDisponible < 0 ? "text-danger" : "text-accent"
-            }`}
-          >
-            {formatearMoneda(data.dineroDisponible)}
+      <div>
+        {colaDecisiones.length > 0 ? (
+          <p className="mb-2.5 text-[13px] font-semibold text-muted">
+            {colaDecisiones.length === 1
+              ? "Hoy deberías hacer solamente esto:"
+              : `Hoy deberías hacer solamente estas ${colaDecisiones.length} cosas:`}
           </p>
-        </Card>
-        <Card className="p-5">
-          <p className="text-[11px] font-semibold text-muted">Dinero por cobrar (total)</p>
-          <p className="mt-1 font-mono text-2xl font-bold tabular-nums">{formatearMoneda(data.dineroPorCobrarTotal)}</p>
-        </Card>
+        ) : null}
+        <ColaDecisiones tarjetas={colaDecisiones} />
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

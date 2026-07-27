@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registrarPago } from "@/lib/pagos/actions";
 import { pagoSchema, type PagoInput } from "@/lib/pagos/validations";
-import { fechaHoyIso } from "@/lib/formato";
+import { fechaHoyIso, formatearMoneda } from "@/lib/formato";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<PagoInput>({
     resolver: zodResolver(pagoSchema),
@@ -41,6 +42,14 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
       tipoAbono: "cuota_completa",
     },
   });
+
+  // Bloqueo financiero crítico (auditoría Sprint 1): no dejar avanzar al
+  // usuario si el valor tecleado ya supera el saldo pendiente, antes
+  // incluso de tocar el servidor. El servidor vuelve a validar esto mismo
+  // como última línea de defensa (ver lib/pagos/actions.ts).
+  const valorTexto = watch("valor");
+  const valorNumerico = limpiarMoneda(valorTexto);
+  const excedeSaldo = valorNumerico > saldoPendiente + 1;
 
   const onSubmit = (values: PagoInput) => {
     setServerError(null);
@@ -61,8 +70,13 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
 
       <div>
         <Label htmlFor="valor">Valor recibido *</Label>
-        <MoneyInput id="valor" autoFocus aria-invalid={!!errors.valor} {...register("valor", { setValueAs: limpiarMoneda })} />
+        <MoneyInput id="valor" autoFocus aria-invalid={!!errors.valor || excedeSaldo} {...register("valor", { setValueAs: limpiarMoneda })} />
         {errors.valor ? <p className="mt-1.5 text-[12px] text-danger">{errors.valor.message}</p> : null}
+        {!errors.valor && excedeSaldo ? (
+          <p className="mt-1.5 text-[12px] font-semibold text-danger">
+            El pago no puede superar el saldo pendiente ({formatearMoneda(saldoPendiente)}). Ajusta el valor.
+          </p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -104,7 +118,7 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
         <Button type="button" variant="ghost" onClick={() => router.back()} disabled={isPending}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || excedeSaldo}>
           {isPending ? "Registrando…" : "Registrar pago"}
         </Button>
       </div>

@@ -208,7 +208,7 @@ export async function getDashboardData() {
       nivel: "warning",
       icono: "💰",
       mensaje: "La caja está en cero o negativa — revisa antes de prestar o vender a crédito",
-      href: "/caja",
+      href: "/dinero",
     });
   }
   return {

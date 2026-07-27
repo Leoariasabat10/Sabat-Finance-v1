@@ -36,6 +36,16 @@ export async function registrarPago(input: PagoInput): Promise<ActionResult<{ id
       if (!operacion) throw new Error("No se encontró la operación de crédito.");
       if (operacion.estado === "pagado") throw new Error("Esta operación ya está paga (paz y salvo).");
 
+      // Bloqueo financiero crítico (auditoría Sprint 1): un pago nunca puede
+      // superar el saldo pendiente real de la operación. Tolerancia de 1
+      // peso para absorber redondeos de centavos entre cuotas.
+      const saldoPendienteActual = Number(operacion.saldoPendienteCalc);
+      if (data.valor > saldoPendienteActual + 1) {
+        throw new Error(
+          `El pago (${data.valor.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 })}) supera el saldo pendiente (${saldoPendienteActual.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 })}). Ajusta el valor antes de registrar el pago.`,
+        );
+      }
+
       const config = await tx.configuracion.findUnique({ where: { id: 1 } });
       const ordenAplicacionPago = config?.ordenAplicacionPago ?? "interes_primero";
 
@@ -145,6 +155,7 @@ export async function registrarPago(input: PagoInput): Promise<ActionResult<{ id
     revalidatePath("/cartera");
     revalidatePath("/cobrar");
     revalidatePath("/caja");
+    revalidatePath("/dinero");
     revalidatePath("/dashboard");
     revalidatePath("/whatsapp");
     return { ok: true, data: { id: resultado.pagoId } };

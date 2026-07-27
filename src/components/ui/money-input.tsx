@@ -21,17 +21,31 @@ export function formatearMiles(v: unknown): string {
 export const MoneyInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
->(({ onChange, ...props }, ref) => (
-  <Input
-    ref={ref}
-    type="text"
-    inputMode="numeric"
-    autoComplete="off"
-    onChange={(e) => {
-      e.target.value = formatearMiles(e.target.value);
-      onChange?.(e);
-    }}
-    {...props}
-  />
-));
+>(({ onChange, ...props }, ref) => {
+  // Auditoría Sprint 1: los montos nunca son negativos, pero en vez de
+  // corregir el signo "-" en silencio, se lo hacemos saber al usuario.
+  const [intentoNegativo, setIntentoNegativo] = React.useState(false);
+
+  return (
+    <div>
+      <Input
+        ref={ref}
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
+        onChange={(e) => {
+          setIntentoNegativo(e.target.value.includes("-"));
+          e.target.value = formatearMiles(e.target.value);
+          onChange?.(e);
+        }}
+        {...props}
+      />
+      {intentoNegativo ? (
+        <p className="mt-1 text-[11.5px] font-medium text-danger">
+          Los valores no pueden ser negativos — se quitó el signo &quot;-&quot;.
+        </p>
+      ) : null}
+    </div>
+  );
+});
 MoneyInput.displayName = "MoneyInput";

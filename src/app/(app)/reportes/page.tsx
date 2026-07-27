@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/shared/empty-state";
 import { getResumenReportes } from "@/lib/reportes/queries";
 import { formatearMoneda } from "@/lib/formato";
 
 export const metadata: Metadata = { title: "Reportes · Sabat Finance" };
 
+/**
+ * Simplificación (visión final, "menos pantallas, más inteligencia"): se
+ * quitó "Top clientes por saldo" — es el mismo dato que ya se ve ordenando
+ * Clientes o desde el expediente financiero de cada cliente, y no traía
+ * ninguna acción propia. Reportes se queda con lo que ningún otro módulo
+ * cubre: el acumulado histórico y la exportación de cartera.
+ */
 export default async function Page() {
-  const { financiero, comercial, topClientes } = await getResumenReportes();
+  const { financiero, comercial } = await getResumenReportes();
 
   return (
     <div className="animate-fade-up flex flex-col gap-6">
@@ -79,28 +84,6 @@ export default async function Page() {
               <p className="text-lg font-bold">{comercial.ventasCredito}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <h3 className="mb-3 text-sm font-bold">Top clientes por saldo pendiente</h3>
-          {topClientes.length === 0 ? (
-            <EmptyState icon="📈" title="Sin saldos pendientes" />
-          ) : (
-            <div className="flex flex-col divide-y divide-[color:var(--border)]">
-              {topClientes.map((c) => (
-                <Link key={c.id} href={`/clientes/${c.id}`} className="flex items-center justify-between py-2.5 text-[13px] hover:text-accent">
-                  <span className="font-semibold">{c.nombre}</span>
-                  <span className="flex gap-4">
-                    <span>🏦 {formatearMoneda(c.saldoPrestamos)}</span>
-                    <span>🛍 {formatearMoneda(c.saldoVentas)}</span>
-                    <span className="font-mono font-bold tabular-nums">{formatearMoneda(c.saldoTotal)}</span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

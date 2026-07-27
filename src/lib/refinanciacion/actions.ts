@@ -106,6 +106,7 @@ export async function refinanciar(input: RefinanciarInput): Promise<ActionResult
 
     revalidatePath("/prestamos");
     revalidatePath("/cartera");
+    revalidatePath("/cobrar");
     revalidatePath("/dashboard");
     return { ok: true, data: { id: nuevaId } };
   } catch (e) {
@@ -193,8 +194,10 @@ export async function renovar(operacionId: string): Promise<ActionResult> {
 
     revalidatePath("/prestamos");
     revalidatePath("/cartera");
+    revalidatePath("/cobrar");
     revalidatePath("/dashboard");
     revalidatePath("/caja");
+    revalidatePath("/dinero");
     return { ok: true, data: undefined };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "No se pudo renovar el préstamo." };

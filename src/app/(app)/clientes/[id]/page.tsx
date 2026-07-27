@@ -7,11 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getClienteById, listEtiquetas, getLineaTiempoCliente } from "@/lib/clientes/queries";
+import { getExpedienteFinanciero } from "@/lib/clientes/expediente";
 import { formatearFecha } from "@/lib/formato";
 import { FotoCliente } from "../_components/foto-cliente";
 import { EtiquetasCliente } from "../_components/etiquetas-cliente";
 import { NotasCliente } from "../_components/notas-cliente";
 import { EliminarClienteDialog } from "../_components/eliminar-cliente-dialog";
+import { ExpedienteCard } from "../_components/expediente-card";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -39,7 +41,10 @@ export default async function ClienteDetallePage({ params }: PageProps) {
 
   if (!cliente) notFound();
 
-  const lineaTiempo = await getLineaTiempoCliente(cliente.id);
+  const [lineaTiempo, expediente] = await Promise.all([
+    getLineaTiempoCliente(cliente.id),
+    getExpedienteFinanciero(cliente.id),
+  ]);
 
   const iconoEvento: Record<string, string> = { prestamo: "🏦", venta: "🛍", pago: "💵", nota: "📝" };
 
@@ -93,6 +98,10 @@ export default async function ClienteDetallePage({ params }: PageProps) {
           </Button>
           <EliminarClienteDialog clienteId={cliente.id} nombre={cliente.nombre} />
         </div>
+      </div>
+
+      <div className="mb-5">
+        <ExpedienteCard expediente={expediente} clienteId={cliente.id} nombreCliente={cliente.nombre} />
       </div>
 
       <Tabs defaultValue="resumen">

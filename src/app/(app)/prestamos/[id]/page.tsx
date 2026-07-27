@@ -9,6 +9,7 @@ import { getPrestamoById } from "@/lib/prestamos/queries";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
 import { RenovarButton } from "../_components/renovar-button";
 import { RefinanciarDialog } from "../_components/refinanciar-dialog";
+import { AnularPrestamoButton } from "../_components/anular-prestamo-button";
 
 export const metadata: Metadata = { title: "Detalle del préstamo · Sabat Finance" };
 
@@ -30,6 +31,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const operacion = await getPrestamoById(id);
   if (!operacion) notFound();
 
+  // Auditoría Sprint 1, punto #2: editar/anular solo tiene sentido antes
+  // de que haya pagos reales sobre el préstamo — después de eso, tocar
+  // capital/tasa/plazo dejaría el historial de pagos sin sentido.
+  const esEditable = operacion.estado === "activo" && operacion.pagos.length === 0;
+
   return (
     <div className="animate-fade-up flex flex-col gap-5">
       <PageHeader
@@ -41,6 +47,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               <>
                 <RenovarButton operacionId={operacion.id} />
                 <RefinanciarDialog operacionId={operacion.id} saldoPendiente={Number(operacion.saldoPendienteCalc)} />
+              </>
+            ) : null}
+            {esEditable ? (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href={`/prestamos/${operacion.id}/editar`}>Editar</Link>
+                </Button>
+                <AnularPrestamoButton prestamoId={operacion.id} montoCapital={Number(operacion.montoCapital)} />
               </>
             ) : null}
             <Button asChild>

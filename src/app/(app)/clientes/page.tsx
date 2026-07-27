@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { listClientes } from "@/lib/clientes/queries";
+import { getInsightsNegocio } from "@/lib/inteligencia/insights";
 import { BuscadorClientes } from "./_components/buscador-clientes";
 import { ClienteCard } from "./_components/cliente-card";
 import { Paginacion } from "./_components/paginacion";
+import { InsightsStrip } from "./_components/insights-strip";
 
 export const metadata: Metadata = { title: "Clientes · Sabat Finance" };
 
@@ -21,10 +23,10 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const busqueda = params.q ?? "";
   const pagina = Number(params.pagina) || 1;
 
-  const { clientes, total, totalPaginas } = await listClientes({
-    busqueda,
-    pagina,
-  });
+  const [{ clientes, total, totalPaginas }, insights] = await Promise.all([
+    listClientes({ busqueda, pagina }),
+    getInsightsNegocio(),
+  ]);
 
   return (
     <div className="animate-fade-up">
@@ -40,6 +42,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
           </Button>
         }
       />
+
+      {!busqueda ? <InsightsStrip insights={insights} /> : null}
 
       <div className="mb-5">
         <Suspense fallback={<div className="h-10 w-full max-w-sm" />}>

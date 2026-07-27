@@ -26,6 +26,7 @@ export async function registrarMovimientoManual(input: MovimientoCajaInput): Pro
       });
     });
     revalidatePath("/caja");
+    revalidatePath("/dinero");
     revalidatePath("/dashboard");
     return { ok: true, data: undefined };
   } catch {

@@ -160,6 +160,19 @@ enum AccionAuditoria {
   @@map("accion_auditoria")
 }
 
+// Confianza de la fecha de origen de un préstamo (26 jul 2026): este negocio
+// operó años con papeles y memoria antes de Sabat Finance — muchas fechas de
+// `fecha_operacion` son en realidad la fecha en que alguien cargó el dato al
+// sistema, no la fecha real en que el préstamo empezó. En vez de fingir
+// precisión, el motor de inteligencia declara qué tan seguro está.
+enum ConfianzaFecha {
+  exacta
+  aproximada
+  desconocida
+
+  @@map("confianza_fecha")
+}
+
 // ── Núcleo: clientes y motor de crédito unificado ───────────────────
 
 model Cliente {
@@ -213,6 +226,14 @@ model OperacionCredito {
   createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt          DateTime?       @map("deleted_at") @db.Timestamptz(6)
+
+  // Historia incompleta (26 jul 2026, ver ConfianzaFecha arriba): fecha_operacion
+  // nunca se toca — sigue siendo el registro oficial del sistema. Estos tres
+  // campos capturan lo que el dueño del negocio sabe por memoria cuando esa
+  // fecha no refleja la realidad del préstamo.
+  confianzaFecha        ConfianzaFecha @default(exacta) @map("confianza_fecha")
+  fechaRealAproximada   DateTime?      @map("fecha_real_aproximada") @db.Date
+  contextoHistorico     String?        @map("contexto_historico")
 
   cliente          Cliente            @relation(fields: [clienteId], references: [id], onDelete: Restrict)
   venta            Venta?             @relation(fields: [ventaId], references: [id])
@@ -343,6 +364,29 @@ model Refinanciacion {
   operacionNueva    OperacionCredito @relation("OperacionNueva", fields: [operacionNuevaId], references: [id])
 
   @@map("refinanciaciones")
+}
+
+// ── Posición del negocio (fotografía diaria) ─────────────────────────
+
+/**
+ * Una fila por día con la Posición del Negocio calculada al momento en que
+ * alguien abrió "Mi dinero" ese día (captura bajo demanda, no un cron).
+ * Sin esta tabla no se pueden detectar tendencias (¿subió o bajó el capital
+ * disponible esta semana?) — es la única pieza de datos nueva que pidió la
+ * visión final del producto (docs de rediseño, 26 jul 2026).
+ */
+model CapitalSnapshot {
+  id                        String   @id @default(uuid()) @db.Uuid
+  fecha                     DateTime @unique @db.Date
+  capitalTotal               Decimal  @map("capital_total") @db.Decimal(14, 2)
+  capitalPrestado             Decimal  @map("capital_prestado") @db.Decimal(14, 2)
+  capitalInvertidoMercancia Decimal  @map("capital_invertido_mercancia") @db.Decimal(14, 2)
+  capitalDisponible         Decimal  @map("capital_disponible") @db.Decimal(14, 2)
+  capitalRetenido           Decimal  @default(0) @map("capital_retenido") @db.Decimal(14, 2)
+  createdAt                 DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([fecha])
+  @@map("capital_snapshots")
 }
 
 // ── Configuración (fila única) ──────────────────────────────────────

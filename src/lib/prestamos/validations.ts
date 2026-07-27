@@ -22,3 +22,17 @@ export const prestamoSchema = z.object({
 });
 
 export type PrestamoInput = z.infer<typeof prestamoSchema>;
+
+/**
+ * Edición de préstamo (auditoría Sprint 1): mismos campos financieros que
+ * la creación, sin los datos del cliente (esos no se editan aquí). Solo se
+ * permite editar préstamos activos que todavía no tienen pagos — ver
+ * lib/prestamos/actions.ts::editarPrestamo.
+ */
+export const prestamoEditSchema = prestamoSchema.omit({
+  clienteId: true,
+  nombreCliente: true,
+  whatsappCliente: true,
+});
+
+export type PrestamoEditInput = z.infer<typeof prestamoEditSchema>;

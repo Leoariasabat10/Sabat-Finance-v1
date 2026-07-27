@@ -4,46 +4,18 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { crearPrestamo } from "@/lib/prestamos/actions";
-import { prestamoSchema, type PrestamoInput } from "@/lib/prestamos/validations";
+import { editarPrestamo } from "@/lib/prestamos/actions";
+import { prestamoEditSchema, type PrestamoEditInput } from "@/lib/prestamos/validations";
 import { calcularInteres, generarCalendarioCuotas } from "@/lib/calculos";
-import { formatearMoneda, formatearFecha, fechaHoyIso } from "@/lib/formato";
+import { formatearMoneda, formatearFecha } from "@/lib/formato";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { MoneyInput, limpiarMoneda } from "@/components/ui/money-input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { MoneyInput, limpiarMoneda, formatearMiles } from "@/components/ui/money-input";
 
-// Auditoría Sprint 1, punto #5: a partir de este monto se pide una
-// segunda confirmación explícita antes de crear el préstamo, para atajar
-// errores de digitación (un cero de más) antes de que muevan dinero real.
-const UMBRAL_DOBLE_CONFIRMACION = 10_000_000;
-
-// El campo de tasa vive en espacio de PORCENTAJE (el usuario escribe "10"
-// para 10%); se convierte a fracción (0.10) solo al simular y al enviar.
-function valoresIniciales(tasaDefecto: number): PrestamoInput {
-  return {
-    nombreCliente: "",
-    whatsappCliente: "",
-    montoCapital: "" as unknown as number,
-    tasaInteres: tasaDefecto,
-    tipoInteres: "mensual",
-    plazoDias: 30,
-    formaPago: "mensual",
-    fechaOperacion: fechaHoyIso(),
-  };
-}
-
-function diasPorPeriodoFormaPago(formaPago: PrestamoInput["formaPago"], plazoDias: number): number {
+function diasPorPeriodoFormaPago(formaPago: PrestamoEditInput["formaPago"], plazoDias: number): number {
   switch (formaPago) {
     case "pago_unico":
       return plazoDias || 1;
@@ -56,20 +28,29 @@ function diasPorPeriodoFormaPago(formaPago: PrestamoInput["formaPago"], plazoDia
   }
 }
 
-export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
+interface EditarPrestamoFormProps {
+  prestamoId: string;
+  valoresIniciales: PrestamoEditInput;
+}
+
+/**
+ * Formulario de edición (auditoría Sprint 1, punto #2). Misma simulación
+ * en vivo que crear-préstamo, para que corregir un error de digitación se
+ * sienta igual de confiable que crear el préstamo desde cero.
+ */
+export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrestamoFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [valoresPendientesConfirmacion, setValoresPendientesConfirmacion] = useState<PrestamoInput | null>(null);
 
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<PrestamoInput>({
-    resolver: zodResolver(prestamoSchema),
-    defaultValues: valoresIniciales(tasaDefecto),
+  } = useForm<PrestamoEditInput>({
+    resolver: zodResolver(prestamoEditSchema),
+    defaultValues: valoresIniciales,
   });
 
   const valores = watch();
@@ -92,7 +73,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
         montoCapital: Number(valores.montoCapital),
         interesTotal: interes.interesTotal,
         numeroCuotas,
-        fechaOperacion: valores.fechaOperacion || fechaHoyIso(),
+        fechaOperacion: valores.fechaOperacion,
         diasPorPeriodo: diasPorCuota,
       });
       return { interes, cuotas };
@@ -101,27 +82,17 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
     }
   }, [valores]);
 
-  const crear = (values: PrestamoInput) => {
+  const onSubmit = (values: PrestamoEditInput) => {
     setServerError(null);
     startTransition(async () => {
-      const resultado = await crearPrestamo({ ...values, tasaInteres: values.tasaInteres / 100 });
+      const resultado = await editarPrestamo(prestamoId, { ...values, tasaInteres: values.tasaInteres / 100 });
       if (!resultado.ok) {
         setServerError(resultado.error);
         return;
       }
-      router.push(`/prestamos/${resultado.data.id}`);
+      router.push(`/prestamos/${prestamoId}`);
       router.refresh();
     });
-  };
-
-  const onSubmit = (values: PrestamoInput) => {
-    // Auditoría Sprint 1, punto #5: monto inusualmente alto -> se pide
-    // confirmar antes de tocar la base de datos.
-    if (Number(values.montoCapital) >= UMBRAL_DOBLE_CONFIRMACION) {
-      setValoresPendientesConfirmacion(values);
-      return;
-    }
-    crear(values);
   };
 
   return (
@@ -130,45 +101,10 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
         <Card>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="nombreCliente">Nombre del cliente *</Label>
-              <Input
-                id="nombreCliente"
-                placeholder="María Pérez"
-                autoComplete="name"
-                autoFocus
-                aria-invalid={!!errors.nombreCliente}
-                {...register("nombreCliente")}
-              />
-              {errors.nombreCliente ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.nombreCliente.message}</p>
-              ) : null}
-            </div>
-            <div>
-              <Label htmlFor="whatsappCliente">WhatsApp *</Label>
-              <Input
-                id="whatsappCliente"
-                placeholder="3001234567"
-                inputMode="tel"
-                aria-invalid={!!errors.whatsappCliente}
-                {...register("whatsappCliente")}
-              />
-              {errors.whatsappCliente ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.whatsappCliente.message}</p>
-              ) : null}
-              <p className="mt-1 text-[11px] text-muted">
-                Si ya existe un cliente con este WhatsApp, se usa el mismo — no se duplica.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
               <Label htmlFor="montoCapital">Valor prestado *</Label>
               <MoneyInput
                 id="montoCapital"
-                placeholder="500.000"
+                defaultValue={formatearMiles(valoresIniciales.montoCapital)}
                 aria-invalid={!!errors.montoCapital}
                 {...register("montoCapital", { setValueAs: limpiarMoneda })}
               />
@@ -257,7 +193,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
             Cancelar
           </Button>
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Guardando…" : "Crear préstamo"}
+            {isPending ? "Guardando…" : "Guardar cambios"}
           </Button>
         </div>
       </div>
@@ -298,35 +234,6 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
           </CardContent>
         </Card>
       </div>
-
-      <Dialog
-        open={valoresPendientesConfirmacion !== null}
-        onOpenChange={(open) => !open && setValoresPendientesConfirmacion(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirma este monto</DialogTitle>
-            <DialogDescription>
-              Vas a prestar{" "}
-              <strong className="text-foreground">
-                {valoresPendientesConfirmacion ? formatearMoneda(valoresPendientesConfirmacion.montoCapital) : ""}
-              </strong>
-              . Es un monto alto — revisa que no tenga un cero de más antes de continuar.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setValoresPendientesConfirmacion(null)} disabled={isPending}>
-              Revisar de nuevo
-            </Button>
-            <Button
-              onClick={() => valoresPendientesConfirmacion && crear(valoresPendientesConfirmacion)}
-              disabled={isPending}
-            >
-              {isPending ? "Guardando…" : "Sí, el monto es correcto"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </form>
   );
 }

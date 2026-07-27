@@ -1,23 +1,18 @@
 import { prisma } from "@/lib/db";
 
 export async function getResumenReportes() {
-  const [prestamos, ventas, clientesConSaldo] = await Promise.all([
+  const [prestamos, ventas] = await Promise.all([
+    // "anulado"/"anulada" se excluyen explícitamente: desde que anular ya
+    // no oculta el registro con deletedAt (bug real de QA, 26 jul 2026, ver
+    // anularPrestamo/anularVenta), un préstamo o venta anulada sigue
+    // apareciendo en deletedAt:null pero nunca debe sumar como histórico.
     prisma.operacionCredito.findMany({
-      where: { origen: "prestamo", deletedAt: null },
+      where: { origen: "prestamo", deletedAt: null, estado: { not: "anulado" } },
       select: { montoCapital: true, interesTotalCalc: true, saldoPendienteCalc: true, estado: true, fechaVencimiento: true },
     }),
     prisma.venta.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, estado: { not: "anulada" } },
       select: { totalCalc: true, utilidadCalc: true, tipoPago: true },
-    }),
-    prisma.cliente.findMany({
-      where: { deletedAt: null },
-      select: {
-        id: true,
-        nombre: true,
-        whatsapp: true,
-        operaciones: { where: { deletedAt: null, estado: { in: ["activo", "vencido"] } }, select: { saldoPendienteCalc: true, origen: true } },
-      },
     }),
   ]);
 
@@ -44,18 +39,5 @@ export async function getResumenReportes() {
     ventasCredito: ventas.filter((v) => v.tipoPago === "credito").length,
   };
 
-  const topClientes = clientesConSaldo
-    .map((c) => ({
-      id: c.id,
-      nombre: c.nombre,
-      whatsapp: c.whatsapp,
-      saldoPrestamos: c.operaciones.filter((o) => o.origen === "prestamo").reduce((a, o) => a + Number(o.saldoPendienteCalc), 0),
-      saldoVentas: c.operaciones.filter((o) => o.origen === "venta").reduce((a, o) => a + Number(o.saldoPendienteCalc), 0),
-    }))
-    .map((c) => ({ ...c, saldoTotal: c.saldoPrestamos + c.saldoVentas }))
-    .filter((c) => c.saldoTotal > 0)
-    .sort((a, b) => b.saldoTotal - a.saldoTotal)
-    .slice(0, 10);
-
-  return { financiero, comercial, topClientes };
+  return { financiero, comercial };
 }
