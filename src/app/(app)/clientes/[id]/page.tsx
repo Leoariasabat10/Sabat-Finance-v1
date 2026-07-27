@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getClienteById, listEtiquetas, getLineaTiempoCliente } from "@/lib/clientes/queries";
 import { getExpedienteFinanciero } from "@/lib/clientes/expediente";
+import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
+import { construirLinkWhatsapp } from "@/lib/whatsapp/mensajes";
 import { formatearFecha } from "@/lib/formato";
 import { FotoCliente } from "../_components/foto-cliente";
 import { EtiquetasCliente } from "../_components/etiquetas-cliente";
@@ -71,7 +73,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
               ) : null}
             </div>
             <a
-              href={`https://wa.me/${cliente.whatsapp.replace(/\D/g, "")}`}
+              href={construirLinkWhatsapp(cliente.whatsapp, `Hola ${cliente.nombre}.`)}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors duration-premium hover:text-accent-dark"
@@ -90,6 +92,13 @@ export default async function ClienteDetallePage({ params }: PageProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <BotonWhatsApp
+            numero={cliente.whatsapp}
+            mensaje={`Hola ${cliente.nombre}.`}
+            etiqueta="Enviar WhatsApp"
+            variant="ghost"
+            size="default"
+          />
           <Button variant="ghost" asChild>
             <Link href={`/clientes/${cliente.id}/editar`}>
               <Pencil className="h-4 w-4" />

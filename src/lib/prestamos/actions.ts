@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { calcularInteres, generarCalendarioCuotas } from "@/lib/calculos";
 import { registrarMovimientoCaja } from "@/lib/caja/motor";
-import { encolarMensajeEvento } from "@/lib/whatsapp/encolarMensaje";
 import { prestamoSchema, prestamoEditSchema, type PrestamoInput, type PrestamoEditInput } from "./validations";
 
 type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
@@ -122,23 +121,6 @@ export async function crearPrestamo(input: PrestamoInput): Promise<ActionResult<
 
       return { operacionId: operacion.id, clienteId };
     });
-
-    // Fire-and-forget: encolar el WhatsApp es una llamada de red extra a
-    // Supabase que no debe sumarse al tiempo de respuesta de "crear
-    // préstamo" (regla dura: préstamo en <20s). No se espera (`await`) —
-    // corre en segundo plano y cualquier error se traga sin afectar al usuario.
-    encolarMensajeEvento(prisma, {
-      evento: "nuevo_prestamo",
-      clienteId: resultado.clienteId,
-      numeroWhatsapp: data.whatsappCliente,
-      variables: {
-        cliente: data.nombreCliente,
-        valor: interes.totalAPagar.toLocaleString("es-CO"),
-        fecha: fechaVencimiento,
-      },
-      referenciaId: resultado.operacionId,
-      referenciaTipo: "operacion_credito",
-    }).catch(() => {});
 
     revalidatePath("/prestamos");
     revalidatePath("/cartera");

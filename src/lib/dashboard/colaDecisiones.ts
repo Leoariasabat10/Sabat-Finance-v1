@@ -2,6 +2,8 @@ import type { ClienteAtencion } from "./queries";
 import type { CobroItem } from "@/lib/cobrar/queries";
 import type { ClienteRetenido } from "@/lib/posicion/queries";
 import { formatearMoneda } from "@/lib/formato";
+import { calcularCupoSeguro } from "@/lib/inteligencia/cfo";
+import { construirLinkWhatsapp, mensajeVencido } from "@/lib/whatsapp/mensajes";
 
 export type TonoDecision = "danger" | "warning" | "success" | "info";
 
@@ -10,12 +12,6 @@ export interface TarjetaDecision {
   etiqueta: string;
   texto: string;
   boton: { texto: string; href: string };
-}
-
-function linkWhatsapp(whatsapp: string, nombre: string, saldo: number): string {
-  const numero = whatsapp.replace(/[^0-9]/g, "");
-  const texto = encodeURIComponent(`Hola ${nombre}, te recordamos tu pago pendiente de ${formatearMoneda(saldo)}. ¡Gracias!`);
-  return `https://wa.me/${numero}?text=${texto}`;
 }
 
 /**
@@ -31,6 +27,8 @@ export function construirColaDecisiones(params: {
   cobrarHoy: CobroItem[];
   clientesRetenidos: ClienteRetenido[];
   dineroDisponible: number;
+  capitalTotalConfigurado: number;
+  capitalDisponible: number;
 }): TarjetaDecision[] {
   const tarjetas: TarjetaDecision[] = [];
 
@@ -41,7 +39,10 @@ export function construirColaDecisiones(params: {
       tono: "danger",
       etiqueta: `Llama a ${vencidoUrgente.nombre}`,
       texto: `Debe ${formatearMoneda(vencidoUrgente.montoVencido)}. Lleva ${vencidoUrgente.diasMora} día${vencidoUrgente.diasMora === 1 ? "" : "s"} de mora.`,
-      boton: { texto: "WhatsApp", href: linkWhatsapp(vencidoUrgente.whatsapp, vencidoUrgente.nombre, vencidoUrgente.montoVencido) },
+      boton: {
+        texto: "WhatsApp",
+        href: construirLinkWhatsapp(vencidoUrgente.whatsapp, mensajeVencido(vencidoUrgente.nombre, vencidoUrgente.montoVencido)),
+      },
     });
   }
 
@@ -71,20 +72,30 @@ export function construirColaDecisiones(params: {
     });
   }
 
-  // 4. Liquidez: siempre se muestra — es la pregunta que responde "¿puedo
-  //    prestar hoy?", la más frecuente del negocio.
+  // 4. Liquidez: siempre se muestra — es la pregunta que responde "¿cuánto
+  //    puedo prestar hoy?", la más frecuente del negocio. No basta con decir
+  //    "sí" o "no": el CFO da un número concreto y deja un colchón de
+  //    seguridad (lib/inteligencia/cfo.ts) en vez de recomendar prestar
+  //    hasta el último peso disponible.
+  const cupo = calcularCupoSeguro({
+    capitalTotalConfigurado: params.capitalTotalConfigurado,
+    capitalDisponible: params.capitalDisponible,
+    saldoCaja: params.dineroDisponible,
+  });
   tarjetas.push(
-    params.dineroDisponible > 0
+    cupo.cupo > 0
       ? {
           tono: "success",
-          etiqueta: `Tienes ${formatearMoneda(params.dineroDisponible)} disponibles`,
-          texto: "Ya puedes volver a prestar.",
+          etiqueta: `Puedes prestar hasta ${formatearMoneda(cupo.cupo)} hoy`,
+          texto: cupo.confiable
+            ? "Ya dejamos un colchón de seguridad para imprevistos."
+            : "Cálculo aproximado con tu caja — configura tu capital inicial para uno exacto.",
           boton: { texto: "Ver candidatos", href: "/clientes" },
         }
       : {
           tono: "danger",
-          etiqueta: "La caja está en cero o negativa",
-          texto: "Revisa antes de prestar o vender a crédito.",
+          etiqueta: "No prestes hoy",
+          texto: cupo.mensaje,
           boton: { texto: "Ver Mi dinero", href: "/dinero" },
         },
   );

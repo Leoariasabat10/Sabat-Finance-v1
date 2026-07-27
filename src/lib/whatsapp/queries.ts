@@ -1,13 +1,37 @@
-import { prisma } from "@/lib/db";
+import { listCobrar } from "@/lib/cobrar/queries";
+import { mensajeSegunSemaforo } from "./mensajes";
 
-export async function listPlantillas() {
-  return prisma.whatsappPlantilla.findMany({ orderBy: { nombre: "asc" } });
+export interface ContactoWhatsapp {
+  operacionId: string;
+  clienteNombre: string;
+  clienteWhatsapp: string;
+  motivo: string;
+  mensaje: string;
+  monto: number;
 }
 
-export async function listMensajes(limite = 50) {
-  return prisma.whatsappMensaje.findMany({
-    orderBy: { createdAt: "desc" },
-    take: limite,
-    include: { cliente: { select: { nombre: true } }, plantilla: { select: { nombre: true } } },
-  });
+/**
+ * WhatsApp simplificado (27 jul 2026): la pantalla ya no gestiona plantillas
+ * ni una cola técnica — responde directamente "¿a quién debería escribirle
+ * hoy y qué le digo?", reutilizando la misma fuente de verdad que Cobrar
+ * (lib/cobrar/queries.ts) para que nunca queden desincronizadas.
+ */
+export async function getContactosHoy(): Promise<ContactoWhatsapp[]> {
+  const cobros = await listCobrar(0);
+
+  return cobros
+    .filter((c) => c.semaforo === "vencido" || c.semaforo === "hoy")
+    .map((c) => ({
+      operacionId: c.operacionId,
+      clienteNombre: c.clienteNombre,
+      clienteWhatsapp: c.clienteWhatsapp,
+      motivo: c.semaforo === "vencido" ? `Pago vencido hace ${c.diasAtraso} día${c.diasAtraso === 1 ? "" : "s"}` : "Vence hoy",
+      mensaje: mensajeSegunSemaforo({
+        semaforo: c.semaforo,
+        cliente: c.clienteNombre,
+        valor: c.saldoCuota,
+        fecha: c.fechaVencimiento,
+      }),
+      monto: c.saldoCuota,
+    }));
 }

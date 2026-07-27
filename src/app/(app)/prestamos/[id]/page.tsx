@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPrestamoById } from "@/lib/prestamos/queries";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
+import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
+import { mensajeRecordatorio } from "@/lib/whatsapp/mensajes";
 import { RenovarButton } from "../_components/renovar-button";
 import { RefinanciarDialog } from "../_components/refinanciar-dialog";
 import { AnularPrestamoButton } from "../_components/anular-prestamo-button";
@@ -35,6 +37,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   // de que haya pagos reales sobre el préstamo — después de eso, tocar
   // capital/tasa/plazo dejaría el historial de pagos sin sentido.
   const esEditable = operacion.estado === "activo" && operacion.pagos.length === 0;
+  const proximaCuota = operacion.cuotas.find((c) => c.estado !== "pagada");
 
   return (
     <div className="animate-fade-up flex flex-col gap-5">
@@ -43,6 +46,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         subtitle={`🏦 Financiero · ${operacion.cliente.whatsapp}`}
         actions={
           <div className="flex items-center gap-2">
+            {proximaCuota ? (
+              <BotonWhatsApp
+                numero={operacion.cliente.whatsapp}
+                mensaje={mensajeRecordatorio(operacion.cliente.nombre, Number(proximaCuota.total), proximaCuota.fechaVencimiento)}
+              />
+            ) : null}
             {operacion.estado === "activo" ? (
               <>
                 <RenovarButton operacionId={operacion.id} />

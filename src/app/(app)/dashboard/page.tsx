@@ -39,6 +39,8 @@ export default async function DashboardPage() {
     cobrarHoy,
     clientesRetenidos: posicion.clientesRetenidos,
     dineroDisponible: data.dineroDisponible,
+    capitalTotalConfigurado: posicion.capitalTotal,
+    capitalDisponible: posicion.capitalDisponible,
   });
 
   return (

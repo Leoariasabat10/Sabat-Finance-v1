@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { calcularInteres, generarCalendarioCuotas } from "@/lib/calculos";
 import { registrarMovimientoCaja } from "@/lib/caja/motor";
-import { encolarMensajeEvento } from "@/lib/whatsapp/encolarMensaje";
 import { ventaSchema, type VentaInput } from "./validations";
 
 type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
@@ -127,22 +126,6 @@ export async function crearVenta(input: VentaInput): Promise<ActionResult<{ id: 
 
       return { ventaId: venta.id, clienteId };
     });
-
-    // Fire-and-forget (misma razón que en préstamos): no sumar una llamada
-    // de red extra al tiempo de respuesta de "crear venta" (<20s).
-    encolarMensajeEvento(prisma, {
-      evento: "nueva_venta",
-      clienteId: ventaId.clienteId,
-      numeroWhatsapp: data.whatsappCliente,
-      variables: {
-        cliente: data.nombreCliente,
-        producto: data.items.map((i) => i.nombreProducto).join(", "),
-        valor: total.toLocaleString("es-CO"),
-        fecha: data.fecha,
-      },
-      referenciaId: ventaId.ventaId,
-      referenciaTipo: "venta",
-    }).catch(() => {});
 
     revalidatePath("/ventas");
     revalidatePath("/cartera");

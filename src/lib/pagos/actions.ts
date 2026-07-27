@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { aplicarPago, estaPagada } from "@/lib/calculos";
 import { registrarMovimientoCaja } from "@/lib/caja/motor";
-import { encolarMensajeEvento } from "@/lib/whatsapp/encolarMensaje";
 import { pagoSchema, type PagoInput } from "./validations";
 
 type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
@@ -134,21 +133,6 @@ export async function registrarPago(input: PagoInput): Promise<ActionResult<{ id
         pagadoCompleto: estaPagada(resultado.saldoPendiente),
       };
     });
-
-    // Fire-and-forget (misma razón): no sumar una llamada de red extra al
-    // tiempo de respuesta de "registrar pago" (regla dura: pago en <10s).
-    encolarMensajeEvento(prisma, {
-      evento: resultado.pagadoCompleto ? "paz_y_salvo" : "pago_recibido",
-      clienteId: resultado.clienteId,
-      numeroWhatsapp: resultado.clienteWhatsapp,
-      variables: {
-        cliente: resultado.clienteNombre,
-        valor: data.valor.toLocaleString("es-CO"),
-        saldo: resultado.saldoFinal.toLocaleString("es-CO"),
-      },
-      referenciaId: data.operacionCreditoId,
-      referenciaTipo: "operacion_credito",
-    }).catch(() => {});
 
     revalidatePath("/prestamos");
     revalidatePath("/ventas");

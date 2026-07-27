@@ -20,6 +20,7 @@ export interface ClienteRetenido {
   operacionId: string;
   clienteId: string;
   clienteNombre: string;
+  clienteWhatsapp: string;
   montoCapital: number;
   saldoPendiente: number;
   fechaOperacion: Date;
@@ -50,7 +51,7 @@ export async function getPosicionActual(): Promise<PosicionDelNegocio> {
     prisma.configuracion.findUnique({ where: { id: 1 } }),
     prisma.operacionCredito.findMany({
       where: { deletedAt: null, origen: "prestamo", estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
-      include: { cliente: { select: { nombre: true } }, ...INCLUDE_OPERACION_DETALLE },
+      include: { cliente: { select: { nombre: true, whatsapp: true } }, ...INCLUDE_OPERACION_DETALLE },
     }),
     prisma.ventaItem.findMany({
       where: {
@@ -76,6 +77,7 @@ export async function getPosicionActual(): Promise<PosicionDelNegocio> {
         operacionId: o.id,
         clienteId: o.clienteId,
         clienteNombre: o.cliente.nombre,
+        clienteWhatsapp: o.cliente.whatsapp,
         montoCapital: r.montoCapital,
         saldoPendiente: r.saldoPendiente,
         fechaOperacion: o.fechaOperacion,

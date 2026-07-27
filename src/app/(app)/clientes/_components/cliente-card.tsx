@@ -3,6 +3,7 @@ import { MessageCircle, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
 import type { ClienteListItem } from "@/lib/clientes/queries";
 
 function iniciales(nombre: string): string {
@@ -14,8 +15,8 @@ function iniciales(nombre: string): string {
 
 export function ClienteCard({ cliente }: { cliente: ClienteListItem }) {
   return (
-    <Link href={`/clientes/${cliente.id}`} className="block">
-      <Card className="flex items-center gap-3.5 p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="flex items-center gap-3.5 p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+      <Link href={`/clientes/${cliente.id}`} className="flex min-w-0 flex-1 items-center gap-3.5">
         <Avatar className="h-11 w-11">
           <AvatarImage src={cliente.fotoUrl ?? undefined} alt={cliente.nombre} />
           <AvatarFallback>{iniciales(cliente.nombre)}</AvatarFallback>
@@ -58,7 +59,14 @@ export function ClienteCard({ cliente }: { cliente: ClienteListItem }) {
         {cliente.estado === "inactivo" ? (
           <Badge variant="warning">Inactivo</Badge>
         ) : null}
-      </Card>
-    </Link>
+      </Link>
+
+      <BotonWhatsApp
+        numero={cliente.whatsapp}
+        mensaje={`Hola ${cliente.nombre}.`}
+        etiqueta=""
+        aria-label={`Enviar WhatsApp a ${cliente.nombre}`}
+      />
+    </Card>
   );
 }

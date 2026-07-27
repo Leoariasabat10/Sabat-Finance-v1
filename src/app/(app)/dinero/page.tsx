@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getSaldoActual, listMovimientos, getResumenHoy } from "@/lib/caja/queries";
 import { getPosicionActual, capturarSnapshotHoy, getVariacionCapital } from "@/lib/posicion/queries";
+import { calcularCupoSeguro, simularRecuperarCapital, narrativaImpactoCapitalRetenido } from "@/lib/inteligencia/cfo";
+import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
 import { MovimientoForm } from "../caja/_components/movimiento-form";
 
@@ -32,6 +34,18 @@ export default async function Page() {
   const pctDisponible = (posicion.capitalDisponible / total) * 100;
 
   const variacionPct = variacion.disponible.variacionPct;
+
+  // Fase 2 (27 jul 2026): "disponible para prestar" dejó de ser solo un
+  // número — es la pregunta que Geisa hace más seguido. Si no configuró el
+  // capital inicial todavía, no la dejamos bloqueada con "sin configurar":
+  // le damos un cupo aproximado calculado sobre su caja real, dejándolo
+  // claro con la palabra "aproximado" en vez de fingir precisión que no
+  // tenemos.
+  const cupoSeguro = calcularCupoSeguro({
+    capitalTotalConfigurado: posicion.capitalTotal,
+    capitalDisponible: posicion.capitalDisponible,
+    saldoCaja,
+  });
 
   return (
     <div className="animate-fade-up flex flex-col gap-5">
@@ -80,18 +94,24 @@ export default async function Page() {
                 {formatearMoneda(posicion.capitalDisponible)}
               </p>
             ) : (
-              // Auditoría Sprint 1 (Build→Measure→Learn, probado con datos
-              // reales): sin capital_inicial configurado, capitalDisponible
-              // da negativo por diseño (0 − prestado). Mostrar ese número en
-              // rojo alarma sin razón — es un dato sin sentido todavía, no
-              // una posición negativa real.
-              <p className="font-mono text-lg font-bold tabular-nums text-faint">— sin configurar</p>
+              // Fase 2 (27 jul 2026): antes esto quedaba en "— sin
+              // configurar" y bloqueaba la respuesta a "¿cuánto puedo
+              // prestar?" hasta que alguien cargara el capital inicial en
+              // Configuración — fricción real encontrada simulando un día de
+              // uso. Ahora usamos la caja real como aproximación honesta.
+              <p className="font-mono text-lg font-bold tabular-nums text-faint">
+                ≈ {formatearMoneda(saldoCaja)}
+              </p>
             )}
           </div>
         </div>
 
+        <p className="mt-4 border-t border-[color:var(--border)] pt-3 text-[12.5px] font-semibold text-foreground">
+          💡 {cupoSeguro.mensaje}
+        </p>
+
         {posicion.capitalTotal > 0 && variacionPct !== null ? (
-          <p className="mt-4 border-t border-[color:var(--border)] pt-3 text-[12.5px] text-muted">
+          <p className="mt-2 text-[12.5px] text-muted">
             Hace 7 días tenías {formatearMoneda(variacion.disponible.hace7Dias ?? 0)} disponibles —{" "}
             <span className={variacionPct >= 0 ? "font-semibold text-success" : "font-semibold text-danger"}>
               {variacionPct >= 0 ? "+" : ""}
@@ -109,27 +129,44 @@ export default async function Page() {
                 ⚠ {formatearMoneda(posicion.capitalRetenido)} en capital retenido
                 {posicion.capitalTotal > 0 ? ` (${((posicion.capitalRetenido / posicion.capitalTotal) * 100).toFixed(0)}% del capital total)` : ""}
               </p>
-              <p className="text-[12px] text-muted">
-                {posicion.clientesRetenidos.length === 1
-                  ? "1 cliente lleva más de un año pagando solo intereses, sin abonar capital."
-                  : `${posicion.clientesRetenidos.length} clientes llevan más de un año pagando solo intereses, sin abonar capital.`}
+              <p className="mt-1 text-[12.5px] text-foreground">
+                {narrativaImpactoCapitalRetenido({
+                  clienteNombre: posicion.clientesRetenidos[0]!.clienteNombre,
+                  montoCapital: posicion.clientesRetenidos[0]!.montoCapital,
+                  antiguedadDias: posicion.clientesRetenidos[0]!.antiguedadDias,
+                  pctDelCapitalTotal:
+                    posicion.capitalTotal > 0 ? (posicion.clientesRetenidos[0]!.montoCapital / posicion.capitalRetenido) * 100 : null,
+                })}
+              </p>
+              <p className="mt-1.5 text-[12px] font-semibold text-accent">
+                💡{" "}
+                {
+                  simularRecuperarCapital({
+                    montoARecuperar: posicion.clientesRetenidos[0]!.montoCapital,
+                    capitalTotalConfigurado: posicion.capitalTotal,
+                    capitalDisponible: posicion.capitalDisponible,
+                    saldoCaja,
+                  }).mensaje
+                }
               </p>
             </div>
             <Badge variant="warning">Revisar</Badge>
           </div>
           <div className="mt-3 flex flex-col gap-1.5">
             {posicion.clientesRetenidos.slice(0, 5).map((c) => (
-              <Link
-                key={c.operacionId}
-                href={`/prestamos/${c.operacionId}`}
-                className="flex items-center justify-between rounded-md px-2 py-1.5 text-[12.5px] transition-colors hover:bg-hover-bg"
-              >
-                <span className="font-semibold text-foreground">
-                  {c.clienteNombre} ·{" "}
-                  {c.antiguedadDias !== null ? `${Math.floor(c.antiguedadDias / 30)} meses` : "patrón de pago, sin fecha confirmada"}
-                </span>
+              <div key={c.operacionId} className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[12.5px]">
+                <Link href={`/prestamos/${c.operacionId}`} className="min-w-0 flex-1 transition-colors hover:text-accent">
+                  <span className="font-semibold text-foreground">
+                    {c.clienteNombre} ·{" "}
+                    {c.antiguedadDias !== null ? `${Math.floor(c.antiguedadDias / 30)} meses` : "patrón de pago, sin fecha confirmada"}
+                  </span>
+                </Link>
                 <span className="font-mono tabular-nums">{formatearMoneda(c.montoCapital)}</span>
-              </Link>
+                <BotonWhatsApp
+                  numero={c.clienteWhatsapp}
+                  mensaje={`Hola ${c.clienteNombre}.\nQuiero conversar contigo sobre el préstamo de ${formatearMoneda(c.montoCapital)} — llevas un tiempo pagando solo intereses. ¿Podemos acordar una devolución de capital?`}
+                />
+              </div>
             ))}
           </div>
         </Card>

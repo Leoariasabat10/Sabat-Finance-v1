@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
+import { mensajeSegunSemaforo } from "@/lib/whatsapp/mensajes";
 import { cn } from "@/lib/utils";
 import type { CobroItem } from "@/lib/cobrar/queries";
 import type { CarteraItem } from "@/lib/pagos/queries";
@@ -16,12 +18,6 @@ function badgeSemaforo(semaforo: string, diasAtraso: number) {
   if (semaforo === "vencido") return <Badge variant="danger">Vencido · {diasAtraso}d</Badge>;
   if (semaforo === "hoy") return <Badge variant="warning">Vence hoy</Badge>;
   return <Badge variant="info">Próximo</Badge>;
-}
-
-function linkWhatsapp(whatsapp: string, nombre: string, saldo: number) {
-  const numero = whatsapp.replace(/[^0-9]/g, "");
-  const texto = encodeURIComponent(`Hola ${nombre}, te recordamos tu pago pendiente de ${formatearMoneda(saldo)}. ¡Gracias!`);
-  return `https://wa.me/${numero}?text=${texto}`;
 }
 
 interface CobrarViewProps {
@@ -130,11 +126,15 @@ function VistaLista({
                             <p className="font-mono font-bold tabular-nums">{formatearMoneda(c.saldoCuota)}</p>
                             {badgeSemaforo(c.semaforo, c.diasAtraso)}
                           </div>
-                          <Button asChild variant="ghost" size="sm">
-                            <a href={linkWhatsapp(c.clienteWhatsapp, c.clienteNombre, c.saldoCuota)} target="_blank" rel="noopener noreferrer">
-                              WhatsApp
-                            </a>
-                          </Button>
+                          <BotonWhatsApp
+                            numero={c.clienteWhatsapp}
+                            mensaje={mensajeSegunSemaforo({
+                              semaforo: c.semaforo,
+                              cliente: c.clienteNombre,
+                              valor: c.saldoCuota,
+                              fecha: c.fechaVencimiento,
+                            })}
+                          />
                           <Button asChild size="sm">
                             <Link href={`/pagos/nuevo?operacion=${c.operacionId}`}>Registrar pago</Link>
                           </Button>
