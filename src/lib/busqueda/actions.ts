@@ -77,3 +77,33 @@ export async function buscarGlobal(query: string): Promise<ResultadoBusqueda[]> 
 
   return resultados;
 }
+
+export interface ClienteSugerido {
+  id: string;
+  nombre: string;
+  whatsapp: string;
+}
+
+/**
+ * Búsqueda rápida de clientes existentes para autocompletar formularios de
+ * Nuevo préstamo / Nueva venta (fricción real encontrada simulando un día de
+ * uso, 27 jul 2026: escribir el nombre de un cliente que ya existe no
+ * sugería nada — obligaba a recordar de memoria su WhatsApp exacto para no
+ * duplicarlo).
+ */
+export async function buscarClientesRapido(query: string): Promise<ClienteSugerido[]> {
+  const termino = query.trim();
+  if (termino.length < 2) return [];
+
+  const clientes = await prisma.cliente.findMany({
+    where: {
+      deletedAt: null,
+      OR: [{ nombre: { contains: termino, mode: "insensitive" } }, { whatsapp: { contains: termino } }],
+    },
+    select: { id: true, nombre: true, whatsapp: true },
+    orderBy: { nombre: "asc" },
+    take: 6,
+  });
+
+  return clientes;
+}

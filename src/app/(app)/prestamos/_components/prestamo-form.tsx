@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { crearPrestamo } from "@/lib/prestamos/actions";
+import { buscarClientesRapido, type ClienteSugerido } from "@/lib/busqueda/actions";
 import { prestamoSchema, type PrestamoInput } from "@/lib/prestamos/validations";
 import { calcularInteres, generarCalendarioCuotas } from "@/lib/calculos";
 import { formatearMoneda, formatearFecha, fechaHoyIso } from "@/lib/formato";
@@ -66,6 +67,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<PrestamoInput>({
     resolver: zodResolver(prestamoSchema),
@@ -73,6 +75,34 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
   });
 
   const valores = watch();
+
+  // Fricción real encontrada simulando un día de uso (27 jul 2026): escribir
+  // el nombre de un cliente que ya existe no sugería nada — obligaba a
+  // recordar de memoria su WhatsApp exacto para no crear un duplicado.
+  const [sugerencias, setSugerencias] = useState<ClienteSugerido[]>([]);
+  const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
+  const clienteSeleccionadoRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const nombre = valores.nombreCliente;
+    if (!nombre || nombre.length < 2 || nombre === clienteSeleccionadoRef.current) {
+      setSugerencias([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      buscarClientesRapido(nombre).then(setSugerencias);
+    }, 200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valores.nombreCliente]);
+
+  const seleccionarCliente = (c: ClienteSugerido) => {
+    clienteSeleccionadoRef.current = c.nombre;
+    setValue("nombreCliente", c.nombre, { shouldValidate: true });
+    setValue("whatsappCliente", c.whatsapp, { shouldValidate: true });
+    setSugerencias([]);
+    setMostrarSugerencias(false);
+  };
 
   const simulacion = useMemo(() => {
     if (!valores.montoCapital || valores.montoCapital <= 0 || !valores.plazoDias || valores.plazoDias <= 0) {
@@ -129,18 +159,40 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
       <div className="flex flex-col gap-5">
         <Card>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
+            <div className="relative">
               <Label htmlFor="nombreCliente">Nombre del cliente *</Label>
               <Input
                 id="nombreCliente"
                 placeholder="María Pérez"
-                autoComplete="name"
+                autoComplete="off"
                 autoFocus
                 aria-invalid={!!errors.nombreCliente}
                 {...register("nombreCliente")}
+                onFocus={() => setMostrarSugerencias(true)}
+                onBlur={(e) => {
+                  register("nombreCliente").onBlur(e);
+                  setTimeout(() => setMostrarSugerencias(false), 150);
+                }}
               />
               {errors.nombreCliente ? (
                 <p className="mt-1.5 text-[12px] text-danger">{errors.nombreCliente.message}</p>
+              ) : null}
+              {mostrarSugerencias && sugerencias.length > 0 ? (
+                <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-[color:var(--border)] bg-card shadow-lg">
+                  {sugerencias.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => seleccionarCliente(c)}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-[13px] transition-colors duration-premium hover:bg-hover-bg"
+                      >
+                        <span className="font-semibold text-foreground">{c.nombre}</span>
+                        <span className="text-muted">{c.whatsapp}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               ) : null}
             </div>
             <div>

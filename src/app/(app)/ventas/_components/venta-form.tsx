@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { crearVenta } from "@/lib/ventas/actions";
+import { buscarClientesRapido, type ClienteSugerido } from "@/lib/busqueda/actions";
 import { ventaSchema, type VentaInput } from "@/lib/ventas/validations";
 import { formatearMoneda, fechaHoyIso } from "@/lib/formato";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export function VentaForm() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<VentaInput>({
     resolver: zodResolver(ventaSchema),
@@ -47,6 +49,33 @@ export function VentaForm() {
 
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const valores = watch();
+
+  // Misma fricción que en Nuevo préstamo (27 jul 2026): sugerir clientes ya
+  // existentes en vez de obligar a recordar su WhatsApp de memoria.
+  const [sugerencias, setSugerencias] = useState<ClienteSugerido[]>([]);
+  const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
+  const clienteSeleccionadoRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const nombre = valores.nombreCliente;
+    if (!nombre || nombre.length < 2 || nombre === clienteSeleccionadoRef.current) {
+      setSugerencias([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      buscarClientesRapido(nombre).then(setSugerencias);
+    }, 200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valores.nombreCliente]);
+
+  const seleccionarCliente = (c: ClienteSugerido) => {
+    clienteSeleccionadoRef.current = c.nombre;
+    setValue("nombreCliente", c.nombre, { shouldValidate: true });
+    setValue("whatsappCliente", c.whatsapp, { shouldValidate: true });
+    setSugerencias([]);
+    setMostrarSugerencias(false);
+  };
 
   const totales = useMemo(() => {
     const total = (valores.items ?? []).reduce((acc, i) => acc + (Number(i.precioVenta) || 0), 0);
@@ -79,10 +108,39 @@ export function VentaForm() {
       <div className="flex flex-col gap-5">
         <Card>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
+            <div className="relative">
               <Label htmlFor="nombreCliente">Nombre del cliente *</Label>
-              <Input id="nombreCliente" placeholder="María Pérez" autoComplete="name" autoFocus aria-invalid={!!errors.nombreCliente} {...register("nombreCliente")} />
+              <Input
+                id="nombreCliente"
+                placeholder="María Pérez"
+                autoComplete="off"
+                autoFocus
+                aria-invalid={!!errors.nombreCliente}
+                {...register("nombreCliente")}
+                onFocus={() => setMostrarSugerencias(true)}
+                onBlur={(e) => {
+                  register("nombreCliente").onBlur(e);
+                  setTimeout(() => setMostrarSugerencias(false), 150);
+                }}
+              />
               {errors.nombreCliente ? <p className="mt-1.5 text-[12px] text-danger">{errors.nombreCliente.message}</p> : null}
+              {mostrarSugerencias && sugerencias.length > 0 ? (
+                <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-[color:var(--border)] bg-card shadow-lg">
+                  {sugerencias.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => seleccionarCliente(c)}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-[13px] transition-colors duration-premium hover:bg-hover-bg"
+                      >
+                        <span className="font-semibold text-foreground">{c.nombre}</span>
+                        <span className="text-muted">{c.whatsapp}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
             <div>
               <Label htmlFor="whatsappCliente">WhatsApp *</Label>
