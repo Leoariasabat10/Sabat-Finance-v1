@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { construirLinkWhatsapp } from "@/lib/whatsapp/mensajes";
 
