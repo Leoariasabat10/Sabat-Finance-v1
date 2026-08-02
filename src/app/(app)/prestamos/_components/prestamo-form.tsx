@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { crearPrestamo } from "@/lib/prestamos/actions";
 import { buscarClientesRapido, type ClienteSugerido } from "@/lib/busqueda/actions";
 import { prestamoSchema, type PrestamoInput } from "@/lib/prestamos/validations";
@@ -137,8 +138,10 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
       const resultado = await crearPrestamo({ ...values, tasaInteres: values.tasaInteres / 100 });
       if (!resultado.ok) {
         setServerError(resultado.error);
+        toast.error(resultado.error);
         return;
       }
+      toast.success("Préstamo creado");
       router.push(`/prestamos/${resultado.data.id}`);
       router.refresh();
     });
@@ -155,7 +158,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_360px]">
       <div className="flex flex-col gap-5">
         <Card>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">

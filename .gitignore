@@ -5,3 +5,11 @@ out
 .env.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Generado por @ducanh2912/next-pwa en cada build (next.config.ts)
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+public/swe-worker-*.js
+.claude/

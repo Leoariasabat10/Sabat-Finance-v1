@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { crearVenta } from "@/lib/ventas/actions";
 import { buscarClientesRapido, type ClienteSugerido } from "@/lib/busqueda/actions";
 import { ventaSchema, type VentaInput } from "@/lib/ventas/validations";
@@ -96,15 +97,17 @@ export function VentaForm() {
       const resultado = await crearVenta(values);
       if (!resultado.ok) {
         setServerError(resultado.error);
+        toast.error(resultado.error);
         return;
       }
+      toast.success("Venta creada");
       router.push(`/ventas/${resultado.data.id}`);
       router.refresh();
     });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_320px]">
       <div className="flex flex-col gap-5">
         <Card>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">

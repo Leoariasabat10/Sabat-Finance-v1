@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { QueryProvider } from "@/components/layout/query-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -20,6 +22,21 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Sabat Finance",
   description: "Tu asistente del negocio: préstamos, ventas y cobros.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Sabat",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -44,7 +61,10 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <QueryProvider>{children}</QueryProvider>
+          <TooltipProvider delayDuration={300}>
+            <QueryProvider>{children}</QueryProvider>
+          </TooltipProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

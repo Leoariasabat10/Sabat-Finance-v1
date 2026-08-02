@@ -19,7 +19,13 @@ interface BotonWhatsAppProps extends Omit<ButtonProps, "asChild"> {
 export function BotonWhatsApp({ numero, mensaje, etiqueta = "WhatsApp", variant = "ghost", size = "sm", ...props }: BotonWhatsAppProps) {
   return (
     <Button asChild variant={variant} size={size} {...props}>
-      <a href={construirLinkWhatsapp(numero, mensaje)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+      <a
+        href={construirLinkWhatsapp(numero, mensaje)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        aria-label={etiqueta ? undefined : "Enviar WhatsApp"}
+      >
         {etiqueta ? `💬 ${etiqueta}` : "💬"}
       </a>
     </Button>

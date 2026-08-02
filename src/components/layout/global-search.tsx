@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { buscarGlobal, type ResultadoBusqueda } from "@/lib/busqueda/actions";
+import { cn } from "@/lib/utils";
 
 const ICONO_TIPO: Record<ResultadoBusqueda["tipo"], string> = {
   cliente: "👤",
   prestamo: "🏦",
   venta: "🛍",
 };
+
+const LISTBOX_ID = "global-search-listbox";
+const optionId = (i: number) => `global-search-option-${i}`;
 
 /**
  * Búsqueda global (auditoría Sprint 2, punto de navegación): un solo
@@ -22,6 +26,7 @@ export function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [resultados, setResultados] = useState<ResultadoBusqueda[]>([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -44,6 +49,7 @@ export function GlobalSearch() {
   }, [open]);
 
   useEffect(() => {
+    setActiveIndex(-1);
     if (query.trim().length < 2) {
       setResultados([]);
       return;
@@ -62,6 +68,21 @@ export function GlobalSearch() {
     setQuery("");
     setResultados([]);
     router.push(href);
+  };
+
+  const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (resultados.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => (i + 1) % resultados.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => (i - 1 + resultados.length) % resultados.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const elegido = resultados[activeIndex] ?? resultados[0];
+      if (elegido) irA(elegido.href);
+    }
   };
 
   return (
@@ -86,8 +107,14 @@ export function GlobalSearch() {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onInputKeyDown}
               placeholder="Buscar por nombre o WhatsApp…"
               className="w-full bg-transparent text-[14px] outline-none placeholder:text-faint"
+              role="combobox"
+              aria-expanded={resultados.length > 0}
+              aria-controls={LISTBOX_ID}
+              aria-autocomplete="list"
+              aria-activedescendant={activeIndex >= 0 ? optionId(activeIndex) : undefined}
             />
           </div>
 
@@ -99,13 +126,20 @@ export function GlobalSearch() {
             ) : resultados.length === 0 ? (
               <p className="px-3 py-6 text-center text-[13px] text-muted">Sin resultados para &quot;{query}&quot;.</p>
             ) : (
-              <ul className="flex flex-col gap-0.5">
-                {resultados.map((r) => (
-                  <li key={`${r.tipo}-${r.id}`}>
+              <ul id={LISTBOX_ID} role="listbox" className="flex flex-col gap-0.5">
+                {resultados.map((r, i) => (
+                  <li key={`${r.tipo}-${r.id}`} role="presentation">
                     <button
+                      id={optionId(i)}
                       type="button"
+                      role="option"
+                      aria-selected={i === activeIndex}
+                      onMouseEnter={() => setActiveIndex(i)}
                       onClick={() => irA(r.href)}
-                      className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors duration-premium hover:bg-hover-bg"
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors duration-premium hover:bg-hover-bg",
+                        i === activeIndex && "bg-hover-bg",
+                      )}
                     >
                       <span className="text-lg">{ICONO_TIPO[r.tipo]}</span>
                       <span className="min-w-0 flex-1">

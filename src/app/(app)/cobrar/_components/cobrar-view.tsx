@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
 import { EmptyState } from "@/components/shared/empty-state";
+import { StaggerList, StaggerItem } from "@/components/shared/motion";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
 import { mensajeSegunSemaforo } from "@/lib/whatsapp/mensajes";
 import { cn } from "@/lib/utils";
@@ -108,40 +109,42 @@ function VistaLista({
               .map((seccion) => (
                 <section key={seccion.titulo}>
                   <h2 className="mb-2.5 text-sm font-bold text-foreground">{seccion.titulo}</h2>
-                  <div className="flex flex-col gap-2.5">
+                  <StaggerList className="flex flex-col gap-2.5">
                     {seccion.data.map((c) => (
-                      <Card key={c.operacionId} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{c.origen === "prestamo" ? "🏦" : "🛍"}</span>
-                          <div>
-                            <p className="font-bold text-foreground">{c.clienteNombre}</p>
-                            <p className="text-[12.5px] text-muted">
-                              {c.producto ? `${c.producto} · ` : ""}
-                              {c.clienteWhatsapp}
-                            </p>
+                      <StaggerItem key={c.operacionId}>
+                        <Card className="flex flex-wrap items-center justify-between gap-3 p-4 transition-shadow duration-premium hover:shadow-md">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl">{c.origen === "prestamo" ? "🏦" : "🛍"}</span>
+                            <div>
+                              <p className="font-bold text-foreground">{c.clienteNombre}</p>
+                              <p className="text-[12.5px] text-muted">
+                                {c.producto ? `${c.producto} · ` : ""}
+                                {c.clienteWhatsapp}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <p className="font-mono font-bold tabular-nums">{formatearMoneda(c.saldoCuota)}</p>
-                            {badgeSemaforo(c.semaforo, c.diasAtraso)}
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="font-mono font-bold tabular-nums">{formatearMoneda(c.saldoCuota)}</p>
+                              {badgeSemaforo(c.semaforo, c.diasAtraso)}
+                            </div>
+                            <BotonWhatsApp
+                              numero={c.clienteWhatsapp}
+                              mensaje={mensajeSegunSemaforo({
+                                semaforo: c.semaforo,
+                                cliente: c.clienteNombre,
+                                valor: c.saldoCuota,
+                                fecha: c.fechaVencimiento,
+                              })}
+                            />
+                            <Button asChild size="sm">
+                              <Link href={`/pagos/nuevo?operacion=${c.operacionId}`}>Registrar pago</Link>
+                            </Button>
                           </div>
-                          <BotonWhatsApp
-                            numero={c.clienteWhatsapp}
-                            mensaje={mensajeSegunSemaforo({
-                              semaforo: c.semaforo,
-                              cliente: c.clienteNombre,
-                              valor: c.saldoCuota,
-                              fecha: c.fechaVencimiento,
-                            })}
-                          />
-                          <Button asChild size="sm">
-                            <Link href={`/pagos/nuevo?operacion=${c.operacionId}`}>Registrar pago</Link>
-                          </Button>
-                        </div>
-                      </Card>
+                        </Card>
+                      </StaggerItem>
                     ))}
-                  </div>
+                  </StaggerList>
                 </section>
               ))
           )}
@@ -149,22 +152,24 @@ function VistaLista({
           {restoCartera.length > 0 ? (
             <section>
               <h2 className="mb-2.5 text-sm font-bold text-foreground">📋 Resto de la cartera activa</h2>
-              <div className="flex flex-col gap-2">
+              <StaggerList className="flex flex-col gap-2">
                 {restoCartera.map((c) => (
-                  <Link key={c.id} href={c.origen === "prestamo" ? `/prestamos/${c.id}` : "/ventas"}>
-                    <Card className="flex items-center justify-between gap-3 p-3.5 transition-colors hover:bg-hover-bg">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-lg">{c.origen === "prestamo" ? "🏦" : "🛍"}</span>
-                        <div>
-                          <p className="text-[13px] font-semibold text-foreground">{c.clienteNombre}</p>
-                          <p className="text-[11.5px] text-muted">vence {formatearFecha(c.fechaVencimiento)}</p>
+                  <StaggerItem key={c.id}>
+                    <Link href={c.origen === "prestamo" ? `/prestamos/${c.id}` : "/ventas"}>
+                      <Card className="flex items-center justify-between gap-3 p-3.5 transition-colors duration-premium hover:bg-hover-bg">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-lg">{c.origen === "prestamo" ? "🏦" : "🛍"}</span>
+                          <div>
+                            <p className="text-[13px] font-semibold text-foreground">{c.clienteNombre}</p>
+                            <p className="text-[11.5px] text-muted">vence {formatearFecha(c.fechaVencimiento)}</p>
+                          </div>
                         </div>
-                      </div>
-                      <span className="font-mono text-[13px] font-bold tabular-nums">{formatearMoneda(c.saldoPendiente)}</span>
-                    </Card>
-                  </Link>
+                        <span className="font-mono text-[13px] font-bold tabular-nums">{formatearMoneda(c.saldoPendiente)}</span>
+                      </Card>
+                    </Link>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerList>
             </section>
           ) : null}
         </>
@@ -206,7 +211,7 @@ function VistaCalendario({ eventos }: { eventos: EventoAgenda[] }) {
   const eventosDelDia = eventosPorDia.get(diaSeleccionado) ?? [];
 
   return (
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_320px]">
       <Card className="p-4">
         <p className="mb-3 text-[13px] font-bold text-foreground">
           {primerDiaMes.toLocaleDateString("es-CO", { month: "long", year: "numeric" })}

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { registrarPago } from "@/lib/pagos/actions";
 import { pagoSchema, type PagoInput } from "@/lib/pagos/validations";
 import { fechaHoyIso, formatearMoneda } from "@/lib/formato";
@@ -57,8 +58,10 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
       const resultado = await registrarPago(values);
       if (!resultado.ok) {
         setServerError(resultado.error);
+        toast.error(resultado.error);
         return;
       }
+      toast.success("Pago registrado");
       router.push(origen === "prestamo" ? `/prestamos/${operacionId}` : `/ventas`);
       router.refresh();
     });

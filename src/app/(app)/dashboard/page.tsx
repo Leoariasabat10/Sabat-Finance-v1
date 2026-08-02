@@ -5,6 +5,8 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { BarrasMensuales } from "@/components/shared/barras-mensuales";
+import { FadeIn, StaggerList, StaggerItem } from "@/components/shared/motion";
+import { AnimatedNumber, AnimatedMoneda } from "@/components/shared/animated-number";
 import { getDashboardData } from "@/lib/dashboard/queries";
 import { listCobrar } from "@/lib/cobrar/queries";
 import { getPosicionActual } from "@/lib/posicion/queries";
@@ -44,7 +46,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="animate-fade-up flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Hola 👋"
         subtitle={fechaLarga()}
@@ -55,7 +57,7 @@ export default async function DashboardPage() {
         }
       />
 
-      <div>
+      <FadeIn>
         {colaDecisiones.length > 0 ? (
           <p className="mb-2.5 text-[13px] font-semibold text-muted">
             {colaDecisiones.length === 1
@@ -64,28 +66,36 @@ export default async function DashboardPage() {
           </p>
         ) : null}
         <ColaDecisiones tarjetas={colaDecisiones} />
-      </div>
+      </FadeIn>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <FadeIn delay={0.05} className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Card>
           <CardContent>
             <h3 className="mb-3 text-sm font-bold">🏦 Financiero</h3>
             <div className="grid grid-cols-2 gap-3 text-[13px]">
               <div>
                 <p className="text-muted">Capital activo</p>
-                <p className="font-mono font-bold tabular-nums">{formatearMoneda(data.bloqueFinanciero.capitalActivo)}</p>
+                <p className="font-mono font-bold tabular-nums">
+                  <AnimatedMoneda valor={data.bloqueFinanciero.capitalActivo} />
+                </p>
               </div>
               <div>
                 <p className="text-muted">Por cobrar</p>
-                <p className="font-mono font-bold tabular-nums">{formatearMoneda(data.bloqueFinanciero.porCobrar)}</p>
+                <p className="font-mono font-bold tabular-nums">
+                  <AnimatedMoneda valor={data.bloqueFinanciero.porCobrar} />
+                </p>
               </div>
               <div>
                 <p className="text-muted">Vencido</p>
-                <p className="font-mono font-bold tabular-nums text-danger">{formatearMoneda(data.bloqueFinanciero.vencido)}</p>
+                <p className="font-mono font-bold tabular-nums text-danger">
+                  <AnimatedMoneda valor={data.bloqueFinanciero.vencido} />
+                </p>
               </div>
               <div>
                 <p className="text-muted">Préstamos activos</p>
-                <p className="font-bold">{data.bloqueFinanciero.cantidadActivos}</p>
+                <p className="font-bold">
+                  <AnimatedNumber value={data.bloqueFinanciero.cantidadActivos} />
+                </p>
               </div>
             </div>
           </CardContent>
@@ -97,26 +107,34 @@ export default async function DashboardPage() {
             <div className="grid grid-cols-2 gap-3 text-[13px]">
               <div>
                 <p className="text-muted">Vendido este mes</p>
-                <p className="font-mono font-bold tabular-nums">{formatearMoneda(data.bloqueComercial.totalVendidoMes)}</p>
+                <p className="font-mono font-bold tabular-nums">
+                  <AnimatedMoneda valor={data.bloqueComercial.totalVendidoMes} />
+                </p>
               </div>
               <div>
                 <p className="text-muted">Utilidad del mes</p>
-                <p className="font-mono font-bold tabular-nums text-success">{formatearMoneda(data.bloqueComercial.utilidadMes)}</p>
+                <p className="font-mono font-bold tabular-nums text-success">
+                  <AnimatedMoneda valor={data.bloqueComercial.utilidadMes} />
+                </p>
               </div>
               <div>
                 <p className="text-muted">Por cobrar (crédito)</p>
-                <p className="font-mono font-bold tabular-nums">{formatearMoneda(data.bloqueComercial.porCobrarCredito)}</p>
+                <p className="font-mono font-bold tabular-nums">
+                  <AnimatedMoneda valor={data.bloqueComercial.porCobrarCredito} />
+                </p>
               </div>
               <div>
                 <p className="text-muted">Ventas del mes</p>
-                <p className="font-bold">{data.bloqueComercial.ventasDelMes}</p>
+                <p className="font-bold">
+                  <AnimatedNumber value={data.bloqueComercial.ventasDelMes} />
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
+      </FadeIn>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr]">
+      <FadeIn delay={0.1} className="grid grid-cols-1 gap-5 md:grid-cols-[1.3fr_1fr]">
         <Card>
           <CardContent>
             <h3 className="mb-3 text-sm font-bold">Caja — últimos 6 meses</h3>
@@ -138,73 +156,81 @@ export default async function DashboardPage() {
             {agendaHoy.length === 0 ? (
               <p className="text-[13px] text-muted">✅ Nada por cobrar hoy — todo al día.</p>
             ) : (
-              <div className="flex flex-col divide-y divide-[color:var(--border)]">
+              <StaggerList className="flex flex-col divide-y divide-[color:var(--border)]">
                 {agendaHoy.map((c) => (
-                  <Link
-                    key={c.operacionId}
-                    href={`/pagos/nuevo?operacion=${c.operacionId}`}
-                    className="flex items-center justify-between py-2 text-[13px] hover:text-accent"
-                  >
-                    <span>
-                      {c.origen === "prestamo" ? "🏦" : "🛍"} {c.clienteNombre}
-                    </span>
-                    <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.saldoCuota)}</span>
-                  </Link>
+                  <StaggerItem key={c.operacionId}>
+                    <Link
+                      href={`/pagos/nuevo?operacion=${c.operacionId}`}
+                      className="flex items-center justify-between py-2 text-[13px] transition-colors duration-premium hover:text-accent"
+                    >
+                      <span>
+                        {c.origen === "prestamo" ? "🏦" : "🛍"} {c.clienteNombre}
+                      </span>
+                      <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.saldoCuota)}</span>
+                    </Link>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerList>
             )}
           </CardContent>
         </Card>
-      </div>
+      </FadeIn>
 
       {data.clientesAtencion.length > 0 && (
-        <Card>
-          <CardContent>
-            <h3 className="mb-3 text-sm font-bold">⚠️ Clientes que requieren atención</h3>
-            <div className="flex flex-col divide-y divide-[color:var(--border)]">
-              {data.clientesAtencion.map((c) => (
-                <Link
-                  key={c.clienteId}
-                  href={`/clientes/${c.clienteId}`}
-                  className="flex items-center justify-between py-2.5 text-[13px] hover:text-accent"
-                >
-                  <span className="flex items-center gap-2">
-                    <span
-                      className={`h-2 w-2 rounded-full ${c.diasMora >= 15 ? "bg-danger" : "bg-warning"}`}
-                    />
-                    {c.origen === "prestamo" ? "🏦" : "🛍"} {c.nombre}
-                    <span className="text-muted">· {c.diasMora}d de mora</span>
-                  </span>
-                  <span className="font-semibold text-danger">{formatearMoneda(c.montoVencido)}</span>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <FadeIn delay={0.15}>
+          <Card>
+            <CardContent>
+              <h3 className="mb-3 text-sm font-bold">⚠️ Clientes que requieren atención</h3>
+              <StaggerList className="flex flex-col divide-y divide-[color:var(--border)]">
+                {data.clientesAtencion.map((c) => (
+                  <StaggerItem key={c.clienteId}>
+                    <Link
+                      href={`/clientes/${c.clienteId}`}
+                      className="flex items-center justify-between py-2.5 text-[13px] transition-colors duration-premium hover:text-accent"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${c.diasMora >= 15 ? "bg-danger" : "bg-warning"}`}
+                        />
+                        {c.origen === "prestamo" ? "🏦" : "🛍"} {c.nombre}
+                        <span className="text-muted">· {c.diasMora}d de mora</span>
+                      </span>
+                      <span className="font-semibold text-danger">{formatearMoneda(c.montoVencido)}</span>
+                    </Link>
+                  </StaggerItem>
+                ))}
+              </StaggerList>
+            </CardContent>
+          </Card>
+        </FadeIn>
       )}
 
-      <Card>
-        <CardContent>
-          <h3 className="mb-3 text-sm font-bold">Actividad reciente</h3>
-          {data.actividad.length === 0 ? (
-            <EmptyState icon="📊" title="Todavía no hay actividad" description="Crea tu primer préstamo o venta para empezar." />
-          ) : (
-            <div className="flex flex-col divide-y divide-[color:var(--border)]">
-              {data.actividad.map((a) => (
-                <div key={`${a.tipo}-${a.id}`} className="flex items-center justify-between py-2.5 text-[13px]">
-                  <span>
-                    {iconoActividad[a.tipo]} <strong>{a.titulo}</strong> · {a.detalle}
-                  </span>
-                  <div className="text-right">
-                    <p className="font-mono font-semibold tabular-nums">{formatearMoneda(a.monto)}</p>
-                    <p className="text-[11px] text-muted">{formatearFecha(a.fecha)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <FadeIn delay={0.2}>
+        <Card>
+          <CardContent>
+            <h3 className="mb-3 text-sm font-bold">Actividad reciente</h3>
+            {data.actividad.length === 0 ? (
+              <EmptyState icon="📊" title="Todavía no hay actividad" description="Crea tu primer préstamo o venta para empezar." />
+            ) : (
+              <StaggerList className="flex flex-col divide-y divide-[color:var(--border)]">
+                {data.actividad.map((a) => (
+                  <StaggerItem key={`${a.tipo}-${a.id}`}>
+                    <div className="flex items-center justify-between py-2.5 text-[13px]">
+                      <span>
+                        {iconoActividad[a.tipo]} <strong>{a.titulo}</strong> · {a.detalle}
+                      </span>
+                      <div className="text-right">
+                        <p className="font-mono font-semibold tabular-nums">{formatearMoneda(a.monto)}</p>
+                        <p className="text-[11px] text-muted">{formatearFecha(a.fecha)}</p>
+                      </div>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </StaggerList>
+            )}
+          </CardContent>
+        </Card>
+      </FadeIn>
     </div>
   );
 }

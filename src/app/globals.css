@@ -14,7 +14,10 @@
 
   --text: #0f172a;
   --text-2: #475569;
-  --text-3: #94a3b8;
+  /* text-3 auditado (Módulo 13, QA de accesibilidad): #94a3b8 daba 2.5:1 sobre
+     fondo blanco, por debajo del mínimo WCAG AA (4.5:1) para texto normal.
+     #64748b (slate-500) es el siguiente tono de la misma escala que sí pasa. */
+  --text-3: #64748b;
 
   --accent: #0ea5e9;
   --accent-dark: #0284c7;
@@ -41,7 +44,8 @@
 
   --text: #e6edf3;
   --text-2: #8b949e;
-  --text-3: #586170;
+  /* Mismo ajuste de accesibilidad que en modo claro — #586170 daba 2.9:1. */
+  --text-3: #7c8794;
 
   --accent: #38bdf8;
   --accent-dark: #0ea5e9;

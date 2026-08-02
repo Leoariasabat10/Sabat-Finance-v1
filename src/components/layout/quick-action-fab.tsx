@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { accionesRapidas } from "@/config/nav";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 /**
  * Botón flotante de acciones rápidas (visión final del producto, sección
@@ -55,18 +56,23 @@ export function QuickActionFab() {
         </div>
       ) : null}
 
-      <button
-        type="button"
-        aria-label={open ? "Cerrar acciones rápidas" : "Acciones rápidas"}
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-dark))] text-white shadow-lg transition-transform duration-premium ease-premium",
-          open ? "rotate-45" : "hover:scale-105",
-        )}
-      >
-        {open ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={open ? "Cerrar acciones rápidas" : "Acciones rápidas"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className={cn(
+              "flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-dark))] text-white shadow-lg transition-transform duration-premium ease-premium",
+              open ? "rotate-45" : "hover:scale-105",
+            )}
+          >
+            {open ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
+          </button>
+        </TooltipTrigger>
+        {open ? null : <TooltipContent side="left">Acciones rápidas</TooltipContent>}
+      </Tooltip>
     </div>
   );
 }

@@ -3,15 +3,18 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { eliminarCliente } from "@/lib/clientes/actions";
 
 export function EliminarClienteDialog({
@@ -31,36 +34,36 @@ export function EliminarClienteDialog({
       const resultado = await eliminarCliente(clienteId);
       if (!resultado.ok) {
         setError(resultado.error);
+        toast.error(resultado.error);
         return;
       }
+      toast.success("Cliente eliminado");
       router.push("/clientes");
       router.refresh();
     });
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Eliminar cliente">
         <Trash2 className="h-4 w-4 text-danger" />
       </Button>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>¿Eliminar a {nombre}?</DialogTitle>
-          <DialogDescription>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Eliminar a {nombre}?</AlertDialogTitle>
+          <AlertDialogDescription>
             El cliente se quitará de tus listados, pero su historial queda guardado
             y puede recuperarse — nunca se borra de verdad de la base de datos.
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
         {error ? <p className="text-[12px] text-danger">{error}</p> : null}
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={confirmar} disabled={isPending}>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmar} disabled={isPending}>
             {isPending ? "Eliminando…" : "Eliminar"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

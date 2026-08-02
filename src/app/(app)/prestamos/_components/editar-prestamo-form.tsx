@@ -96,7 +96,7 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_360px]">
       <div className="flex flex-col gap-5">
         <Card>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
