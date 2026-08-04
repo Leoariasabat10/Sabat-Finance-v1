@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ShoppingBag } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getVentaById } from "@/lib/ventas/queries";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
+import { BadgeEstadoCuota } from "@/components/shared/badge-estado-cuota";
 import { AnularVentaButton } from "../_components/anular-venta-button";
 
 export const metadata: Metadata = { title: "Detalle de venta · Sabat Finance" };
@@ -18,9 +21,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   return (
     <div className="animate-fade-up flex flex-col gap-5">
+      <Breadcrumb items={[{ label: "Ventas", href: "/ventas" }, { label: venta.cliente.nombre }]} />
       <PageHeader
         title={venta.cliente.nombre}
-        subtitle={`🛍 Comercial · ${venta.cliente.whatsapp} · ${formatearFecha(venta.fecha)}`}
+        subtitle={
+          <span className="inline-flex items-center gap-1.5">
+            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial · {venta.cliente.whatsapp} · {formatearFecha(venta.fecha)}
+          </span>
+        }
         actions={
           <div className="flex items-center gap-2.5">
             {venta.estado !== "anulada" ? (
@@ -41,13 +49,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         <Card>
           <CardContent>
             <p className="text-[11px] font-semibold text-muted">Total</p>
-            <p className="text-lg font-bold">{formatearMoneda(venta.totalCalc)}</p>
+            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(venta.totalCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <p className="text-[11px] font-semibold text-muted">Utilidad</p>
-            <p className="text-lg font-bold">{formatearMoneda(venta.utilidadCalc)}</p>
+            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(venta.utilidadCalc)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -62,7 +70,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <Card>
             <CardContent>
               <p className="text-[11px] font-semibold text-muted">Saldo pendiente</p>
-              <p className="text-lg font-bold text-accent">
+              <p className="font-mono text-lg font-bold tabular-nums text-accent">
                 {formatearMoneda(venta.operacionCredito.saldoPendienteCalc)}
               </p>
             </CardContent>
@@ -95,9 +103,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                     #{c.numeroCuota} · vence {formatearFecha(c.fechaVencimiento)}
                   </span>
                   <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
-                  <Badge variant={c.estado === "pagada" ? "success" : c.estado === "vencida" ? "danger" : "info"}>
-                    {c.estado}
-                  </Badge>
+                  <BadgeEstadoCuota estado={c.estado} />
                 </div>
               ))}
             </div>

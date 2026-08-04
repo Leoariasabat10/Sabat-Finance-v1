@@ -1,8 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil, MessageCircle, MapPin, IdCard, Users2 } from "lucide-react";
+import {
+  Pencil,
+  MessageCircle,
+  MapPin,
+  IdCard,
+  Users2,
+  Landmark,
+  ShoppingBag,
+  HandCoins,
+  StickyNote,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -48,7 +60,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
     getExpedienteFinanciero(cliente.id),
   ]);
 
-  const iconoEvento: Record<string, string> = { prestamo: "🏦", venta: "🛍", pago: "💵", nota: "📝" };
+  const iconoEvento: Record<string, LucideIcon> = { prestamo: Landmark, venta: ShoppingBag, pago: HandCoins, nota: StickyNote };
 
   const datosContacto = [
     { icono: IdCard, valor: cliente.cedula, etiqueta: "Cédula" },
@@ -58,6 +70,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
 
   return (
     <div className="animate-fade-up">
+      <Breadcrumb items={[{ label: "Clientes", href: "/clientes" }, { label: cliente.nombre }]} />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <FotoCliente
@@ -125,7 +138,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
             <Card>
               <CardContent>
                 <p className="mb-3 flex items-center gap-1.5 text-[12px] font-bold text-muted">
-                  🏦 Financiero — préstamos
+                  <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero — préstamos
                 </p>
                 <p className="font-display text-2xl text-foreground">
                   {formatoMoneda.format(cliente.resumen.saldoPrestamos)}
@@ -140,7 +153,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
             <Card>
               <CardContent>
                 <p className="mb-3 flex items-center gap-1.5 text-[12px] font-bold text-muted">
-                  🛍 Comercial — ventas
+                  <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial — ventas
                 </p>
                 <p className="font-display text-2xl text-foreground">
                   {formatoMoneda.format(cliente.resumen.saldoVentas)}
@@ -189,11 +202,13 @@ export default async function ClienteDetallePage({ params }: PageProps) {
               ) : (
                 <div className="flex flex-col divide-y divide-[color:var(--border)]">
                   {lineaTiempo.map((e, i) => {
+                    const IconoEvento = iconoEvento[e.tipo];
                     const contenido = (
                       <div className="flex items-center justify-between py-2.5 text-[13px]">
-                        <span>
-                          {iconoEvento[e.tipo]} <strong>{e.titulo}</strong>
-                          <span className="text-muted"> · {e.detalle}</span>
+                        <span className="inline-flex items-center gap-1.5">
+                          {IconoEvento ? <IconoEvento className="h-3.5 w-3.5 shrink-0 text-faint" aria-hidden /> : null}
+                          <strong>{e.titulo}</strong>
+                          <span className="text-muted">· {e.detalle}</span>
                         </span>
                         <span className="text-[11.5px] text-muted">{formatearFecha(e.fecha)}</span>
                       </div>

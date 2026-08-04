@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { TarjetaDecision } from "@/lib/dashboard/colaDecisiones";
 
@@ -32,7 +33,9 @@ export function ColaDecisiones({ tarjetas }: { tarjetas: TarjetaDecision[] }) {
   if (tarjetas.length === 0) {
     return (
       <Card className="p-5">
-        <p className="text-[14px] font-semibold text-foreground">✅ Nada urgente hoy.</p>
+        <p className="flex items-center gap-1.5 text-[14px] font-semibold text-foreground">
+          <CheckCircle2 className="h-4 w-4 text-success" aria-hidden /> Nada urgente hoy.
+        </p>
         <p className="mt-1 text-[13px] text-muted">Sin cobros vencidos, sin capital retenido nuevo, todo al día.</p>
       </Card>
     );

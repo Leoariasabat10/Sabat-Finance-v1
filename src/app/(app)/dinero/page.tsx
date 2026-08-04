@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Landmark, ShoppingBag, Wallet, Lightbulb, AlertTriangle } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { InsightBanner } from "@/components/shared/insight-banner";
+import { StaggerList, StaggerItem } from "@/components/shared/motion";
 import { getSaldoActual, listMovimientos, getResumenHoy } from "@/lib/caja/queries";
 import { getPosicionActual, capturarSnapshotHoy, getVariacionCapital } from "@/lib/posicion/queries";
 import { calcularCupoSeguro, simularRecuperarCapital, narrativaImpactoCapitalRetenido } from "@/lib/inteligencia/cfo";
@@ -71,21 +75,21 @@ export default async function Page() {
           <div>
             <div className="mb-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-accent" />
-              <p className="text-[11px] font-semibold text-muted">🏦 Prestado</p>
+              <p className="flex items-center gap-1 text-[11px] font-semibold text-muted"><Landmark className="h-3 w-3" aria-hidden /> Prestado</p>
             </div>
             <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(posicion.capitalPrestado)}</p>
           </div>
           <div>
             <div className="mb-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-warning" />
-              <p className="text-[11px] font-semibold text-muted">🛍 Invertido en mercancía</p>
+              <p className="flex items-center gap-1 text-[11px] font-semibold text-muted"><ShoppingBag className="h-3 w-3" aria-hidden /> Invertido en mercancía</p>
             </div>
             <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(posicion.capitalInvertidoMercancia)}</p>
           </div>
           <div>
             <div className="mb-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-success" />
-              <p className="text-[11px] font-semibold text-muted">💰 Disponible para prestar</p>
+              <p className="flex items-center gap-1 text-[11px] font-semibold text-muted"><Wallet className="h-3 w-3" aria-hidden /> Disponible para prestar</p>
             </div>
             {posicion.capitalTotal > 0 ? (
               <p
@@ -106,8 +110,8 @@ export default async function Page() {
           </div>
         </div>
 
-        <p className="mt-4 border-t border-[color:var(--border)] pt-3 text-[12.5px] font-semibold text-foreground">
-          💡 {cupoSeguro.mensaje}
+        <p className="mt-4 flex items-start gap-1.5 border-t border-[color:var(--border)] pt-3 text-[12.5px] font-semibold text-foreground">
+          <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" aria-hidden /> {cupoSeguro.mensaje}
         </p>
 
         {posicion.capitalTotal > 0 && variacionPct !== null ? (
@@ -122,53 +126,59 @@ export default async function Page() {
       </Card>
 
       {posicion.clientesRetenidos.length > 0 ? (
-        <Card className="border-warning/40 bg-warning-bg p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[13px] font-bold text-foreground">
-                ⚠ {formatearMoneda(posicion.capitalRetenido)} en capital retenido
-                {posicion.capitalTotal > 0 ? ` (${((posicion.capitalRetenido / posicion.capitalTotal) * 100).toFixed(0)}% del capital total)` : ""}
-              </p>
-              <p className="mt-1 text-[12.5px] text-foreground">
-                {narrativaImpactoCapitalRetenido({
-                  clienteNombre: posicion.clientesRetenidos[0]!.clienteNombre,
-                  montoCapital: posicion.clientesRetenidos[0]!.montoCapital,
-                  antiguedadDias: posicion.clientesRetenidos[0]!.antiguedadDias,
-                  pctDelCapitalTotal:
-                    posicion.capitalTotal > 0 ? (posicion.clientesRetenidos[0]!.montoCapital / posicion.capitalRetenido) * 100 : null,
-                })}
-              </p>
-              <p className="mt-1.5 text-[12px] font-semibold text-accent">
-                💡{" "}
-                {
-                  simularRecuperarCapital({
-                    montoARecuperar: posicion.clientesRetenidos[0]!.montoCapital,
-                    capitalTotalConfigurado: posicion.capitalTotal,
-                    capitalDisponible: posicion.capitalDisponible,
-                    saldoCaja,
-                  }).mensaje
-                }
-              </p>
-            </div>
-            <Badge variant="warning">Revisar</Badge>
-          </div>
-          <div className="mt-3 flex flex-col gap-1.5">
+        <Card className="p-4">
+          <InsightBanner
+            tono="warning"
+            icon={<AlertTriangle className="h-4 w-4" aria-hidden />}
+            title={`${formatearMoneda(posicion.capitalRetenido)} en capital retenido${
+              posicion.capitalTotal > 0 ? ` (${((posicion.capitalRetenido / posicion.capitalTotal) * 100).toFixed(0)}% del capital total)` : ""
+            }`}
+            description={narrativaImpactoCapitalRetenido({
+              clienteNombre: posicion.clientesRetenidos[0]!.clienteNombre,
+              montoCapital: posicion.clientesRetenidos[0]!.montoCapital,
+              antiguedadDias: posicion.clientesRetenidos[0]!.antiguedadDias,
+              pctDelCapitalTotal:
+                posicion.capitalTotal > 0 ? (posicion.clientesRetenidos[0]!.montoCapital / posicion.capitalRetenido) * 100 : null,
+            })}
+            action={<Badge variant="warning">Revisar</Badge>}
+          />
+          {posicion.capitalTotal > 0 ? (
+            <Progress
+              value={Math.min(100, (posicion.capitalRetenido / posicion.capitalTotal) * 100)}
+              className="mt-3 bg-warning-bg"
+              indicatorClassName="bg-warning"
+            />
+          ) : null}
+          <p className="mt-3 flex items-start gap-1.5 text-[12px] font-semibold text-accent">
+            <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+            {
+              simularRecuperarCapital({
+                montoARecuperar: posicion.clientesRetenidos[0]!.montoCapital,
+                capitalTotalConfigurado: posicion.capitalTotal,
+                capitalDisponible: posicion.capitalDisponible,
+                saldoCaja,
+              }).mensaje
+            }
+          </p>
+          <StaggerList className="mt-3 flex flex-col gap-1.5">
             {posicion.clientesRetenidos.slice(0, 5).map((c) => (
-              <div key={c.operacionId} className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[12.5px]">
-                <Link href={`/prestamos/${c.operacionId}`} className="min-w-0 flex-1 transition-colors hover:text-accent">
-                  <span className="font-semibold text-foreground">
-                    {c.clienteNombre} ·{" "}
-                    {c.antiguedadDias !== null ? `${Math.floor(c.antiguedadDias / 30)} meses` : "patrón de pago, sin fecha confirmada"}
-                  </span>
-                </Link>
-                <span className="font-mono tabular-nums">{formatearMoneda(c.montoCapital)}</span>
-                <BotonWhatsApp
-                  numero={c.clienteWhatsapp}
-                  mensaje={`Hola ${c.clienteNombre}.\nQuiero conversar contigo sobre el préstamo de ${formatearMoneda(c.montoCapital)} — llevas un tiempo pagando solo intereses. ¿Podemos acordar una devolución de capital?`}
-                />
-              </div>
+              <StaggerItem key={c.operacionId}>
+                <div className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[12.5px] transition-colors duration-premium hover:bg-hover-bg">
+                  <Link href={`/prestamos/${c.operacionId}`} className="min-w-0 flex-1 transition-colors hover:text-accent">
+                    <span className="font-semibold text-foreground">
+                      {c.clienteNombre} ·{" "}
+                      {c.antiguedadDias !== null ? `${Math.floor(c.antiguedadDias / 30)} meses` : "patrón de pago, sin fecha confirmada"}
+                    </span>
+                  </Link>
+                  <span className="font-mono tabular-nums">{formatearMoneda(c.montoCapital)}</span>
+                  <BotonWhatsApp
+                    numero={c.clienteWhatsapp}
+                    mensaje={`Hola ${c.clienteNombre}.\nQuiero conversar contigo sobre el préstamo de ${formatearMoneda(c.montoCapital)} — llevas un tiempo pagando solo intereses. ¿Podemos acordar una devolución de capital?`}
+                  />
+                </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerList>
         </Card>
       ) : null}
 
@@ -200,26 +210,28 @@ export default async function Page() {
           </div>
 
           {movimientos.length === 0 ? (
-            <EmptyState icon="🏦" title="Sin movimientos todavía" />
+            <EmptyState icon={<Wallet className="h-10 w-10 text-faint" />} title="Sin movimientos todavía" />
           ) : (
-            <div className="flex max-h-[420px] flex-col divide-y divide-[color:var(--border)] overflow-y-auto">
+            <StaggerList className="flex max-h-[420px] flex-col divide-y divide-[color:var(--border)] overflow-y-auto">
               {movimientos.map((m) => (
-                <div key={m.id} className="flex items-center justify-between py-2.5 text-[13px]">
-                  <div>
-                    <p className="font-semibold">{m.descripcion ?? m.categoria ?? "Movimiento"}</p>
-                    <p className="text-[11.5px] text-muted">{formatearFecha(m.fecha)}</p>
+                <StaggerItem key={m.id}>
+                  <div className="flex items-center justify-between py-2.5 text-[13px] transition-colors duration-premium hover:bg-hover-bg">
+                    <div>
+                      <p className="font-semibold">{m.descripcion ?? m.categoria ?? "Movimiento"}</p>
+                      <p className="text-[11.5px] text-muted">{formatearFecha(m.fecha)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className={m.tipo === "ingreso" ? "font-bold text-success" : "font-bold text-danger"}>
+                        {m.tipo === "ingreso" ? "+" : "−"}
+                        {formatearMoneda(m.monto)}
+                      </p>
+                      <p className="text-[11px] text-muted">saldo {formatearMoneda(m.saldoResultante)}</p>
+                    </div>
+                    <Badge variant={m.tipo === "ingreso" ? "success" : "danger"}>{m.tipo}</Badge>
                   </div>
-                  <div className="text-right">
-                    <p className={m.tipo === "ingreso" ? "font-bold text-success" : "font-bold text-danger"}>
-                      {m.tipo === "ingreso" ? "+" : "−"}
-                      {formatearMoneda(m.monto)}
-                    </p>
-                    <p className="text-[11px] text-muted">saldo {formatearMoneda(m.saldoResultante)}</p>
-                  </div>
-                  <Badge variant={m.tipo === "ingreso" ? "success" : "danger"}>{m.tipo}</Badge>
-                </div>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerList>
           )}
         </CardContent>
       </Card>

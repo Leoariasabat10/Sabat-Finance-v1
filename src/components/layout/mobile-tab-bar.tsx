@@ -32,9 +32,7 @@ export function MobileTabBar() {
               active ? "text-accent" : "text-faint",
             )}
           >
-            <span className="text-[19px] leading-none" aria-hidden>
-              {item.emoji}
-            </span>
+            <item.icon className="h-[19px] w-[19px]" aria-hidden />
             <span>{item.title}</span>
           </Link>
         );

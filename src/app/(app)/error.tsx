@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 
@@ -22,7 +23,7 @@ export default function AppError({
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <EmptyState
-        icon="⚠️"
+        icon={<AlertTriangle className="h-10 w-10 text-warning" />}
         title="Algo salió mal"
         description="No se pudo cargar esta pantalla. Tus datos están a salvo — intenta de nuevo."
         action={

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Landmark, ShoppingBag } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card } from "@/components/ui/card";
 import { listCobrar } from "@/lib/cobrar/queries";
@@ -24,15 +25,28 @@ export default async function Page() {
 
   return (
     <div className="animate-fade-up flex flex-col gap-5">
-      <PageHeader title="Cobrar" subtitle="Vencidos, próximos y calendario — cartera 🏦 Financiero + 🛍 Comercial, siempre desagregada" />
+      <PageHeader
+        title="Cobrar"
+        subtitle={
+          <span className="inline-flex flex-wrap items-center gap-1">
+            Vencidos, próximos y calendario — cartera
+            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero +
+            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial, siempre desagregada
+          </span>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Card className="p-4">
-          <p className="text-[11px] font-semibold text-muted">🏦 Saldo por cobrar — Financiero</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Saldo por cobrar — Financiero
+          </p>
           <p className="font-mono text-xl font-bold tabular-nums">{formatearMoneda(totalFinanciero)}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[11px] font-semibold text-muted">🛍 Saldo por cobrar — Comercial</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Saldo por cobrar — Comercial
+          </p>
           <p className="font-mono text-xl font-bold tabular-nums">{formatearMoneda(totalComercial)}</p>
         </Card>
       </div>

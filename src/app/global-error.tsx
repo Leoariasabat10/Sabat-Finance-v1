@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
 
 /**
  * Último recurso: se activa solo si el root layout mismo falla (por eso
@@ -34,7 +35,9 @@ export default function GlobalError({
         }}
       >
         <div style={{ textAlign: "center", maxWidth: 360, padding: 24 }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>⚠️</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <AlertTriangle size={36} color="#f59e0b" />
+          </div>
           <h1 style={{ fontSize: 16, fontWeight: 800 }}>Algo salió mal</h1>
           <p style={{ fontSize: 13, color: "#475569", marginTop: 6 }}>
             Sabat Finance no pudo cargar. Tus datos están a salvo — intenta de
@@ -53,6 +56,7 @@ export default function GlobalError({
               border: "none",
               cursor: "pointer",
             }}
+
           >
             Reintentar
           </button>

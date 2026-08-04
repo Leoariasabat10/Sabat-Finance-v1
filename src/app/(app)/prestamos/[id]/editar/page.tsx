@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Landmark } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { getPrestamoById } from "@/lib/prestamos/queries";
 import { EditarPrestamoForm } from "../../_components/editar-prestamo-form";
@@ -20,7 +21,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   return (
     <div className="animate-fade-up flex flex-col gap-5">
-      <PageHeader title={`Editar préstamo de ${operacion.cliente.nombre}`} subtitle="🏦 Financiero" />
+      <PageHeader
+        title={`Editar préstamo de ${operacion.cliente.nombre}`}
+        subtitle={
+          <span className="inline-flex items-center gap-1.5">
+            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero
+          </span>
+        }
+      />
       <EditarPrestamoForm
         prestamoId={operacion.id}
         valoresIniciales={{

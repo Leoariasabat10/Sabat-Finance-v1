@@ -25,13 +25,6 @@ export interface ClienteAtencion {
   montoVencido: number;
 }
 
-export interface Alerta {
-  nivel: "danger" | "warning" | "info";
-  icono: string;
-  mensaje: string;
-  href?: string;
-}
-
 export async function getDashboardData() {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
@@ -187,34 +180,6 @@ export async function getDashboardData() {
     .sort((a, b) => b.diasMora - a.diasMora)
     .slice(0, 6);
 
-  // Alertas: señales operativas que la dueña debe ver de un vistazo.
-  const alertas: Alerta[] = [];
-  if (bloqueFinanciero.vencido + bloqueComercial.porCobrarCredito > 0 && clientesAtencion.length > 0) {
-    const totalVencido = clientesAtencion.reduce((a, c) => a + c.montoVencido, 0);
-    alertas.push({
-      nivel: "danger",
-      icono: "⚠️",
-      mensaje: `${clientesAtencion.length} cliente${clientesAtencion.length === 1 ? "" : "s"} con cuotas vencidas por ${formatearMonedaAlerta(totalVencido)}`,
-      href: "/cobrar",
-    });
-  }
-  const moraLarga = clientesAtencion.filter((c) => c.diasMora >= 15);
-  if (moraLarga.length > 0) {
-    alertas.push({
-      nivel: "danger",
-      icono: "🔴",
-      mensaje: `${moraLarga.length} cliente${moraLarga.length === 1 ? "" : "s"} con más de 15 días de mora`,
-      href: "/cobrar",
-    });
-  }
-  if (dineroDisponible <= 0) {
-    alertas.push({
-      nivel: "warning",
-      icono: "💰",
-      mensaje: "La caja está en cero o negativa — revisa antes de prestar o vender a crédito",
-      href: "/dinero",
-    });
-  }
   return {
     dineroDisponible,
     dineroPorCobrarTotal,
@@ -223,10 +188,5 @@ export async function getDashboardData() {
     actividad,
     serieMeses,
     clientesAtencion,
-    alertas,
   };
-}
-
-function formatearMonedaAlerta(valor: number): string {
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(valor);
 }

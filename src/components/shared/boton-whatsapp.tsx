@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
+import { WhatsAppIcon } from "@/components/shared/icons";
 import { construirLinkWhatsapp } from "@/lib/whatsapp/mensajes";
 
 interface BotonWhatsAppProps extends Omit<ButtonProps, "asChild"> {
@@ -26,7 +27,8 @@ export function BotonWhatsApp({ numero, mensaje, etiqueta = "WhatsApp", variant 
         onClick={(e) => e.stopPropagation()}
         aria-label={etiqueta ? undefined : "Enviar WhatsApp"}
       >
-        {etiqueta ? `💬 ${etiqueta}` : "💬"}
+        <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        {etiqueta || undefined}
       </a>
     </Button>
   );

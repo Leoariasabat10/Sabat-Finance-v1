@@ -2,32 +2,58 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { registrarPago } from "@/lib/pagos/actions";
 import { pagoSchema, type PagoInput } from "@/lib/pagos/validations";
 import { fechaHoyIso, formatearMoneda } from "@/lib/formato";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { MoneyInput, limpiarMoneda, formatearMiles } from "@/components/ui/money-input";
 
 interface PagoFormProps {
   operacionId: string;
+  /** Tope real — el pago nunca puede superarlo (bloqueo financiero crítico). */
   saldoPendiente: number;
+  /**
+   * Valor con el que se prellena el campo. Por defecto es igual a
+   * `saldoPendiente` (comportamiento original: liquidar el saldo completo).
+   * El Sheet inline de Cobrar pasa aquí el valor de la cuota del día en vez
+   * del saldo total de la operación — en el cobro diario de calle lo normal
+   * es pagar la cuota de hoy, no todo el préstamo de una vez.
+   */
+  valorSugerido?: number;
   origen: string;
+  /**
+   * Cuando se usa dentro de un Sheet inline (ej. cobro-inline-sheet.tsx) no
+   * queremos navegar fuera de la pantalla actual al registrar el pago — solo
+   * cerrar el panel y refrescar. Si no se pasa, conserva el comportamiento
+   * original (navegar a la operación).
+   */
+  onSuccess?: () => void;
+  /** Reemplaza el "Cancelar" (que por defecto hace router.back()) cuando el form vive dentro de un panel que no navegó. */
+  onCancel?: () => void;
 }
 
-export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps) {
+export function PagoForm({
+  operacionId,
+  saldoPendiente,
+  valorSugerido,
+  origen,
+  onSuccess,
+  onCancel,
+}: PagoFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const {
     register,
+    control,
     handleSubmit,
     watch,
     formState: { errors },
@@ -37,7 +63,7 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
       operacionCreditoId: operacionId,
       // Prellenado con el saldo, ya formateado con miles ("2.200.000") —
       // limpiarMoneda lo convierte a número al validar/enviar.
-      valor: formatearMiles(saldoPendiente) as unknown as number,
+      valor: formatearMiles(valorSugerido ?? saldoPendiente) as unknown as number,
       fechaPago: fechaHoyIso(),
       metodoPago: "efectivo",
       tipoAbono: "cuota_completa",
@@ -62,7 +88,11 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
         return;
       }
       toast.success("Pago registrado");
-      router.push(origen === "prestamo" ? `/prestamos/${operacionId}` : `/ventas`);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(origen === "prestamo" ? `/prestamos/${operacionId}` : `/ventas`);
+      }
       router.refresh();
     });
   };
@@ -85,7 +115,11 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label htmlFor="fechaPago">Fecha *</Label>
-          <Input id="fechaPago" type="date" {...register("fechaPago")} />
+          <Controller
+            name="fechaPago"
+            control={control}
+            render={({ field }) => <DatePicker id="fechaPago" value={field.value} onChange={field.onChange} />}
+          />
         </div>
         <div>
           <Label htmlFor="metodoPago">Método</Label>
@@ -118,7 +152,7 @@ export function PagoForm({ operacionId, saldoPendiente, origen }: PagoFormProps)
       ) : null}
 
       <div className="flex justify-end gap-2.5">
-        <Button type="button" variant="ghost" onClick={() => router.back()} disabled={isPending}>
+        <Button type="button" variant="ghost" onClick={onCancel ?? (() => router.back())} disabled={isPending}>
           Cancelar
         </Button>
         <Button type="submit" disabled={isPending || excedeSaldo}>

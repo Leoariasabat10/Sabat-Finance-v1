@@ -63,14 +63,14 @@ export async function buscarGlobal(query: string): Promise<ResultadoBusqueda[]> 
       tipo: "prestamo" as const,
       id: p.id,
       titulo: p.cliente.nombre,
-      subtitulo: `🏦 Préstamo · ${Number(p.montoCapital).toLocaleString("es-CO")} · ${p.estado}`,
+      subtitulo: `Préstamo · ${Number(p.montoCapital).toLocaleString("es-CO")} · ${p.estado}`,
       href: `/prestamos/${p.id}`,
     })),
     ...ventas.map((v) => ({
       tipo: "venta" as const,
       id: v.id,
       titulo: v.cliente.nombre,
-      subtitulo: `🛍 Venta · ${Number(v.totalCalc).toLocaleString("es-CO")} · ${v.tipoPago}`,
+      subtitulo: `Venta · ${Number(v.totalCalc).toLocaleString("es-CO")} · ${v.tipoPago}`,
       href: `/ventas/${v.id}`,
     })),
   ];

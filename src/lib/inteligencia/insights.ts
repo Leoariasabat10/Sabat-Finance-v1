@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { calcularMetricasCliente, formatoAntiguedad, INCLUDE_OPERACION_DETALLE } from "@/lib/clientes/metricas";
+import { detectarReendeudamiento } from "@/lib/inteligencia/reendeudamiento";
 
 /**
  * Inteligencia de negocio a nivel de cartera (visión final, 26 jul 2026):
@@ -13,6 +14,7 @@ import { calcularMetricasCliente, formatoAntiguedad, INCLUDE_OPERACION_DETALLE }
 export interface InsightCliente {
   clienteId: string;
   nombre: string;
+  tipo: "riesgo" | "rentable" | "puntual" | "retenido" | "reendeudamiento";
   etiqueta: string;
   detalle: string;
   href: string;
@@ -23,6 +25,7 @@ export interface InsightsNegocio {
   masRentable: InsightCliente | null;
   masPuntual: InsightCliente | null;
   capitalRetenidoMasAntiguo: InsightCliente | null;
+  reendeudamientoActivo: InsightCliente | null;
 }
 
 const formatoMoneda = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
@@ -46,6 +49,7 @@ export async function getInsightsNegocio(): Promise<InsightsNegocio> {
         c.operaciones.map((o) => o.createdAt),
         0, // el conteo de refinanciaciones no afecta ningún ranking aquí
       ),
+      reendeudamiento: detectarReendeudamiento(c.operaciones),
     }))
     .filter((c) => c.m.prestadoHistorico > 0);
 
@@ -67,12 +71,21 @@ export async function getInsightsNegocio(): Promise<InsightsNegocio> {
     (a, b) => (b.m.operacionRetenida?.antiguedadDias ?? 0) - (a.m.operacionRetenida?.antiguedadDias ?? 0),
   )[0];
 
+  // Ciclo de reendeudamiento: cliente al que se le prestó de nuevo muy poco
+  // después de haber pagado otra operación — se prioriza a quien más veces
+  // repite el patrón (más señales), no solo la más reciente.
+  const conReendeudamiento = candidatos.filter((c) => c.reendeudamiento.length > 0);
+  const reendeudamientoActivo = conReendeudamiento.sort(
+    (a, b) => b.reendeudamiento.length - a.reendeudamiento.length,
+  )[0];
+
   return {
     mayorRiesgo: mayorRiesgo
       ? {
           clienteId: mayorRiesgo.clienteId,
           nombre: mayorRiesgo.nombre,
-          etiqueta: "⚠️ Mayor riesgo",
+          tipo: "riesgo",
+          etiqueta: "Mayor riesgo",
           detalle: `${mayorRiesgo.m.moraActivaDias}d de mora`,
           href: `/clientes/${mayorRiesgo.clienteId}`,
         }
@@ -81,7 +94,8 @@ export async function getInsightsNegocio(): Promise<InsightsNegocio> {
       ? {
           clienteId: masRentable.clienteId,
           nombre: masRentable.nombre,
-          etiqueta: "💰 Más rentable",
+          tipo: "rentable",
+          etiqueta: "Más rentable",
           detalle: `te ha generado ${formatoMoneda.format(masRentable.m.utilidadGenerada)}`,
           href: `/clientes/${masRentable.clienteId}`,
         }
@@ -90,7 +104,8 @@ export async function getInsightsNegocio(): Promise<InsightsNegocio> {
       ? {
           clienteId: masPuntual.clienteId,
           nombre: masPuntual.nombre,
-          etiqueta: "✅ Nunca falla",
+          tipo: "puntual",
+          etiqueta: "Nunca falla",
           detalle: `${masPuntual.m.cuotasEvaluadas} cuotas a tiempo`,
           href: `/clientes/${masPuntual.clienteId}`,
         }
@@ -99,12 +114,26 @@ export async function getInsightsNegocio(): Promise<InsightsNegocio> {
       ? {
           clienteId: capitalRetenidoMasAntiguo.clienteId,
           nombre: capitalRetenidoMasAntiguo.nombre,
-          etiqueta: "🔒 Capital retenido",
+          tipo: "retenido",
+          etiqueta: "Capital retenido",
           detalle:
             capitalRetenidoMasAntiguo.m.operacionRetenida.antiguedadDias !== null
               ? `${formatoAntiguedad(capitalRetenidoMasAntiguo.m.operacionRetenida.antiguedadDias)} solo pagando intereses`
               : "solo pagando intereses — sin fecha de inicio confirmada",
           href: `/clientes/${capitalRetenidoMasAntiguo.clienteId}`,
+        }
+      : null,
+    reendeudamientoActivo: reendeudamientoActivo
+      ? {
+          clienteId: reendeudamientoActivo.clienteId,
+          nombre: reendeudamientoActivo.nombre,
+          tipo: "reendeudamiento",
+          etiqueta: "Ciclo de reendeudamiento",
+          detalle:
+            reendeudamientoActivo.reendeudamiento.length > 1
+              ? `${reendeudamientoActivo.reendeudamiento.length} préstamos nuevos justo después de un pago`
+              : "recibió un préstamo nuevo días después de pagar otro",
+          href: `/clientes/${reendeudamientoActivo.clienteId}`,
         }
       : null,
   };

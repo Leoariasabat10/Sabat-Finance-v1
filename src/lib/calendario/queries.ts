@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 export interface EventoAgenda {
   fecha: Date;
   tipo: "cuota" | "evento";
+  origen?: "prestamo" | "venta";
   titulo: string;
   subtitulo: string;
   href: string | null;
@@ -40,7 +41,8 @@ export async function listAgenda(dias = 30): Promise<EventoAgenda[]> {
   const deCuotas: EventoAgenda[] = cuotas.map((c) => ({
     fecha: c.fechaVencimiento,
     tipo: "cuota",
-    titulo: `${c.operacion.origen === "prestamo" ? "🏦" : "🛍"} ${c.operacion.cliente.nombre}`,
+    origen: c.operacion.origen as "prestamo" | "venta",
+    titulo: c.operacion.cliente.nombre,
     subtitulo: `Cuota #${c.numeroCuota} · $${Number(c.saldoCalc).toLocaleString("es-CO")}`,
     href: c.operacion.origen === "prestamo" ? `/prestamos/${c.operacionCreditoId}` : `/ventas/${c.operacion.ventaId ?? ""}`,
   }));

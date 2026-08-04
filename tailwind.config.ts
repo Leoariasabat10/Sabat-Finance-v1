@@ -34,12 +34,11 @@ const config: Config = {
         strong: "var(--border-md)",
       },
       fontFamily: {
-        // Una sola familia tipográfica en toda la app (títulos incluidos),
-        // como Linear/Vercel/Stripe: la jerarquía se logra con peso y tamaño,
-        // no con una tipografía decorativa aparte para encabezados.
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-inter)", "system-ui", "sans-serif"],
-        mono: ["var(--font-jetbrains)", "monospace"],
+        // Tipografías nativas: cargan de inmediato y dan un tono sobrio de
+        // software financiero sin bloquear el primer render con fuentes remotas.
+        sans: ["Segoe UI", "Arial", "Helvetica", "sans-serif"],
+        display: ["Segoe UI", "Arial", "Helvetica", "sans-serif"],
+        mono: ["Cascadia Mono", "Consolas", "Courier New", "monospace"],
       },
       borderRadius: {
         sm: "8px",

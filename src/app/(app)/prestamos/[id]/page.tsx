@@ -1,32 +1,21 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Landmark } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getPrestamoById } from "@/lib/prestamos/queries";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
 import { BotonWhatsApp } from "@/components/shared/boton-whatsapp";
+import { BadgeEstadoCuota } from "@/components/shared/badge-estado-cuota";
 import { mensajeRecordatorio } from "@/lib/whatsapp/mensajes";
 import { RenovarButton } from "../_components/renovar-button";
 import { RefinanciarDialog } from "../_components/refinanciar-dialog";
 import { AnularPrestamoButton } from "../_components/anular-prestamo-button";
 
 export const metadata: Metadata = { title: "Detalle del préstamo · Sabat Finance" };
-
-function badgeEstadoCuota(estado: string) {
-  switch (estado) {
-    case "pagada":
-      return <Badge variant="success">Pagada</Badge>;
-    case "parcial":
-      return <Badge variant="warning">Abono parcial</Badge>;
-    case "vencida":
-      return <Badge variant="danger">Vencida</Badge>;
-    default:
-      return <Badge variant="info">Pendiente</Badge>;
-  }
-}
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -41,9 +30,19 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   return (
     <div className="animate-fade-up flex flex-col gap-5">
+      <Breadcrumb
+        items={[
+          { label: "Préstamos", href: "/prestamos" },
+          { label: operacion.cliente.nombre },
+        ]}
+      />
       <PageHeader
         title={operacion.cliente.nombre}
-        subtitle={`🏦 Financiero · ${operacion.cliente.whatsapp}`}
+        subtitle={
+          <span className="inline-flex items-center gap-1.5">
+            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero · {operacion.cliente.whatsapp}
+          </span>
+        }
         actions={
           <div className="flex items-center gap-2">
             {proximaCuota ? (
@@ -77,25 +76,25 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         <Card>
           <CardContent>
             <p className="text-[11px] font-semibold text-muted">Capital</p>
-            <p className="text-lg font-bold">{formatearMoneda(operacion.montoCapital)}</p>
+            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(operacion.montoCapital)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <p className="text-[11px] font-semibold text-muted">Interés total</p>
-            <p className="text-lg font-bold">{formatearMoneda(operacion.interesTotalCalc)}</p>
+            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(operacion.interesTotalCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <p className="text-[11px] font-semibold text-muted">Total a pagar</p>
-            <p className="text-lg font-bold">{formatearMoneda(operacion.totalAPagarCalc)}</p>
+            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(operacion.totalAPagarCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <p className="text-[11px] font-semibold text-muted">Saldo pendiente</p>
-            <p className="text-lg font-bold text-accent">{formatearMoneda(operacion.saldoPendienteCalc)}</p>
+            <p className="font-mono text-lg font-bold tabular-nums text-accent">{formatearMoneda(operacion.saldoPendienteCalc)}</p>
           </CardContent>
         </Card>
       </div>
@@ -110,7 +109,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                   #{c.numeroCuota} · vence {formatearFecha(c.fechaVencimiento)}
                 </span>
                 <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
-                {badgeEstadoCuota(c.estado)}
+                <BadgeEstadoCuota estado={c.estado} />
               </div>
             ))}
           </div>

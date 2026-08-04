@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Landmark, ShoppingBag } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export default async function Page() {
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 text-sm font-bold">🏦 Financiero</h3>
+          <h3 className="mb-3 flex items-center gap-1.5 text-sm font-bold"><Landmark className="h-4 w-4 text-accent" aria-hidden /> Financiero</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div>
               <p className="text-[11px] font-semibold text-muted">Capital prestado (histórico)</p>
@@ -65,7 +66,7 @@ export default async function Page() {
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 text-sm font-bold">🛍 Comercial</h3>
+          <h3 className="mb-3 flex items-center gap-1.5 text-sm font-bold"><ShoppingBag className="h-4 w-4 text-success" aria-hidden /> Comercial</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
               <p className="text-[11px] font-semibold text-muted">Total vendido (histórico)</p>

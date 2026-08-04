@@ -7,6 +7,7 @@ export interface CobroItem {
   origen: string;
   clienteNombre: string;
   clienteWhatsapp: string;
+  clienteBarrio: string | null;
   producto: string | null;
   saldoCuota: number;
   saldoOperacion: number;
@@ -27,7 +28,7 @@ export async function listCobrar(diasAlerta = 3): Promise<CobroItem[]> {
   const operaciones = await prisma.operacionCredito.findMany({
     where: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },
     include: {
-      cliente: { select: { nombre: true, whatsapp: true } },
+      cliente: { select: { nombre: true, whatsapp: true, barrio: true } },
       venta: { include: { items: { select: { nombreProducto: true } } } },
       cuotas: {
         where: { estado: { in: ["pendiente", "parcial", "vencida"] } },
@@ -55,6 +56,7 @@ export async function listCobrar(diasAlerta = 3): Promise<CobroItem[]> {
       origen: o.origen,
       clienteNombre: o.cliente.nombre,
       clienteWhatsapp: o.cliente.whatsapp,
+      clienteBarrio: o.cliente.barrio,
       producto: o.venta?.items.map((i) => i.nombreProducto).join(", ") ?? null,
       saldoCuota: Number(cuota?.saldoCalc ?? o.saldoPendienteCalc),
       saldoOperacion: Number(o.saldoPendienteCalc),

@@ -102,7 +102,7 @@ export function EtiquetasCliente({
             onClick={() => quitar(et.id)}
             disabled={isPending}
             aria-label={`Quitar etiqueta ${et.nombre}`}
-            className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <X className="h-3 w-3" />
           </button>
@@ -113,7 +113,7 @@ export function EtiquetasCliente({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1 rounded-pill border-[1.5px] border-dashed border-[color:var(--border-md)] px-2.5 py-1 text-[11px] font-bold text-faint transition-colors duration-premium hover:border-accent hover:text-accent-dark"
+          className="inline-flex cursor-pointer items-center gap-1 rounded-pill border-[1.5px] border-dashed border-[color:var(--border-md)] px-2.5 py-1 text-[11px] font-bold text-faint transition-colors duration-premium hover:border-accent hover:text-accent-dark"
         >
           <Plus className="h-3 w-3" />
           Etiqueta
@@ -137,6 +137,7 @@ export function EtiquetasCliente({
                     setOpen(false);
                   }}
                   disabled={isPending}
+                  className="cursor-pointer disabled:cursor-not-allowed"
                 >
                   <Badge style={{ backgroundColor: `${et.color}22`, color: et.color }}>
                     {et.nombre}
@@ -163,7 +164,7 @@ export function EtiquetasCliente({
                   type="button"
                   aria-label={`Color ${c}`}
                   onClick={() => setColorNueva(c)}
-                  className="h-6 w-6 rounded-full transition-transform duration-premium hover:scale-110"
+                  className="h-6 w-6 cursor-pointer rounded-full transition-transform duration-premium hover:scale-110"
                   style={{
                     backgroundColor: c,
                     outline: colorNueva === c ? `2px solid ${c}` : "none",

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { crearPrestamo } from "@/lib/prestamos/actions";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent } from "@/components/ui/card";
 import { MoneyInput, limpiarMoneda } from "@/components/ui/money-input";
 import {
@@ -66,6 +67,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
 
   const {
     register,
+    control,
     handleSubmit,
     watch,
     setValue,
@@ -188,7 +190,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                         type="button"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => seleccionarCliente(c)}
-                        className="flex w-full items-center justify-between px-3 py-2 text-left text-[13px] transition-colors duration-premium hover:bg-hover-bg"
+                        className="flex w-full cursor-pointer items-center justify-between px-3 py-2 text-left text-[13px] transition-colors duration-premium hover:bg-hover-bg"
                       >
                         <span className="font-semibold text-foreground">{c.nombre}</span>
                         <span className="text-muted">{c.whatsapp}</span>
@@ -233,7 +235,11 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
             </div>
             <div>
               <Label htmlFor="fechaOperacion">Fecha del préstamo *</Label>
-              <Input id="fechaOperacion" type="date" {...register("fechaOperacion")} />
+              <Controller
+                name="fechaOperacion"
+                control={control}
+                render={({ field }) => <DatePicker id="fechaOperacion" value={field.value} onChange={field.onChange} />}
+              />
             </div>
 
             <div>

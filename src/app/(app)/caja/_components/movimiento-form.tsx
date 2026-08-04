@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registrarMovimientoManual } from "@/lib/caja/actions";
 import { movimientoCajaSchema, type MovimientoCajaInput } from "@/lib/caja/validations";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { MoneyInput, limpiarMoneda } from "@/components/ui/money-input";
 
 export function MovimientoForm() {
@@ -19,7 +20,7 @@ export function MovimientoForm() {
   const [isPending, startTransition] = useTransition();
   const [abierto, setAbierto] = useState(false);
 
-  const { register, handleSubmit, reset } = useForm<MovimientoCajaInput>({
+  const { register, control, handleSubmit, reset } = useForm<MovimientoCajaInput>({
     resolver: zodResolver(movimientoCajaSchema),
     defaultValues: { tipo: "egreso", monto: "" as unknown as number, fecha: fechaHoyIso() },
   });
@@ -61,7 +62,11 @@ export function MovimientoForm() {
       </div>
       <div>
         <Label htmlFor="fecha">Fecha</Label>
-        <Input id="fecha" type="date" {...register("fecha")} />
+        <Controller
+          name="fecha"
+          control={control}
+          render={({ field }) => <DatePicker id="fecha" value={field.value} onChange={field.onChange} className="w-auto" />}
+        />
       </div>
       <div className="min-w-[160px] flex-1">
         <Label htmlFor="descripcion">Descripción</Label>

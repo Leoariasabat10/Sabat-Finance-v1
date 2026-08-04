@@ -53,7 +53,7 @@ export function MobileNav() {
         aria-label="Abrir menú"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--border)] bg-card text-foreground"
+        className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-[color:var(--border)] bg-card text-foreground"
       >
         <Menu className="h-4 w-4" />
       </button>
@@ -71,11 +71,11 @@ export function MobileNav() {
               type="button"
               aria-label="Cerrar menú"
               onClick={() => setOpen(false)}
-              className="absolute right-3 top-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-card text-foreground"
+              className="absolute right-3 top-3 z-20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-card text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
-            <Sidebar onNavigate={() => setOpen(false)} />
+            <Sidebar onNavigate={() => setOpen(false)} allowCollapse={false} />
           </div>
         </div>
       ) : null}

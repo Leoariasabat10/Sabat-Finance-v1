@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 
 /**
  * Datos de identificación de la operación antes de registrar un pago
- * (doc 07 Módulo 6): nombre grande, WhatsApp, tipo 🏦/🛍, producto si aplica,
+ * (doc 07 Módulo 6): nombre grande, WhatsApp, tipo (préstamo/venta), producto si aplica,
  * saldo, próxima cuota, vencimiento y días de atraso — todo antes del valor
  * recibido, para que sea imposible confundir de cliente.
  */

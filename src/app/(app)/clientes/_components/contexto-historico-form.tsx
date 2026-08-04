@@ -37,7 +37,7 @@ export function ContextoHistoricoForm({ clienteId, operacionId, yaConfirmado, no
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted transition-colors duration-premium hover:text-accent-dark"
+        className="inline-flex cursor-pointer items-center gap-1.5 text-[12.5px] font-semibold text-muted transition-colors duration-premium hover:text-accent-dark"
       >
         <Clock className="h-3.5 w-3.5" />
         ¿Desde cuándo le prestas a {nombreCliente}?

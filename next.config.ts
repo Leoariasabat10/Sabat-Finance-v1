@@ -1,8 +1,14 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import withPWAInit from "@ducanh2912/next-pwa";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // sabat-finance vive dentro de PAGINA CARTAGENA (proyecto Cartagena, un
+  // servidor Node distinto con su propio package-lock.json) — sin esto,
+  // Next.js sube un nivel, encuentra ese lockfile ajeno y adivina mal la
+  // raíz del workspace para el file tracing.
+  outputFileTracingRoot: path.join(__dirname),
 };
 
 // Service worker solo para consulta offline (páginas y estáticos ya

@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/db";
 import { calcularMetricasCliente, formatoAntiguedad, INCLUDE_OPERACION_DETALLE, type ConfianzaDato } from "./metricas";
+import { detectarReendeudamiento } from "@/lib/inteligencia/reendeudamiento";
 
 export type TonoRecomendacion = "success" | "warning" | "danger" | "info";
-export type EtiquetaComportamiento = "puntual" | "tardio" | "solo-intereses" | "alto-riesgo" | "nuevo";
+export type EtiquetaComportamiento = "puntual" | "tardio" | "solo-intereses" | "alto-riesgo" | "nuevo" | "reendeudamiento";
 
 export interface Recomendacion {
   tono: TonoRecomendacion;
@@ -23,6 +24,7 @@ export interface ExpedienteFinanciero {
   puntualidadPct: number | null; // null = sin historial suficiente
   cuotasEvaluadas: number;
   capitalRetenido: boolean;
+  vecesReendeudado: number;
   moraActivaDias: number;
   vecesRefinanciado: number;
   etiquetas: EtiquetaComportamiento[];
@@ -67,17 +69,20 @@ export async function getExpedienteFinanciero(clienteId: string): Promise<Expedi
 
   const primerasFechas = [primeraOperacion?.createdAt, primeraVenta?.createdAt].filter((f): f is Date => !!f);
   const m = calcularMetricasCliente(operaciones, primerasFechas, refinanciaciones);
+  const reendeudamiento = detectarReendeudamiento(operaciones);
 
   const etiquetas: EtiquetaComportamiento[] = [];
   if (operaciones.length === 0) etiquetas.push("nuevo");
   if (m.puntualidadPct !== null && m.puntualidadPct >= 90 && m.cuotasEvaluadas >= 3) etiquetas.push("puntual");
   if (m.puntualidadPct !== null && m.puntualidadPct < 50 && m.cuotasEvaluadas >= 2) etiquetas.push("tardio");
   if (m.operacionRetenida) etiquetas.push("solo-intereses");
+  if (reendeudamiento.length > 0) etiquetas.push("reendeudamiento");
   if (m.moraActivaDias >= 30) etiquetas.push("alto-riesgo");
 
   const recomendacion = construirRecomendacion({
     puntualidadPct: m.puntualidadPct,
     operacionRetenida: m.operacionRetenida,
+    reendeudamiento,
     moraActivaDias: m.moraActivaDias,
     tieneOperaciones: operaciones.length > 0,
   });
@@ -105,6 +110,7 @@ export async function getExpedienteFinanciero(clienteId: string): Promise<Expedi
     puntualidadPct: m.puntualidadPct,
     cuotasEvaluadas: m.cuotasEvaluadas,
     capitalRetenido: m.operacionRetenida !== null,
+    vecesReendeudado: reendeudamiento.length,
     moraActivaDias: m.moraActivaDias,
     vecesRefinanciado: m.vecesRefinanciado,
     etiquetas,
@@ -116,6 +122,7 @@ export async function getExpedienteFinanciero(clienteId: string): Promise<Expedi
 function construirRecomendacion(params: {
   puntualidadPct: number | null;
   operacionRetenida: { antiguedadDias: number | null; montoCapital: number; confianza: ConfianzaDato } | null;
+  reendeudamiento: { diasEntre: number; montoNuevo: number }[];
   moraActivaDias: number;
   tieneOperaciones: boolean;
 }): Recomendacion {
@@ -126,6 +133,23 @@ function construirRecomendacion(params: {
     return {
       tono: "danger",
       texto: "Riesgo alto. No se recomienda ampliar el crédito hasta que regularice.",
+      boton: null,
+      confianza: "alta",
+    };
+  }
+  // Auditoría "paga diario": ciclo de reendeudamiento — se le prestó de
+  // nuevo muy pocos días después de haber pagado otra operación. No se
+  // bloquea nada (la decisión sigue siendo de Geisa), pero se nombra el
+  // patrón explícitamente en vez de dejarlo solo como una coincidencia de
+  // fechas en el historial.
+  if (params.reendeudamiento.length > 0) {
+    const monto = formatoMoneda.format(params.reendeudamiento[0]!.montoNuevo);
+    return {
+      tono: "warning",
+      texto:
+        params.reendeudamiento.length > 1
+          ? `Ya son ${params.reendeudamiento.length} veces que recibe un préstamo nuevo justo después de pagar otro — revisa si de verdad puede sostener el ritmo antes de prestarle de nuevo.`
+          : `Recibió un préstamo nuevo de ${monto} muy pocos días después de pagar otra operación — puede ser normal o puede ser que le prestaste para que pagara la cuota anterior. Vale la pena confirmarlo antes de repetirlo.`,
       boton: null,
       confianza: "alta",
     };

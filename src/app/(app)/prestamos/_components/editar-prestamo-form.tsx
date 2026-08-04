@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editarPrestamo } from "@/lib/prestamos/actions";
 import { prestamoEditSchema, type PrestamoEditInput } from "@/lib/prestamos/validations";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent } from "@/components/ui/card";
 import { MoneyInput, limpiarMoneda, formatearMiles } from "@/components/ui/money-input";
 
@@ -45,6 +46,7 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
 
   const {
     register,
+    control,
     handleSubmit,
     watch,
     formState: { errors },
@@ -114,7 +116,11 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
             </div>
             <div>
               <Label htmlFor="fechaOperacion">Fecha del préstamo *</Label>
-              <Input id="fechaOperacion" type="date" {...register("fechaOperacion")} />
+              <Controller
+                name="fechaOperacion"
+                control={control}
+                render={({ field }) => <DatePicker id="fechaOperacion" value={field.value} onChange={field.onChange} />}
+              />
             </div>
 
             <div>

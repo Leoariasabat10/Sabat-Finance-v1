@@ -91,7 +91,7 @@ export function NotasCliente({ clienteId, notas }: NotasClienteProps) {
                   onClick={() => eliminar(nota.id)}
                   disabled={isPending}
                   aria-label="Eliminar nota"
-                  className="rounded-sm p-1 text-faint transition-colors duration-premium hover:text-danger"
+                  className="cursor-pointer rounded-sm p-1 text-faint transition-colors duration-premium hover:text-danger"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

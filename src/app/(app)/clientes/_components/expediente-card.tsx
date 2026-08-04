@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2, Clock, Lock, AlertTriangle, Sparkles, Info, RefreshCw, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { EtiquetaComportamiento, ExpedienteFinanciero } from "@/lib/clientes/expediente";
@@ -23,11 +24,21 @@ const TONO_BOTON: Record<ExpedienteFinanciero["recomendacion"]["tono"], string> 
 };
 
 const ETIQUETA_TEXTO: Record<EtiquetaComportamiento, string> = {
-  puntual: "✅ Siempre puntual",
-  tardio: "🐢 Paga tarde seguido",
-  "solo-intereses": "🔒 Solo intereses",
-  "alto-riesgo": "⚠️ Alto riesgo",
-  nuevo: "🆕 Cliente nuevo",
+  puntual: "Siempre puntual",
+  tardio: "Paga tarde seguido",
+  "solo-intereses": "Solo intereses",
+  "alto-riesgo": "Alto riesgo",
+  nuevo: "Cliente nuevo",
+  reendeudamiento: "Ciclo de reendeudamiento",
+};
+
+const ETIQUETA_ICONO: Record<EtiquetaComportamiento, LucideIcon> = {
+  puntual: CheckCircle2,
+  tardio: Clock,
+  "solo-intereses": Lock,
+  "alto-riesgo": AlertTriangle,
+  nuevo: Sparkles,
+  reendeudamiento: RefreshCw,
 };
 
 const ETIQUETA_VARIANTE: Record<EtiquetaComportamiento, "success" | "warning" | "danger" | "info"> = {
@@ -36,6 +47,7 @@ const ETIQUETA_VARIANTE: Record<EtiquetaComportamiento, "success" | "warning" | 
   "solo-intereses": "warning",
   "alto-riesgo": "danger",
   nuevo: "info",
+  reendeudamiento: "warning",
 };
 
 /**
@@ -59,11 +71,15 @@ export function ExpedienteCard({
     <Card className={`border-l-4 p-5 ${TONO_BORDE[recomendacion.tono]}`}>
       {expediente.etiquetas.length > 0 ? (
         <div className="mb-4 flex flex-wrap gap-1.5">
-          {expediente.etiquetas.map((e) => (
-            <Badge key={e} variant={ETIQUETA_VARIANTE[e]}>
-              {ETIQUETA_TEXTO[e]}
-            </Badge>
-          ))}
+          {expediente.etiquetas.map((e) => {
+            const IconoEtiqueta = ETIQUETA_ICONO[e];
+            return (
+              <Badge key={e} variant={ETIQUETA_VARIANTE[e]}>
+                <IconoEtiqueta className="h-3 w-3" aria-hidden />
+                {ETIQUETA_TEXTO[e]}
+              </Badge>
+            );
+          })}
         </div>
       ) : null}
 
@@ -106,7 +122,9 @@ export function ExpedienteCard({
         <div>
           <p className="text-[13.5px] text-foreground">{recomendacion.texto}</p>
           {recomendacion.confianza && recomendacion.confianza !== "alta" ? (
-            <p className="mt-1 text-[11.5px] font-semibold text-muted">🔵 {CONFIANZA_TEXTO[recomendacion.confianza]}</p>
+            <p className="mt-1 inline-flex items-center gap-1 text-[11.5px] font-semibold text-muted">
+              <Info className="h-3 w-3 shrink-0 text-accent" aria-hidden /> {CONFIANZA_TEXTO[recomendacion.confianza]}
+            </p>
           ) : null}
         </div>
         {recomendacion.boton ? (

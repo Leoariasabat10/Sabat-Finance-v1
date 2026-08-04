@@ -48,9 +48,7 @@ export function QuickActionFab() {
               className="flex items-center gap-2.5 rounded-full border border-[color:var(--border)] bg-card py-2 pl-4 pr-3 text-[13px] font-semibold text-foreground shadow-lg transition-colors duration-premium hover:bg-hover-bg"
             >
               {accion.title}
-              <span className="text-base" aria-hidden>
-                {accion.emoji}
-              </span>
+              <accion.icon className="h-4 w-4 text-accent" aria-hidden />
             </Link>
           ))}
         </div>
@@ -64,7 +62,7 @@ export function QuickActionFab() {
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
             className={cn(
-              "flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-dark))] text-white shadow-lg transition-transform duration-premium ease-premium",
+              "flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-dark))] text-white shadow-lg transition-transform duration-premium ease-premium",
               open ? "rotate-45" : "hover:scale-105",
             )}
           >

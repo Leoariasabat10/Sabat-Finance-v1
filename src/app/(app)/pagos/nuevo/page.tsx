@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { OrigenIcon } from "@/components/shared/origen-icon";
 import { getOperacionParaPago } from "@/lib/pagos/queries";
 import { formatearMoneda, formatearFecha } from "@/lib/formato";
 import { PagoForm } from "../_components/pago-form";
@@ -22,7 +23,15 @@ export default async function Page({
 
   return (
     <div className="animate-fade-up mx-auto flex max-w-lg flex-col gap-5">
-      <PageHeader title="Registrar pago" subtitle={operacion.origen === "prestamo" ? "🏦 Financiero" : "🛍 Comercial"} />
+      <PageHeader
+        title="Registrar pago"
+        subtitle={
+          <span className="inline-flex items-center gap-1.5">
+            <OrigenIcon origen={operacion.origen} />
+            {operacion.origen === "prestamo" ? "Financiero" : "Comercial"}
+          </span>
+        }
+      />
 
       <Card>
         <CardContent className="flex flex-col gap-2">
