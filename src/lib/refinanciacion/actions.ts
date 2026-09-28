@@ -143,6 +143,8 @@ export async function renovar(operacionId: string): Promise<ActionResult> {
           operacionCreditoId: operacion.id,
           fechaPago: new Date(),
           valor: simulacion.interesPeriodo,
+          aplicadoInteres: simulacion.interesPeriodo,
+          aplicadoCapital: 0,
           metodoPago: "efectivo",
           tipoAbono: "abono_interes",
           observaciones: "Renovación: pago del interés del período",

@@ -1,9 +1,13 @@
 "use client";
 
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, LogOut, ArrowLeft } from "lucide-react";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { useSidebar } from "@/components/layout/sidebar-provider";
 import { cn } from "@/lib/utils";
+import { signOut } from "@/app/login/actions";
+
+/** URL pública de la web de la marca. Configurable por si cambia el dominio. */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabat-joyeria.vercel.app";
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -35,6 +39,33 @@ export function Sidebar({ onNavigate, allowCollapse = true }: SidebarProps) {
       </div>
 
       <SidebarNav onNavigate={onNavigate} />
+
+      <div className="mt-auto flex flex-col gap-1 border-t border-[color:var(--border)] pt-2">
+        <a
+          href={SITE_URL}
+          className={cn(
+            "flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md text-[12.5px] font-semibold text-faint transition-colors duration-premium hover:bg-hover-bg hover:text-foreground",
+            collapsed ? "justify-center px-0" : "px-3",
+          )}
+          title="Volver a SABAT JOYERÍA"
+        >
+          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+          {!collapsed ? <span>Volver a SABAT JOYERÍA</span> : null}
+        </a>
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            className={cn(
+              "flex h-9 w-full shrink-0 cursor-pointer items-center gap-2 rounded-md text-[12.5px] font-semibold text-faint transition-colors duration-premium hover:bg-danger-bg hover:text-danger",
+              collapsed ? "justify-center px-0" : "px-3",
+            )}
+          >
+            <LogOut className="h-4 w-4 shrink-0" aria-hidden />
+            {!collapsed ? <span>Cerrar sesión</span> : null}
+          </button>
+        </form>
+      </div>
 
       {allowCollapse ? (
         <button

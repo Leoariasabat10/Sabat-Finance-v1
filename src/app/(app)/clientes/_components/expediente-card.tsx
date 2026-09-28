@@ -97,6 +97,11 @@ export function ExpedienteCard({
           <p className={`font-mono text-[15px] font-bold tabular-nums ${expediente.saldoActual > 0 ? "text-accent" : ""}`}>
             {formatoMoneda.format(expediente.saldoActual)}
           </p>
+          {expediente.saldoActualPrestamo > 0 && expediente.saldoActualVenta > 0 ? (
+            <p className="mt-0.5 text-[10.5px] text-muted">
+              🏦 {formatoMoneda.format(expediente.saldoActualPrestamo)} · 🛍 {formatoMoneda.format(expediente.saldoActualVenta)}
+            </p>
+          ) : null}
         </div>
         <div>
           <p className="text-[11px] font-semibold text-muted">Puntualidad</p>
@@ -105,7 +110,7 @@ export function ExpedienteCard({
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Te ha generado</p>
+          <p className="text-[11px] font-semibold text-muted">Interés generado (préstamos)</p>
           <p className="font-mono text-[15px] font-bold tabular-nums text-success">{formatoMoneda.format(expediente.utilidadGenerada)}</p>
         </div>
         <div>

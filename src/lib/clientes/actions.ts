@@ -135,7 +135,7 @@ export async function eliminarNotaCliente(
   clienteId: string,
 ): Promise<ActionResult> {
   try {
-    await prisma.notaCliente.delete({ where: { id } });
+    await prisma.notaCliente.update({ where: { id }, data: { deletedAt: new Date() } });
     revalidatePath(`/clientes/${clienteId}`);
     return { ok: true, data: undefined };
   } catch {

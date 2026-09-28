@@ -17,6 +17,8 @@ export interface ExpedienteFinanciero {
   prestadoHistorico: number;
   pagadoHistorico: number;
   saldoActual: number;
+  saldoActualPrestamo: number;
+  saldoActualVenta: number;
   interesGenerado: number;
   utilidadGenerada: number;
   antiguedadDias: number | null;
@@ -103,6 +105,8 @@ export async function getExpedienteFinanciero(clienteId: string): Promise<Expedi
     prestadoHistorico: m.prestadoHistorico,
     pagadoHistorico: m.pagadoHistorico,
     saldoActual: m.saldoActual,
+    saldoActualPrestamo: m.saldoActualPrestamo,
+    saldoActualVenta: m.saldoActualVenta,
     interesGenerado: m.interesGenerado,
     utilidadGenerada: m.utilidadGenerada,
     antiguedadDias: m.antiguedadDias,

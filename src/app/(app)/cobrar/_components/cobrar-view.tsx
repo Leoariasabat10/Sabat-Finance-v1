@@ -123,6 +123,9 @@ function CobroRow({ c }: { c: CobroItem }) {
         <div className="text-right">
           <p className="font-mono font-bold tabular-nums">{formatearMoneda(c.saldoCuota)}</p>
           {badgeSemaforo(c.semaforo, c.diasAtraso)}
+          {c.montoMora > 0 ? (
+            <p className="mt-0.5 text-[11px] font-semibold text-danger">+ {formatearMoneda(c.montoMora)} mora</p>
+          ) : null}
         </div>
         <BotonWhatsApp
           numero={c.clienteWhatsapp}

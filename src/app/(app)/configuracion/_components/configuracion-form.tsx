@@ -95,6 +95,9 @@ export function ConfiguracionForm({ valoresIniciales }: { valoresIniciales: Conf
           <div>
             <Label htmlFor="tasaMoraDefecto">Tasa de mora por defecto</Label>
             <Input id="tasaMoraDefecto" type="number" step="0.1" min={0} {...register("tasaMoraDefecto")} />
+            <p className="mt-1 text-[11px] text-muted">
+              Se muestra como referencia junto a los clientes atrasados en Cobrar — no se cobra sola, tú decides si la incluyes al registrar el pago.
+            </p>
           </div>
           <div>
             <Label htmlFor="ordenAplicacionPago" className="flex items-center gap-1.5"><CircleDollarSign className="h-3.5 w-3.5 text-faint" aria-hidden />Orden de aplicación de pagos</Label>

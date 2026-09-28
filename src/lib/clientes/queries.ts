@@ -145,7 +145,7 @@ export async function getClienteById(id: string) {
     where: { id, deletedAt: null },
     include: {
       etiquetas: { include: { etiqueta: true } },
-      notasList: { orderBy: { createdAt: "desc" } },
+      notasList: { where: { deletedAt: null }, orderBy: { createdAt: "desc" } },
       operaciones: {
         where: { deletedAt: null },
         select: { id: true, origen: true, estado: true, saldoPendienteCalc: true },
@@ -216,7 +216,7 @@ export async function getLineaTiempoCliente(clienteId: string): Promise<EventoLi
       where: { operacion: { clienteId }, deletedAt: null },
       select: { id: true, valor: true, createdAt: true, operacionCreditoId: true, operacion: { select: { origen: true } } },
     }),
-    prisma.notaCliente.findMany({ where: { clienteId }, select: { id: true, texto: true, createdAt: true } }),
+    prisma.notaCliente.findMany({ where: { clienteId, deletedAt: null }, select: { id: true, texto: true, createdAt: true } }),
   ]);
 
   const eventos: EventoLineaTiempo[] = [

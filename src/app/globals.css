@@ -19,10 +19,15 @@
      #64748b (slate-500) es el siguiente tono de la misma escala que sí pasa. */
   --text-3: #64748b;
 
-  --accent: #0ea5e9;
-  --accent-dark: #0284c7;
-  --accent-light: #e0f2fe;
-  --accent-glow: rgba(14, 165, 233, 0.15);
+  /* Identidad SABAT (retinte 28 sep 2026 — integración con sabat-joyeria).
+     #8a6d1c es un dorado profundo, no el dorado brillante de marca (#d5af34):
+     ese falla WCAG AA como texto sobre blanco (~2.1:1). Este tono da ~4.6:1,
+     manteniendo el carácter "oro" sin repetir el error de contraste que ya
+     se corrigió para --text-3 arriba. */
+  --accent: #8a6d1c;
+  --accent-dark: #6b5416;
+  --accent-light: #f7f0da;
+  --accent-glow: rgba(213, 175, 52, 0.18);
 
   --success: #10b981;
   --success-bg: #d1fae5;
@@ -49,10 +54,12 @@
   /* Mismo ajuste de accesibilidad que en modo claro — #586170 daba 2.9:1. */
   --text-3: #7c8794;
 
-  --accent: #38bdf8;
-  --accent-dark: #0ea5e9;
-  --accent-light: rgba(56, 189, 248, 0.12);
-  --accent-glow: rgba(56, 189, 248, 0.2);
+  /* Dorado SABAT sobre fondo oscuro: aquí sí puede brillar el dorado real
+     de marca, porque el problema de contraste es específico de fondo claro. */
+  --accent: #e8c84a;
+  --accent-dark: #d5af34;
+  --accent-light: rgba(232, 200, 74, 0.12);
+  --accent-glow: rgba(232, 200, 74, 0.2);
   --chart-grid: rgba(255, 255, 255, 0.1);
   --surface-highlight: rgba(255, 255, 255, 0.035);
 }

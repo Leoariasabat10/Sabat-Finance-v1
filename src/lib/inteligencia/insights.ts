@@ -96,7 +96,7 @@ export async function getInsightsNegocio(): Promise<InsightsNegocio> {
           nombre: masRentable.nombre,
           tipo: "rentable",
           etiqueta: "Más rentable",
-          detalle: `te ha generado ${formatoMoneda.format(masRentable.m.utilidadGenerada)}`,
+          detalle: `te ha generado ${formatoMoneda.format(masRentable.m.utilidadGenerada)} en intereses`,
           href: `/clientes/${masRentable.clienteId}`,
         }
       : null,

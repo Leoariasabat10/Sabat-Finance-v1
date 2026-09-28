@@ -251,6 +251,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 <option value="quincenal">Quincenal</option>
                 <option value="personalizado">Personalizado</option>
               </Select>
+              <p className="mt-1 text-[11px] text-muted">Cómo se calcula el interés (ej. &quot;10% mensual&quot;).</p>
             </div>
             <div>
               <Label htmlFor="tasaInteres">Tasa de interés (%) *</Label>
@@ -303,6 +304,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 <option value="quincenal">Cuotas quincenales</option>
                 <option value="mensual">Cuotas mensuales</option>
               </Select>
+              <p className="mt-1 text-[11px] text-muted">Cada cuánto te va a pagar el cliente.</p>
             </div>
           </CardContent>
         </Card>

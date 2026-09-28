@@ -279,6 +279,13 @@ model Pago {
   cuotaId            String?    @map("cuota_id") @db.Uuid
   fechaPago          DateTime   @map("fecha_pago") @db.Date
   valor              Decimal    @db.Decimal(14, 2)
+  // Desglose real de a qué se aplicó el pago (auditoría 2 ago 2026): el
+  // motor puro (lib/calculos/aplicarPago) ya calculaba este desglose en
+  // cada pago, pero se descartaba sin guardarlo — no había forma de saber
+  // después cuánto de un pago fue interés vs. capital. Ambos quedan en 0
+  // por defecto para pagos históricos previos a este cambio.
+  aplicadoInteres    Decimal    @default(0) @map("aplicado_interes") @db.Decimal(14, 2)
+  aplicadoCapital    Decimal    @default(0) @map("aplicado_capital") @db.Decimal(14, 2)
   metodoPago         MetodoPago @default(efectivo) @map("metodo_pago")
   tipoAbono          TipoAbono  @default(cuota_completa) @map("tipo_abono")
   observaciones      String?
@@ -481,11 +488,15 @@ model ClienteEtiqueta {
 }
 
 model NotaCliente {
-  id        String   @id @default(uuid()) @db.Uuid
-  clienteId String   @map("cliente_id") @db.Uuid
+  id        String    @id @default(uuid()) @db.Uuid
+  clienteId String    @map("cliente_id") @db.Uuid
   texto     String
-  creadoPor String?  @map("creado_por") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  creadoPor String?   @map("creado_por") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  // Regla dura #8 (CLAUDE.md): borrado siempre lógico. Bug real de
+  // auditoría (2 ago 2026): eliminarNotaCliente hacía un DELETE físico,
+  // la única tabla de negocio del listado de CLAUDE.md que lo hacía.
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 

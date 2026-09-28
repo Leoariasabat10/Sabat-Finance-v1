@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BarChart3, Landmark, ShoppingBag, HandCoins, CheckCircle2, AlertTriangle, ArrowUpRight, CircleDollarSign, Sparkles } from "lucide-react";
+import { BarChart3, Landmark, ShoppingBag, HandCoins, CheckCircle2, AlertTriangle, ArrowUpRight, CircleDollarSign, Sparkles, Wallet, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,6 +62,32 @@ export default async function DashboardPage() {
       />
 
       <FadeIn>
+        {/* Auditoría 2 ago 2026: "cuánto dinero tengo" y "cuánto gané hoy"
+            son 2 de las 8 preguntas que este dashboard debe responder en
+            menos de 5 segundos, y ninguna se veía en esta pantalla (la
+            primera se calculaba pero nunca se pintaba; la segunda ni
+            siquiera se calculaba). Franja compacta, no tarjetas nuevas, para
+            no repetir el mismo error de sobrecargar "Hoy" con más bloques. */}
+        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-[color:var(--border)] bg-card px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-accent" aria-hidden />
+            <span className="text-[12.5px] text-muted">Dinero disponible hoy</span>
+            <span className="font-mono text-[15px] font-bold tabular-nums">{formatearMoneda(data.dineroDisponible)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-success" aria-hidden />
+            <span className="text-[12.5px] text-muted">Ganaste hoy</span>
+            <span className="font-mono text-[15px] font-bold tabular-nums text-success">
+              {formatearMoneda(data.gananciaHoy.financiero + data.gananciaHoy.comercial)}
+            </span>
+            {data.gananciaHoy.financiero > 0 && data.gananciaHoy.comercial > 0 ? (
+              <span className="text-[11px] text-muted">
+                (🏦 {formatearMoneda(data.gananciaHoy.financiero)} · 🛍 {formatearMoneda(data.gananciaHoy.comercial)})
+              </span>
+            ) : null}
+          </div>
+        </div>
+
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="eyebrow">Centro de decisiones</p>

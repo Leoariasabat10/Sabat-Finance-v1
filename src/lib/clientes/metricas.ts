@@ -115,9 +115,21 @@ export function evaluarOperacionRetenida(o: OperacionConDetalle): OperacionReten
 export interface MetricasCliente {
   prestadoHistorico: number;
   pagadoHistorico: number;
+  /** Suma de saldo pendiente 🏦+🛍 — para desglose real ver saldoActualPrestamo/saldoActualVenta. */
   saldoActual: number;
+  /** Saldo pendiente solo de préstamos (Financiero, origen='prestamo'). */
+  saldoActualPrestamo: number;
+  /** Saldo pendiente solo de ventas a crédito (Comercial, origen='venta'). */
+  saldoActualVenta: number;
   interesGenerado: number;
-  /** Aproximación de utilidad realmente cobrada: pagado − capital recuperado. */
+  /**
+   * Interés realmente cobrado en préstamos: pagado en préstamos − capital de
+   * préstamos recuperado. Escrito a propósito solo con cifras de origen
+   * 'prestamo' (regla dura #7 de CLAUDE.md — Financiero y Comercial nunca se
+   * mezclan en un solo cálculo). La utilidad de ventas vive aparte, en
+   * `venta.utilidadCalc`, porque ya queda fijada en el precio al vender, no
+   * se "genera" con el tiempo como el interés de un préstamo.
+   */
   utilidadGenerada: number;
   antiguedadDias: number | null;
   puntualidadPct: number | null;
@@ -139,16 +151,26 @@ export function calcularMetricasCliente(
   // de que la fila esté "borrada".
   const prestamos = operaciones.filter((o) => o.origen === "prestamo" && o.estado !== "anulado");
   const activos = operaciones.filter((o) => o.estado === "activo" || o.estado === "vencido");
+  const activosPrestamo = activos.filter((o) => o.origen === "prestamo");
+  const activosVenta = activos.filter((o) => o.origen === "venta");
   const hoy = new Date();
 
   const prestadoHistorico = prestamos.reduce((a, o) => a + Number(o.montoCapital), 0);
   const pagadoHistorico = operaciones
     .filter((o) => o.estado !== "anulado")
     .reduce((a, o) => a + o.pagos.reduce((s, p) => s + Number(p.valor), 0), 0);
-  const saldoActual = activos.reduce((a, o) => a + Number(o.saldoPendienteCalc), 0);
+  // Regla dura #7: préstamos y ventas a crédito nunca se suman en una sola
+  // cifra sin desagregar — bug real encontrado en auditoría (2 ago 2026):
+  // saldoActual mezclaba ambos orígenes y eso contaminaba capitalRecuperado/
+  // utilidadGenerada más abajo con dinero de ventas dentro de un cálculo que
+  // debía ser puramente de préstamos.
+  const saldoActualPrestamo = activosPrestamo.reduce((a, o) => a + Number(o.saldoPendienteCalc), 0);
+  const saldoActualVenta = activosVenta.reduce((a, o) => a + Number(o.saldoPendienteCalc), 0);
+  const saldoActual = saldoActualPrestamo + saldoActualVenta;
   const interesGenerado = prestamos.reduce((a, o) => a + Number(o.interesTotalCalc), 0);
-  const capitalRecuperado = Math.max(0, prestadoHistorico - saldoActual);
-  const utilidadGenerada = Math.max(0, pagadoHistorico - capitalRecuperado);
+  const pagadoHistoricoPrestamo = prestamos.reduce((a, o) => a + o.pagos.reduce((s, p) => s + Number(p.valor), 0), 0);
+  const capitalRecuperado = Math.max(0, prestadoHistorico - saldoActualPrestamo);
+  const utilidadGenerada = Math.max(0, pagadoHistoricoPrestamo - capitalRecuperado);
 
   const antiguedadDias =
     primerasFechas.length > 0
@@ -197,6 +219,8 @@ export function calcularMetricasCliente(
     prestadoHistorico,
     pagadoHistorico,
     saldoActual,
+    saldoActualPrestamo,
+    saldoActualVenta,
     interesGenerado,
     utilidadGenerada,
     antiguedadDias,

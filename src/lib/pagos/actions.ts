@@ -100,6 +100,8 @@ export async function registrarPago(input: PagoInput): Promise<ActionResult<{ id
           operacionCreditoId: operacion.id,
           fechaPago: new Date(`${data.fechaPago}T00:00:00Z`),
           valor: data.valor,
+          aplicadoInteres: resultado.aplicadoInteres,
+          aplicadoCapital: resultado.aplicadoCapital,
           metodoPago: data.metodoPago,
           tipoAbono: data.tipoAbono,
           observaciones: data.observaciones,

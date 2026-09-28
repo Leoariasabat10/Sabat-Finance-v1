@@ -40,6 +40,7 @@ export async function getDashboardData() {
     ultimosPagos,
     movimientos6Meses,
     cuotasVencidas,
+    interesHoyAgg,
   ] = await Promise.all([
     obtenerSaldoActual(prisma),
     prisma.operacionCredito.findMany({
@@ -48,7 +49,7 @@ export async function getDashboardData() {
     }),
     prisma.venta.findMany({
       where: { deletedAt: null, fecha: { gte: inicioMes } },
-      select: { totalCalc: true, utilidadCalc: true, tipoPago: true },
+      select: { totalCalc: true, utilidadCalc: true, tipoPago: true, fecha: true },
     }),
     prisma.operacionCredito.findMany({
       // Un cliente borrado (deletedAt) no debe seguir apareciendo en la
@@ -90,6 +91,15 @@ export async function getDashboardData() {
         },
       },
     }),
+    // "Ganancia de hoy" — Financiero (auditoría 2 ago 2026, pregunta
+    // prioritaria del negocio que el dashboard no respondía todavía). Solo
+    // es exacto para pagos registrados desde que aplicadoInteres empezó a
+    // guardarse (ver migración de pagos/actions.ts); pagos previos a hoy no
+    // importan aquí porque esta cifra es siempre "hoy".
+    prisma.pago.aggregate({
+      where: { deletedAt: null, fechaPago: { gte: hoy }, operacion: { origen: "prestamo" } },
+      _sum: { aplicadoInteres: true },
+    }),
   ]);
 
   const financiero = operacionesActivas.filter((o) => o.origen === "prestamo");
@@ -114,6 +124,15 @@ export async function getDashboardData() {
   };
 
   const dineroPorCobrarTotal = bloqueFinanciero.porCobrar + bloqueComercial.porCobrarCredito;
+
+  // Regla dura #7: financiero y comercial se mantienen desagregados incluso
+  // en "ganancia de hoy" — nunca se suman en una sola cifra sin desagregar.
+  const gananciaHoy = {
+    financiero: Number(interesHoyAgg._sum.aplicadoInteres ?? 0),
+    comercial: ventasDelMes
+      .filter((v) => v.fecha >= hoy)
+      .reduce((a, v) => a + Number(v.utilidadCalc), 0),
+  };
 
   const actividad: ActividadItem[] = [
     ...ultimosPrestamos.map((p) => ({
@@ -183,6 +202,7 @@ export async function getDashboardData() {
   return {
     dineroDisponible,
     dineroPorCobrarTotal,
+    gananciaHoy,
     bloqueFinanciero,
     bloqueComercial,
     actividad,
