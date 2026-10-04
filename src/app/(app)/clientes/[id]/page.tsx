@@ -138,7 +138,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
             <Card>
               <CardContent>
                 <p className="mb-3 flex items-center gap-1.5 text-[13px] font-medium text-muted">
-                  <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero — préstamos
+                  <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Préstamos
                 </p>
                 <p className="font-display text-2xl text-foreground">
                   {formatoMoneda.format(cliente.resumen.saldoPrestamos)}
@@ -153,7 +153,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
             <Card>
               <CardContent>
                 <p className="mb-3 flex items-center gap-1.5 text-[13px] font-medium text-muted">
-                  <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial — ventas
+                  <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Ventas
                 </p>
                 <p className="font-display text-2xl text-foreground">
                   {formatoMoneda.format(cliente.resumen.saldoVentas)}

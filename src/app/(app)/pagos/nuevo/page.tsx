@@ -28,7 +28,7 @@ export default async function Page({
         subtitle={
           <span className="inline-flex items-center gap-1.5">
             <OrigenIcon origen={operacion.origen} />
-            {operacion.origen === "prestamo" ? "Financiero" : "Comercial"}
+            {operacion.origen === "prestamo" ? "Préstamo" : "Mercancía"}
           </span>
         }
       />

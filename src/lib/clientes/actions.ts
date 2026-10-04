@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getSupabaseStorage } from "@/lib/supabase/storage";
+import { getSupabaseServer } from "@/lib/supabase/server";
 import {
   clienteSchema,
   notaClienteSchema,
@@ -85,7 +85,8 @@ export async function subirFotoCliente(
     return { ok: false, error: "La foto no puede pesar más de 5MB" };
   }
 
-  const storage = getSupabaseStorage();
+  // Se sube con la sesión del administrador (la política de Storage solo deja escribir a administradores), no con una clave de servicio.
+  const storage = await getSupabaseServer();
   const extension = archivo.name.split(".").pop() ?? "jpg";
   const ruta = `${clienteId}/${Date.now()}.${extension}`;
 

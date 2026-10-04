@@ -29,7 +29,7 @@ export default async function Page() {
         title="Préstamos"
         subtitle={
           <span className="inline-flex items-center gap-1.5">
-            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero
+            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Préstamo
           </span>
         }
         actions={

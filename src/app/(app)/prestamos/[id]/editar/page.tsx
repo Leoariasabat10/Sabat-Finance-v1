@@ -25,7 +25,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         title={`Editar préstamo de ${operacion.cliente.nombre}`}
         subtitle={
           <span className="inline-flex items-center gap-1.5">
-            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero
+            <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Préstamo
           </span>
         }
       />

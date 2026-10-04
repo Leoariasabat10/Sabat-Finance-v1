@@ -130,11 +130,11 @@ export function GlobalSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-10 w-full max-w-[390px] cursor-pointer items-center gap-2.5 rounded-full border border-[color:var(--border)] bg-subtle/70 px-4 text-[13px] text-muted shadow-[inset_0_1px_0_var(--surface-highlight)] transition-all duration-premium hover:border-accent hover:bg-card hover:text-foreground hover:shadow-sm"
+        className="flex min-h-11 w-full min-w-0 max-w-[390px] cursor-pointer items-center gap-2.5 border border-[color:var(--border)] bg-subtle/70 px-4 text-[13px] text-muted shadow-[inset_0_1px_0_var(--surface-highlight)] transition-all duration-premium hover:border-accent hover:bg-card hover:text-foreground hover:shadow-sm"
       >
         <Search className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">Buscar o ejecutar una acción…</span>
-        <kbd className="ml-auto hidden shrink-0 rounded border border-[color:var(--border)] px-1.5 py-0.5 font-mono text-[10px] text-faint sm:inline">
+        <kbd className="ml-auto hidden shrink-0 border border-[color:var(--border)] px-1.5 py-0.5 text-[13px] text-faint sm:inline">
           Ctrl K
         </kbd>
       </button>
@@ -166,7 +166,7 @@ export function GlobalSearch() {
             ) : (
               <ul id={LISTBOX_ID} role="listbox" className="flex flex-col gap-0.5">
                 {comandosFiltrados.length > 0 ? (
-                  <li role="presentation" className="px-3 pb-1 pt-1.5 text-[10.5px] font-bold uppercase tracking-[0.06em] text-faint">
+                  <li role="presentation" className="px-3 pb-1 pt-1.5 text-[13px] font-bold uppercase tracking-[0.06em] text-faint">
                     Acciones
                   </li>
                 ) : null}
@@ -174,7 +174,7 @@ export function GlobalSearch() {
                   if (item.grupo === "resultado" && i === comandosFiltrados.length && mostrarSeparador) {
                     return (
                       <li key={`sep-${item.clave}`} role="presentation">
-                        <p className="px-3 pb-1 pt-2.5 text-[10.5px] font-bold uppercase tracking-[0.06em] text-faint">Resultados</p>
+                        <p className="px-3 pb-1 pt-2.5 text-[13px] font-bold uppercase tracking-[0.06em] text-faint">Resultados</p>
                         <ItemBoton item={item} index={i} activo={i === activeIndex} onHover={setActiveIndex} onSeleccionar={irA} />
                       </li>
                     );
@@ -223,7 +223,7 @@ function ItemBoton({
       <item.icon className="h-4 w-4 shrink-0 text-faint" aria-hidden />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[13.5px] font-semibold text-foreground">{item.titulo}</span>
-        <span className="block truncate text-[12px] text-muted">{item.subtitulo}</span>
+        <span className="block truncate text-[13px] text-muted">{item.subtitulo}</span>
       </span>
     </button>
   );

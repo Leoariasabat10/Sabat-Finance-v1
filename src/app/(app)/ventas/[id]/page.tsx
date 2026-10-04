@@ -26,7 +26,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         title={venta.cliente.nombre}
         subtitle={
           <span className="inline-flex items-center gap-1.5">
-            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial · {venta.cliente.whatsapp} · {formatearFecha(venta.fecha)}
+            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Venta · {venta.cliente.whatsapp} · {formatearFecha(venta.fecha)}
           </span>
         }
         actions={

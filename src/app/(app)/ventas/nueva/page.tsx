@@ -12,7 +12,7 @@ export default function Page() {
         title="Nueva venta"
         subtitle={
           <span className="inline-flex items-center gap-1.5">
-            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial
+            <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Venta
           </span>
         }
       />

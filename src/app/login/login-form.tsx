@@ -23,14 +23,14 @@ export default function LoginForm() {
         <label htmlFor="email" className="text-[15px] text-[#ece9e2]/75">
           Correo
         </label>
-        <input id="email" name="email" type="email" required autoComplete="username" autoFocus placeholder="tu@correo.com" className={campo} />
+        <input id="email" name="email" type="email" required autoComplete="username" autoFocus={!state.error} defaultValue={state.email ?? ""} key={state.email ?? "vacio"} placeholder="tu@correo.com" className={campo} />
       </div>
 
       <div className="flex flex-col gap-2">
         <label htmlFor="password" className="text-[15px] text-[#ece9e2]/75">
           Contraseña
         </label>
-        <input id="password" name="password" type="password" required autoComplete="current-password" className={campo} />
+        <input id="password" name="password" type="password" required autoComplete="current-password" autoFocus={!!state.error} className={campo} />
       </div>
 
       {state.error ? (

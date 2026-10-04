@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  * Estado en una palabra: un punto de color (el color nunca va solo, siempre acompaña un texto) y el texto.
  * esmeralda = al día / cobrado · oro = vence hoy · granate = atrasado.
  */
-const badgeVariants = cva("inline-flex items-center gap-1.5 px-2 py-0.5 text-[13px] font-medium", {
+const badgeVariants = cva("inline-flex items-center gap-1.5 whitespace-nowrap px-2 py-0.5 text-[13px] font-medium", {
   variants: {
     variant: {
       success: "bg-success-bg text-success",

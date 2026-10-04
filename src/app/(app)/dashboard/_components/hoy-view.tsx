@@ -113,15 +113,30 @@ export function HoyView({ d }: { d: DatosHoy }) {
         <h2 id="h-disponible" className="eyebrow">
           Dinero disponible
         </h2>
-        <p className="metric-value mt-2 text-[52px] sm:text-[84px]">{formatearMoneda(d.dineroDisponible)}</p>
-        {d.faltaSaldoInicial ? (
-          <p className="lead-italic mt-3 max-w-xl text-[17px] text-muted">
-            Todavía no dijiste con cuánto dinero empezó el negocio, así que este número puede no ser el real.{" "}
-            <Link href="/configuracion" className="text-accent underline underline-offset-4">
-              Registrarlo ahora
-            </Link>
-          </p>
-        ) : null}
+        {d.faltaSaldoInicial && d.dineroDisponible < 0 ? (
+          <>
+            <p className="metric-value mt-2 text-[40px] text-muted sm:text-[56px]">Falta un dato</p>
+            <p className="lead-italic mt-3 max-w-xl text-[18px] text-muted">
+              Para saber cuánto dinero hay, dinos con cuánto empezó el negocio. Los movimientos registrados suman{" "}
+              <span className="money">{formatearMoneda(d.dineroDisponible)}</span> sin ese punto de partida.{" "}
+              <Link href="/configuracion" className="text-accent underline underline-offset-4">
+                Registrarlo ahora
+              </Link>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="metric-value mt-2 text-[52px] sm:text-[84px]">{formatearMoneda(d.dineroDisponible)}</p>
+            {d.faltaSaldoInicial ? (
+              <p className="lead-italic mt-3 max-w-xl text-[17px] text-muted">
+                Todavía no dijiste con cuánto dinero empezó el negocio, así que este número puede no ser el real.{" "}
+                <Link href="/configuracion" className="text-accent underline underline-offset-4">
+                  Registrarlo ahora
+                </Link>
+              </p>
+            ) : null}
+          </>
+        )}
       </section>
 
       <section aria-labelledby="h-calle">

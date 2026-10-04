@@ -29,7 +29,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <Image src="/sabat-logo-mark.png" alt="SABAT" width={556} height={188} className="h-auto w-[72px]" />
             </Link>
 
-            <div className="flex flex-1 justify-center lg:justify-start">
+            <div className="flex min-w-0 flex-1 justify-center lg:justify-start">
               <GlobalSearch />
             </div>
 

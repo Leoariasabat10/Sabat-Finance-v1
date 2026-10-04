@@ -95,7 +95,11 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
       return;
     }
     const t = setTimeout(() => {
-      buscarClientesRapido(nombre).then(setSugerencias);
+      buscarClientesRapido(nombre).then((r) => {
+        setSugerencias(r);
+        // Con autoFocus el campo ya estaba enfocado antes de hidratar y onFocus nunca se dispara: se muestran al llegar.
+        setMostrarSugerencias(true);
+      });
     }, 200);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
