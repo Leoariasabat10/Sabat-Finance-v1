@@ -4,11 +4,17 @@ import { QueryProvider } from "@/components/layout/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { ReactNode } from "react";
+import { Fraunces, Newsreader, Inter_Tight } from "next/font/google";
 import "./globals.css";
+
+// Las mismas familias que sabat-joyeria: títulos y cifras en Fraunces, interfaz en Inter Tight.
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", axes: ["SOFT"] });
+const newsreader = Newsreader({ subsets: ["latin"], variable: "--font-newsreader", style: ["italic", "normal"], display: "swap" });
+const interTight = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Sabat Finance",
-  description: "Tu asistente del negocio: préstamos, ventas y cobros.",
+  description: "La parte administrativa de SABAT: ventas, créditos, cobros y clientes.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -27,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a1628",
+  themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
 };
@@ -39,7 +45,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className="font-sans">
+      <body className={`${fraunces.variable} ${newsreader.variable} ${interTight.variable} font-sans`}>
         <ThemeProvider
           attribute="data-theme"
           defaultTheme="light"

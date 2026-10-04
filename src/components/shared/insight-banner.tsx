@@ -46,8 +46,8 @@ export function InsightBanner({
     >
       {icon ? <span className={cn("shrink-0", TONO_TEXTO[tono])}>{icon}</span> : null}
       <div className="min-w-0 flex-1">
-        <p className={cn("text-[13px] font-bold", TONO_TEXTO[tono])}>{title}</p>
-        {description ? <p className="text-[12px] text-muted">{description}</p> : null}
+        <p className={cn("text-[13px] font-medium", TONO_TEXTO[tono])}>{title}</p>
+        {description ? <p className="text-[13px] text-muted">{description}</p> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>

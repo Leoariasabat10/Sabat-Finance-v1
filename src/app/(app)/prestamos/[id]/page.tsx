@@ -75,40 +75,40 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Capital</p>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(operacion.montoCapital)}</p>
+            <p className="text-[13px] font-semibold text-muted">Capital</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(operacion.montoCapital)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Interés total</p>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(operacion.interesTotalCalc)}</p>
+            <p className="text-[13px] font-semibold text-muted">Interés total</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(operacion.interesTotalCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Total a pagar</p>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(operacion.totalAPagarCalc)}</p>
+            <p className="text-[13px] font-semibold text-muted">Total a pagar</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(operacion.totalAPagarCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Saldo pendiente</p>
-            <p className="font-mono text-lg font-bold tabular-nums text-accent">{formatearMoneda(operacion.saldoPendienteCalc)}</p>
+            <p className="text-[13px] font-semibold text-muted">Saldo pendiente</p>
+            <p className="money text-lg font-medium tabular-nums text-accent">{formatearMoneda(operacion.saldoPendienteCalc)}</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 text-sm font-bold">Cuotas</h3>
+          <h3 className="mb-3 text-sm font-medium">Cuotas</h3>
           <div className="flex flex-col divide-y divide-[color:var(--border)]">
             {operacion.cuotas.map((c) => (
               <div key={c.id} className="flex items-center justify-between py-2.5 text-[13px]">
                 <span className="text-muted">
                   #{c.numeroCuota} · vence {formatearFecha(c.fechaVencimiento)}
                 </span>
-                <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
+                <span className="money font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
                 <BadgeEstadoCuota estado={c.estado} />
               </div>
             ))}
@@ -118,7 +118,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 text-sm font-bold">Pagos registrados</h3>
+          <h3 className="mb-3 text-sm font-medium">Pagos registrados</h3>
           {operacion.pagos.length === 0 ? (
             <p className="text-[13px] text-muted">Sin pagos todavía.</p>
           ) : (
@@ -126,7 +126,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               {operacion.pagos.map((p) => (
                 <div key={p.id} className="flex items-center justify-between py-2.5 text-[13px]">
                   <span className="text-muted">{formatearFecha(p.fechaPago)}</span>
-                  <span className="font-mono font-semibold tabular-nums">{formatearMoneda(p.valor)}</span>
+                  <span className="money font-semibold tabular-nums">{formatearMoneda(p.valor)}</span>
                 </div>
               ))}
             </div>

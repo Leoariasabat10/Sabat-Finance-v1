@@ -111,7 +111,7 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
                 {...register("montoCapital", { setValueAs: limpiarMoneda })}
               />
               {errors.montoCapital ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.montoCapital.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.montoCapital.message}</p>
               ) : null}
             </div>
             <div>
@@ -146,7 +146,7 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
                 })}
               />
               {errors.tasaInteres ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.tasaInteres.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.tasaInteres.message}</p>
               ) : null}
             </div>
 
@@ -173,7 +173,7 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
                 {...register("plazoDias")}
               />
               {errors.plazoDias ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.plazoDias.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.plazoDias.message}</p>
               ) : null}
             </div>
             <div>
@@ -189,7 +189,7 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
         </Card>
 
         {serverError ? (
-          <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger">
+          <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[13px] font-semibold text-danger">
             {serverError}
           </div>
         ) : null}
@@ -207,28 +207,28 @@ export function EditarPrestamoForm({ prestamoId, valoresIniciales }: EditarPrest
       <div>
         <Card className="sticky top-4">
           <CardContent className="flex flex-col gap-3">
-            <h3 className="text-sm font-bold text-foreground">Simulación en vivo</h3>
+            <h3 className="text-sm font-medium text-foreground">Simulación en vivo</h3>
             {simulacion ? (
               <>
                 <div className="flex justify-between text-[13px]">
                   <span className="text-muted">Interés total</span>
-                  <span className="font-mono font-bold tabular-nums">{formatearMoneda(simulacion.interes.interesTotal)}</span>
+                  <span className="money font-medium tabular-nums">{formatearMoneda(simulacion.interes.interesTotal)}</span>
                 </div>
                 <div className="flex justify-between text-[13px]">
                   <span className="text-muted">Total a pagar</span>
-                  <span className="font-mono font-bold tabular-nums text-accent">{formatearMoneda(simulacion.interes.totalAPagar)}</span>
+                  <span className="money font-medium tabular-nums text-accent">{formatearMoneda(simulacion.interes.totalAPagar)}</span>
                 </div>
                 <div className="mt-2 border-t border-[color:var(--border)] pt-3">
-                  <p className="mb-2 text-[12px] font-semibold text-muted">
+                  <p className="mb-2 text-[13px] font-semibold text-muted">
                     Calendario de cuotas ({simulacion.cuotas.length})
                   </p>
                   <ul className="flex flex-col gap-1.5">
                     {simulacion.cuotas.map((c) => (
-                      <li key={c.numeroCuota} className="flex justify-between text-[12.5px]">
+                      <li key={c.numeroCuota} className="flex justify-between text-[13px]">
                         <span className="text-muted">
                           #{c.numeroCuota} · {formatearFecha(c.fechaVencimiento)}
                         </span>
-                        <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
+                        <span className="money font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
                       </li>
                     ))}
                   </ul>

@@ -3,15 +3,20 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 type TxClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
 /**
- * Libro de caja simple con saldo corrido (doc CLAUDE.md: `movimientos_caja`).
- * El saldo de cada movimiento se calcula a partir del último movimiento
- * registrado (o de `configuracion.capital_inicial` si todavía no hay ninguno).
+ * Libro de caja simple (doc CLAUDE.md: `movimientos_caja`).
+ *
+ * El saldo es SIEMPRE: dinero con el que empezó el negocio (`capital_inicial`) + todo lo que entró − todo lo
+ * que salió. Antes se tomaba el `saldo_resultante_calc` del último movimiento (una cadena): si dos pagos se
+ * registraban a la vez, ambos leían el mismo "último" saldo y la cadena quedaba mal; y cambiar el saldo
+ * inicial no movía nada. Sumar es exacto y no depende del orden.
  */
 export async function obtenerSaldoActual(tx: TxClient): Promise<number> {
-  const ultimo = await tx.movimientoCaja.findFirst({ orderBy: { createdAt: "desc" } });
-  if (ultimo) return Number(ultimo.saldoResultanteCalc);
-  const config = await tx.configuracion.findUnique({ where: { id: 1 } });
-  return Number(config?.capitalInicial ?? 0);
+  const [config, ingresos, egresos] = await Promise.all([
+    tx.configuracion.findUnique({ where: { id: 1 } }),
+    tx.movimientoCaja.aggregate({ where: { tipo: "ingreso" }, _sum: { monto: true } }),
+    tx.movimientoCaja.aggregate({ where: { tipo: "egreso" }, _sum: { monto: true } }),
+  ]);
+  return Number(config?.capitalInicial ?? 0) + Number(ingresos._sum.monto ?? 0) - Number(egresos._sum.monto ?? 0);
 }
 
 export interface ParametrosMovimientoCaja {

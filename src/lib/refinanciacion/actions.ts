@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { simularRefinanciacion, simularRenovacion } from "@/lib/calculos";
 import { registrarMovimientoCaja } from "@/lib/caja/motor";
 import { z } from "zod";
+import { hoyIso, hoyFecha } from "@/lib/fecha";
 
 type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -30,7 +31,7 @@ export async function refinanciar(input: RefinanciarInput): Promise<ActionResult
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
   const data = parsed.data;
-  const hoyIso = new Date().toISOString().slice(0, 10);
+  const hoyTexto = hoyIso();
 
   try {
     const nuevaId = await prisma.$transaction(async (tx) => {
@@ -47,7 +48,7 @@ export async function refinanciar(input: RefinanciarInput): Promise<ActionResult
         nuevoTipoInteres: data.nuevoTipoInteres,
         nuevoPlazoDias: data.nuevoPlazoDias,
         numeroCuotas: data.numeroCuotas,
-        fechaOperacion: hoyIso,
+        fechaOperacion: hoyTexto,
       });
 
       const fechaVencimiento = simulacion.cuotas[simulacion.cuotas.length - 1]!.fechaVencimiento;
@@ -58,7 +59,7 @@ export async function refinanciar(input: RefinanciarInput): Promise<ActionResult
           clienteId: original.clienteId,
           ventaId: original.origen === "venta" ? original.ventaId : null,
           montoCapital: simulacion.montoCapital,
-          fechaOperacion: new Date(`${hoyIso}T00:00:00Z`),
+          fechaOperacion: new Date(`${hoyTexto}T00:00:00Z`),
           plazoDias: data.nuevoPlazoDias,
           tipoInteres: data.nuevoTipoInteres,
           modeloInteres: "fijo_sobre_capital",
@@ -95,7 +96,7 @@ export async function refinanciar(input: RefinanciarInput): Promise<ActionResult
         data: {
           operacionOriginalId: original.id,
           operacionNuevaId: nueva.id,
-          fecha: new Date(`${hoyIso}T00:00:00Z`),
+          fecha: new Date(`${hoyTexto}T00:00:00Z`),
           saldoConsolidado: saldo,
           motivo: data.motivo,
         },
@@ -141,7 +142,7 @@ export async function renovar(operacionId: string): Promise<ActionResult> {
       await tx.pago.create({
         data: {
           operacionCreditoId: operacion.id,
-          fechaPago: new Date(),
+          fechaPago: hoyFecha(),
           valor: simulacion.interesPeriodo,
           aplicadoInteres: simulacion.interesPeriodo,
           aplicadoCapital: 0,
@@ -189,7 +190,7 @@ export async function renovar(operacionId: string): Promise<ActionResult> {
         categoria: "renovacion",
         referenciaId: operacion.id,
         referenciaTipo: "operacion_credito",
-        fecha: new Date().toISOString().slice(0, 10),
+        fecha: hoyIso(),
         descripcion: `Renovación de ${operacion.cliente.nombre}`,
       });
     });

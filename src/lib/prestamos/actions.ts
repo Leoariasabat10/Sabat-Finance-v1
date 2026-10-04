@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { calcularInteres, generarCalendarioCuotas } from "@/lib/calculos";
 import { registrarMovimientoCaja } from "@/lib/caja/motor";
 import { prestamoSchema, prestamoEditSchema, type PrestamoInput, type PrestamoEditInput } from "./validations";
+import { hoyIso } from "@/lib/fecha";
 
 type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -63,19 +64,28 @@ export async function crearPrestamo(input: PrestamoInput): Promise<ActionResult<
   try {
     const resultado = await prisma.$transaction(async (tx) => {
       let clienteId = data.clienteId;
-
-      if (!clienteId) {
-        const existente = await tx.cliente.findFirst({
-          where: { whatsapp: data.whatsappCliente, deletedAt: null },
-        });
-        clienteId = existente
-          ? existente.id
-          : (
-              await tx.cliente.create({
-                data: { nombre: data.nombreCliente, whatsapp: data.whatsappCliente },
-              })
-            ).id;
+      if (clienteId) {
+        const existe = await tx.cliente.findFirst({ where: { id: clienteId, deletedAt: null }, select: { id: true } });
+        if (!existe) throw new Error("Ese cliente ya no existe. Elígelo de nuevo.");
+      } else {
+        const whatsapp = (data.whatsappCliente ?? "").trim();
+        const existente = await tx.cliente.findFirst({ where: { whatsapp, deletedAt: null } });
+        clienteId = existente ? existente.id : (await tx.cliente.create({ data: { nombre: data.nombreCliente, whatsapp } })).id;
       }
+
+      // Mismo préstamo (cliente, monto y día) en los últimos 20 s: doble toque, no un préstamo nuevo.
+      const repetido = await tx.operacionCredito.findFirst({
+        where: {
+          origen: "prestamo",
+          clienteId,
+          montoCapital: data.montoCapital,
+          fechaOperacion: new Date(`${data.fechaOperacion}T00:00:00Z`),
+          deletedAt: null,
+          createdAt: { gte: new Date(Date.now() - 20_000) },
+        },
+        select: { id: true },
+      });
+      if (repetido) throw new Error("Este préstamo ya quedó registrado hace un momento. Revisa Préstamos antes de repetirlo.");
 
       const operacion = await tx.operacionCredito.create({
         data: {
@@ -182,7 +192,7 @@ export async function anularPrestamo(id: string): Promise<ActionResult> {
         categoria: "anulacion_prestamo",
         referenciaId: operacion.id,
         referenciaTipo: "operacion_credito",
-        fecha: new Date().toISOString().slice(0, 10),
+        fecha: hoyIso(),
         descripcion: `Anulación de préstamo a ${operacion.cliente.nombre}`,
       });
     });
@@ -295,7 +305,7 @@ export async function editarPrestamo(id: string, input: PrestamoEditInput): Prom
           categoria: "ajuste_edicion_prestamo",
           referenciaId: id,
           referenciaTipo: "operacion_credito",
-          fecha: new Date().toISOString().slice(0, 10),
+          fecha: hoyIso(),
           descripcion: "Ajuste de caja por edición de préstamo",
         });
       }

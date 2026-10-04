@@ -1,4 +1,4 @@
-import { formatearMoneda, formatearFecha } from "@/lib/formato";
+import { formatearMoneda, formatearFecha } from "../formato";
 
 /**
  * WhatsApp simplificado (27 jul 2026): la app es de un solo negocio, en un
@@ -25,16 +25,26 @@ export function construirLinkWhatsapp(numero: string, mensaje: string): string {
   return `https://wa.me/${destino}?text=${encodeURIComponent(mensaje)}`;
 }
 
+/** Solo el primer nombre, como se le habla a alguien: "María Fernanda Pérez" -> "María". */
+export function primerNombre(nombreCompleto: string): string {
+  return nombreCompleto.trim().split(/\s+/)[0] ?? nombreCompleto;
+}
+
+/** Un número sirve para WhatsApp solo si tiene al menos 10 dígitos (hay clientes importados con "Pendiente"). */
+export function tieneWhatsapp(numero: string | null | undefined): boolean {
+  return (numero ?? "").replace(/[^0-9]/g, "").length >= 10;
+}
+
 export function mensajeRecordatorio(cliente: string, valor: number, fecha: Date | string): string {
-  return `Hola ${cliente}.\nTe recuerdo que tu pago de ${formatearMoneda(valor)} vence el ${formatearFecha(fecha)}.\nMuchas gracias.`;
+  return `Hola ${primerNombre(cliente)}, te recordamos que tu pago de ${formatearMoneda(valor)} con SABAT vence el ${formatearFecha(fecha)}. Gracias.`;
 }
 
 export function mensajeHoyVence(cliente: string, valor: number): string {
-  return `Hola ${cliente}.\nHoy vence tu pago de ${formatearMoneda(valor)}.\nCuando puedas me confirmas.\nGracias.`;
+  return `Hola ${primerNombre(cliente)}, hoy vence tu pago de ${formatearMoneda(valor)} con SABAT. Cuando puedas, me confirmas. Gracias.`;
 }
 
 export function mensajeVencido(cliente: string, valor: number): string {
-  return `Hola ${cliente}.\nTu pago por ${formatearMoneda(valor)} se encuentra pendiente.\nPor favor comunícate conmigo para acordar el pago.\nGracias.`;
+  return `Hola ${primerNombre(cliente)}, te recordamos que tienes un saldo pendiente de ${formatearMoneda(valor)} con SABAT. ¿Cuándo podemos acordar el pago? Gracias.`;
 }
 
 export function mensajeGraciasPorPagar(cliente: string, valor: number): string {

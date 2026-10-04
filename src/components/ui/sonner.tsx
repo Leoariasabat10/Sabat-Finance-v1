@@ -21,11 +21,11 @@ export function Toaster(props: ToasterProps) {
         classNames: {
           toast:
             "group toast flex items-center gap-3 rounded-lg border border-[color:var(--border)] bg-card px-4 py-3.5 text-[13.5px] font-semibold text-foreground shadow-lg data-[type=success]:border-[color:var(--success)]/30 data-[type=error]:border-[color:var(--danger)]/30",
-          description: "text-[12.5px] font-normal text-muted",
+          description: "text-[13px] font-normal text-muted",
           actionButton:
-            "rounded-sm bg-accent px-2.5 py-1.5 text-[12px] font-bold text-white",
+            "rounded-sm bg-accent px-2.5 py-1.5 text-[13px] font-medium text-white",
           cancelButton:
-            "rounded-sm bg-hover-bg px-2.5 py-1.5 text-[12px] font-bold text-muted",
+            "rounded-sm bg-hover-bg px-2.5 py-1.5 text-[13px] font-medium text-muted",
           icon: "data-[type=success]:text-success data-[type=error]:text-danger data-[type=info]:text-info",
         },
       }}

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { calcularInteres, generarCalendarioCuotas } from "@/lib/calculos";
 import { registrarMovimientoCaja } from "@/lib/caja/motor";
 import { ventaSchema, type VentaInput } from "./validations";
+import { hoyIso } from "@/lib/fecha";
 
 type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -27,18 +28,27 @@ export async function crearVenta(input: VentaInput): Promise<ActionResult<{ id: 
   try {
     const ventaId = await prisma.$transaction(async (tx) => {
       let clienteId = data.clienteId;
-      if (!clienteId) {
-        const existente = await tx.cliente.findFirst({
-          where: { whatsapp: data.whatsappCliente, deletedAt: null },
-        });
-        clienteId = existente
-          ? existente.id
-          : (
-              await tx.cliente.create({
-                data: { nombre: data.nombreCliente, whatsapp: data.whatsappCliente },
-              })
-            ).id;
+      if (clienteId) {
+        const existe = await tx.cliente.findFirst({ where: { id: clienteId, deletedAt: null }, select: { id: true } });
+        if (!existe) throw new Error("Ese cliente ya no existe. Elígelo de nuevo.");
+      } else {
+        const whatsapp = (data.whatsappCliente ?? "").trim();
+        const existente = await tx.cliente.findFirst({ where: { whatsapp, deletedAt: null } });
+        clienteId = existente ? existente.id : (await tx.cliente.create({ data: { nombre: data.nombreCliente, whatsapp } })).id;
       }
+
+      // Misma venta (cliente, valor y día) en los últimos 20 s: doble toque, no una venta nueva.
+      const repetida = await tx.venta.findFirst({
+        where: {
+          clienteId,
+          totalCalc: total,
+          fecha: new Date(`${data.fecha}T00:00:00Z`),
+          deletedAt: null,
+          createdAt: { gte: new Date(Date.now() - 20_000) },
+        },
+        select: { id: true },
+      });
+      if (repetida) throw new Error("Esta venta ya quedó registrada hace un momento. Revisa Ventas antes de repetirla.");
 
       const venta = await tx.venta.create({
         data: {
@@ -174,7 +184,7 @@ export async function anularVenta(id: string): Promise<ActionResult> {
           categoria: "anulacion_venta",
           referenciaId: venta.id,
           referenciaTipo: "venta",
-          fecha: new Date().toISOString().slice(0, 10),
+          fecha: hoyIso(),
           descripcion: `Anulación de venta de ${venta.cliente.nombre}`,
         });
       }

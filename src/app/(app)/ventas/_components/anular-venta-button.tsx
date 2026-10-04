@@ -57,7 +57,7 @@ export function AnularVentaButton({
             La venta quedará marcada como anulada — no se borra del historial.
           </DialogDescription>
         </DialogHeader>
-        {error ? <p className="text-[12px] text-danger">{error}</p> : null}
+        {error ? <p className="text-[13px] text-danger">{error}</p> : null}
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
             Cancelar

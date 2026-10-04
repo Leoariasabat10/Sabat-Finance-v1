@@ -6,11 +6,9 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { listClientes } from "@/lib/clientes/queries";
-import { getInsightsNegocio } from "@/lib/inteligencia/insights";
 import { BuscadorClientes } from "./_components/buscador-clientes";
 import { ClienteCard } from "./_components/cliente-card";
 import { Paginacion } from "./_components/paginacion";
-import { InsightsStrip } from "./_components/insights-strip";
 
 export const metadata: Metadata = { title: "Clientes · Sabat Finance" };
 
@@ -23,16 +21,13 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const busqueda = params.q ?? "";
   const pagina = Number(params.pagina) || 1;
 
-  const [{ clientes, total, totalPaginas }, insights] = await Promise.all([
-    listClientes({ busqueda, pagina }),
-    getInsightsNegocio(),
-  ]);
+  const { clientes, total, totalPaginas } = await listClientes({ busqueda, pagina });
 
   return (
     <div className="animate-fade-up">
       <PageHeader
         title="Clientes"
-        subtitle={`${total} cliente${total === 1 ? "" : "s"} registrado${total === 1 ? "" : "s"}`}
+        subtitle={`${total} ${total === 1 ? "cliente" : "clientes"}`}
         actions={
           <Button asChild>
             <Link href="/clientes/nuevo">
@@ -43,8 +38,6 @@ export default async function ClientesPage({ searchParams }: PageProps) {
         }
       />
 
-      {!busqueda ? <InsightsStrip insights={insights} /> : null}
-
       <div className="mb-5">
         <Suspense fallback={<div className="h-10 w-full max-w-sm" />}>
           <BuscadorClientes valorInicial={busqueda} />
@@ -54,11 +47,11 @@ export default async function ClientesPage({ searchParams }: PageProps) {
       {clientes.length === 0 ? (
         <EmptyState
           icon={<Users className="h-10 w-10 text-faint" />}
-          title={busqueda ? "No encontramos ese cliente" : "Todavía no tienes clientes"}
+          title={busqueda ? "No encontramos ese cliente" : "Todavía no hay clientes"}
           description={
             busqueda
               ? "Prueba con otro nombre o número de WhatsApp."
-              : "Registra tu primer cliente — solo necesitas su nombre y WhatsApp, todo lo demás es opcional."
+              : "Registra el primero: solo hacen falta el nombre y el WhatsApp."
           }
           action={
             !busqueda ? (

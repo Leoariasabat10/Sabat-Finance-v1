@@ -47,18 +47,18 @@ export default async function Page() {
           {ventas.map((v) => (
             <StaggerItem key={v.id}>
               <Link href={`/ventas/${v.id}`}>
-                <Card className="p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+                <Card className="p-4 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <ShoppingBag className="h-5 w-5 shrink-0 text-success" aria-hidden />
                       <div>
-                        <p className="font-bold text-foreground">{v.clienteNombre}</p>
-                        <p className="text-[12.5px] text-muted">{formatearFecha(v.fecha)}</p>
+                        <p className="font-medium text-foreground">{v.clienteNombre}</p>
+                        <p className="text-[13px] text-muted">{formatearFecha(v.fecha)}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-foreground">{formatearMoneda(v.total)}</p>
-                      <p className="text-[12px] text-muted">utilidad {formatearMoneda(v.utilidad)}</p>
+                      <p className="font-medium text-foreground">{formatearMoneda(v.total)}</p>
+                      <p className="text-[13px] text-muted">utilidad {formatearMoneda(v.utilidad)}</p>
                     </div>
                     <Badge variant={v.tipoPago === "credito" ? "warning" : "success"}>
                       {v.tipoPago === "credito" ? "Crédito" : "Contado"}

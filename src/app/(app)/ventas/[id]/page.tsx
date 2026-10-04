@@ -48,19 +48,19 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Total</p>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(venta.totalCalc)}</p>
+            <p className="text-[13px] font-semibold text-muted">Total</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(venta.totalCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Utilidad</p>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(venta.utilidadCalc)}</p>
+            <p className="text-[13px] font-semibold text-muted">Utilidad</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(venta.utilidadCalc)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-[11px] font-semibold text-muted">Tipo de pago</p>
+            <p className="text-[13px] font-semibold text-muted">Tipo de pago</p>
             <Badge variant={venta.tipoPago === "credito" ? "warning" : "success"}>
               {venta.tipoPago === "credito" ? "Crédito" : "Contado"}
             </Badge>
@@ -69,8 +69,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         {venta.operacionCredito ? (
           <Card>
             <CardContent>
-              <p className="text-[11px] font-semibold text-muted">Saldo pendiente</p>
-              <p className="font-mono text-lg font-bold tabular-nums text-accent">
+              <p className="text-[13px] font-semibold text-muted">Saldo pendiente</p>
+              <p className="money text-lg font-medium tabular-nums text-accent">
                 {formatearMoneda(venta.operacionCredito.saldoPendienteCalc)}
               </p>
             </CardContent>
@@ -80,12 +80,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 text-sm font-bold">Artículos</h3>
+          <h3 className="mb-3 text-sm font-medium">Artículos</h3>
           <div className="flex flex-col divide-y divide-[color:var(--border)]">
             {venta.items.map((i) => (
               <div key={i.id} className="flex items-center justify-between py-2.5 text-[13px]">
                 <span>{i.nombreProducto}</span>
-                <span className="font-mono font-semibold tabular-nums">{formatearMoneda(i.precioVenta)}</span>
+                <span className="money font-semibold tabular-nums">{formatearMoneda(i.precioVenta)}</span>
               </div>
             ))}
           </div>
@@ -95,14 +95,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       {venta.operacionCredito ? (
         <Card>
           <CardContent>
-            <h3 className="mb-3 text-sm font-bold">Cuotas (sin interés)</h3>
+            <h3 className="mb-3 text-sm font-medium">Cuotas (sin interés)</h3>
             <div className="flex flex-col divide-y divide-[color:var(--border)]">
               {venta.operacionCredito.cuotas.map((c) => (
                 <div key={c.id} className="flex items-center justify-between py-2.5 text-[13px]">
                   <span className="text-muted">
                     #{c.numeroCuota} · vence {formatearFecha(c.fechaVencimiento)}
                   </span>
-                  <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
+                  <span className="money font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
                   <BadgeEstadoCuota estado={c.estado} />
                 </div>
               ))}

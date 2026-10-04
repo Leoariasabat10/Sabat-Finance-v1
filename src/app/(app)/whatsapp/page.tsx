@@ -35,14 +35,14 @@ export default async function Page() {
         <StaggerList className="flex flex-col gap-3">
           {contactos.map((c) => (
             <StaggerItem key={c.operacionId}>
-              <Card className="flex flex-col gap-3 p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between">
+              <Card className="flex flex-col gap-3 p-4 transition-all duration-premium ease-premium hover:border-[color:var(--gold)] sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="font-bold text-foreground">{c.clienteNombre}</p>
+                    <p className="font-medium text-foreground">{c.clienteNombre}</p>
                     <Badge variant={c.motivo.startsWith("Pago vencido") ? "danger" : "warning"}>{c.motivo}</Badge>
-                    <span className="font-mono text-[12.5px] font-semibold tabular-nums text-muted">{formatearMoneda(c.monto)}</span>
+                    <span className="money text-[13px] font-semibold tabular-nums text-muted">{formatearMoneda(c.monto)}</span>
                   </div>
-                  <p className="mt-1.5 whitespace-pre-line text-[12.5px] text-muted">{c.mensaje}</p>
+                  <p className="mt-1.5 whitespace-pre-line text-[13px] text-muted">{c.mensaje}</p>
                 </div>
                 <BotonWhatsApp numero={c.clienteWhatsapp} mensaje={c.mensaje} etiqueta="Abrir WhatsApp" variant="primary" size="default" />
               </Card>

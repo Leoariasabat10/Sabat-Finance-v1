@@ -37,7 +37,7 @@ export function ContextoHistoricoForm({ clienteId, operacionId, yaConfirmado, no
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="inline-flex cursor-pointer items-center gap-1.5 text-[12.5px] font-semibold text-muted transition-colors duration-premium hover:text-accent-dark"
+        className="inline-flex cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-muted transition-colors duration-premium hover:text-accent-dark"
       >
         <Clock className="h-3.5 w-3.5" />
         ¿Desde cuándo le prestas a {nombreCliente}?
@@ -67,7 +67,7 @@ export function ContextoHistoricoForm({ clienteId, operacionId, yaConfirmado, no
 
   return (
     <div className="rounded-lg border border-[color:var(--border)] bg-subtle p-3.5">
-      <p className="mb-2.5 text-[12.5px] font-semibold text-foreground">
+      <p className="mb-2.5 text-[13px] font-semibold text-foreground">
         ¿Desde cuándo le prestas a {nombreCliente}, aproximadamente?
       </p>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
@@ -89,7 +89,7 @@ export function ContextoHistoricoForm({ clienteId, operacionId, yaConfirmado, no
           onChange={(e) => setNota(e.target.value)}
         />
       </div>
-      {error ? <p className="mt-2 text-[12px] text-danger">{error}</p> : null}
+      {error ? <p className="mt-2 text-[13px] text-danger">{error}</p> : null}
       <div className="mt-2.5 flex justify-end gap-2">
         <Button type="button" size="sm" variant="ghost" onClick={() => setAbierto(false)} disabled={isPending}>
           Cancelar

@@ -60,6 +60,8 @@ export function VentaForm() {
 
   useEffect(() => {
     const nombre = valores.nombreCliente;
+    // Si cambia el nombre después de elegir a alguien de la lista, ya no es ese cliente: se suelta su id.
+    if (valores.clienteId && nombre !== clienteSeleccionadoRef.current) setValue("clienteId", undefined);
     if (!nombre || nombre.length < 2 || nombre === clienteSeleccionadoRef.current) {
       setSugerencias([]);
       return;
@@ -74,6 +76,7 @@ export function VentaForm() {
   const seleccionarCliente = (c: ClienteSugerido) => {
     clienteSeleccionadoRef.current = c.nombre;
     setValue("nombreCliente", c.nombre, { shouldValidate: true });
+    setValue("clienteId", c.id);
     setValue("whatsappCliente", c.whatsapp, { shouldValidate: true });
     setSugerencias([]);
     setMostrarSugerencias(false);
@@ -101,7 +104,7 @@ export function VentaForm() {
         toast.error(resultado.error);
         return;
       }
-      toast.success("Venta creada");
+      toast.success("Venta registrada");
       router.push(`/ventas/${resultado.data.id}`);
       router.refresh();
     });
@@ -127,7 +130,7 @@ export function VentaForm() {
                   setTimeout(() => setMostrarSugerencias(false), 150);
                 }}
               />
-              {errors.nombreCliente ? <p className="mt-1.5 text-[12px] text-danger">{errors.nombreCliente.message}</p> : null}
+              {errors.nombreCliente ? <p className="mt-1.5 text-[13px] text-danger">{errors.nombreCliente.message}</p> : null}
               {mostrarSugerencias && sugerencias.length > 0 ? (
                 <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-[color:var(--border)] bg-card shadow-lg">
                   {sugerencias.map((c) => (
@@ -147,9 +150,9 @@ export function VentaForm() {
               ) : null}
             </div>
             <div>
-              <Label htmlFor="whatsappCliente">WhatsApp *</Label>
+              <Label htmlFor="whatsappCliente">WhatsApp (solo si el cliente es nuevo)</Label>
               <Input id="whatsappCliente" placeholder="3001234567" inputMode="tel" aria-invalid={!!errors.whatsappCliente} {...register("whatsappCliente")} />
-              {errors.whatsappCliente ? <p className="mt-1.5 text-[12px] text-danger">{errors.whatsappCliente.message}</p> : null}
+              {errors.whatsappCliente ? <p className="mt-1.5 text-[13px] text-danger">{errors.whatsappCliente.message}</p> : null}
             </div>
             <div>
               <Label htmlFor="tipoPago">Tipo de pago *</Label>
@@ -185,7 +188,7 @@ export function VentaForm() {
         <Card>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold">Artículos</h3>
+              <h3 className="text-sm font-medium">Artículos</h3>
               <Button
                 type="button"
                 variant="ghost"
@@ -206,7 +209,7 @@ export function VentaForm() {
                     {...register(`items.${index}.nombreProducto` as const)}
                   />
                   {errors.items?.[index]?.nombreProducto ? (
-                    <p className="mt-1.5 text-[12px] text-danger">{errors.items[index]?.nombreProducto?.message}</p>
+                    <p className="mt-1.5 text-[13px] text-danger">{errors.items[index]?.nombreProducto?.message}</p>
                   ) : null}
                 </div>
                 <div>
@@ -234,12 +237,12 @@ export function VentaForm() {
                 </div>
               </div>
             ))}
-            {errors.items?.message ? <p className="text-[12px] text-danger">{errors.items.message}</p> : null}
+            {errors.items?.message ? <p className="text-[13px] text-danger">{errors.items.message}</p> : null}
           </CardContent>
         </Card>
 
         {serverError ? (
-          <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger">
+          <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[13px] font-semibold text-danger">
             {serverError}
           </div>
         ) : null}
@@ -249,7 +252,7 @@ export function VentaForm() {
             Cancelar
           </Button>
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Guardando…" : "Crear venta"}
+            {isPending ? "Guardando…" : "Registrar venta"}
           </Button>
         </div>
       </div>
@@ -257,22 +260,22 @@ export function VentaForm() {
       <div>
         <Card className="sticky top-4">
           <CardContent className="flex flex-col gap-3">
-            <h3 className="text-sm font-bold">Resumen</h3>
+            <h3 className="text-sm font-medium">Resumen</h3>
             <div className="flex justify-between text-[13px]">
               <span className="text-muted">Total de la venta</span>
-              <span className="font-mono font-bold tabular-nums text-accent">{formatearMoneda(totales.total)}</span>
+              <span className="money font-medium tabular-nums text-accent">{formatearMoneda(totales.total)}</span>
             </div>
             <div className="flex justify-between text-[13px]">
               <span className="text-muted">Utilidad</span>
-              <span className="font-mono font-bold tabular-nums">{formatearMoneda(totales.utilidad)}</span>
+              <span className="money font-medium tabular-nums">{formatearMoneda(totales.utilidad)}</span>
             </div>
             {totales.cuota !== null ? (
               <div className="flex justify-between text-[13px]">
                 <span className="text-muted">Cuota (sin interés)</span>
-                <span className="font-mono font-bold tabular-nums">{formatearMoneda(totales.cuota)}</span>
+                <span className="money font-medium tabular-nums">{formatearMoneda(totales.cuota)}</span>
               </div>
             ) : null}
-            <p className="mt-1 text-[11px] text-muted">
+            <p className="mt-1 text-[13px] text-muted">
               Las ventas a crédito nunca cobran interés — el total se reparte en partes iguales.
             </p>
           </CardContent>

@@ -72,7 +72,7 @@ export function MovimientoForm() {
         <Label htmlFor="descripcion">Descripción</Label>
         <Input id="descripcion" placeholder="Ej. pago de arriendo" {...register("descripcion")} />
       </div>
-      {serverError ? <p className="text-[12px] text-danger">{serverError}</p> : null}
+      {serverError ? <p className="text-[13px] text-danger">{serverError}</p> : null}
       <div className="flex gap-2">
         <Button type="button" variant="ghost" size="sm" onClick={() => setAbierto(false)} disabled={isPending}>
           Cancelar

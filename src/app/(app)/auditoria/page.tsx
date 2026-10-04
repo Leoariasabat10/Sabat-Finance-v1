@@ -63,7 +63,7 @@ export default async function Page() {
                           {nombreTabla[e.tabla] ?? e.tabla}
                         </span>
                       </div>
-                      <span className="text-[12px] text-muted">
+                      <span className="text-[13px] text-muted">
                         {e.fecha.toLocaleString("es-CO", {
                           day: "numeric",
                           month: "short",

@@ -2,7 +2,7 @@
 
 Asistente financiero y comercial para el negocio familiar: préstamos y ventas
 (de contado o a crédito). Aplicación premium, ultrarrápida y sin capacitación.
-Uso privado — sin autenticación, sin usuarios ni roles (ver `DECISIONS.md`).
+Uso privado: solo administradores (Supabase Auth + lista `ADMIN_EMAILS`; ver `docs/AUDITORIA-2026-10.md`).
 
 Documentación oficial (fuente de verdad): carpeta `spec-sistema-prestamos/` y
 los archivos raíz `CLAUDE.md`, `TASK.md`, `DECISIONS.md`, `STYLEGUIDE.md`.
@@ -19,8 +19,8 @@ React Hook Form · Zod · Framer Motion · Recharts · next-themes.
   layout base (sidebar, dark/light, responsive), shell navegable.
 - **Módulo 2 (Clientes):** CRUD completo, ficha 360°, foto (Supabase Storage),
   búsqueda difusa, etiquetas y notas.
-- Sin autenticación: la app abre directo en `/dashboard`, no hay login ni
-  sesión — pensada para un solo computador y una sola persona administrando.
+- Acceso: `/login` (Supabase Auth). El middleware verifica la sesión en el servidor y que la cuenta sea administradora.
+  Finance comparte proyecto de Supabase con SABAT Joyería, en el esquema `finance`.
 - `prisma/sql/setup.sql`: CHECK constraints (incluye venta-sin-interés),
   búsqueda difusa (`pg_trgm`) y triggers de auditoría (JSONB antes/después,
   sin usuario asociado). Sin RLS ni permisos.

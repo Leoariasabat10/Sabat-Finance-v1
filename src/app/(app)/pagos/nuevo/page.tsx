@@ -35,7 +35,7 @@ export default async function Page({
 
       <Card>
         <CardContent className="flex flex-col gap-2">
-          <p className="text-xl font-bold">{operacion.clienteNombre}</p>
+          <p className="text-xl font-medium">{operacion.clienteNombre}</p>
           <p className="text-[13px] text-muted">{operacion.clienteWhatsapp}</p>
           {operacion.producto ? <p className="text-[13px] text-muted">{operacion.producto}</p> : null}
 

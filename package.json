@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --experimental-loader ./scripts/ts-loader.mjs --test src/lib/calculos/*.test.ts",
+    "test": "node --experimental-strip-types --experimental-loader ./scripts/ts-loader.mjs --test src/lib/calculos/*.test.ts src/lib/*.test.ts src/lib/auth/*.test.ts src/lib/whatsapp/*.test.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push"

@@ -62,7 +62,7 @@ export function NotasCliente({ clienteId, notas }: NotasClienteProps) {
           placeholder="Escribe una nota sobre este cliente..."
           rows={3}
         />
-        {error ? <p className="text-[12px] text-danger">{error}</p> : null}
+        {error ? <p className="text-[13px] text-danger">{error}</p> : null}
         <div className="flex justify-end">
           <Button type="button" size="sm" onClick={agregar} disabled={isPending}>
             {isPending ? "Guardando…" : "Agregar nota"}
@@ -83,7 +83,7 @@ export function NotasCliente({ clienteId, notas }: NotasClienteProps) {
                 {nota.texto}
               </p>
               <div className="mt-2 flex items-center justify-between">
-                <span className="text-[11px] text-faint">
+                <span className="text-[13px] text-faint">
                   {formatoFecha.format(new Date(nota.createdAt))}
                 </span>
                 <button

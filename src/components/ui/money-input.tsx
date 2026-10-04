@@ -41,7 +41,7 @@ export const MoneyInput = React.forwardRef<
         {...props}
       />
       {intentoNegativo ? (
-        <p className="mt-1 text-[11.5px] font-medium text-danger">
+        <p className="mt-1 text-[13px] font-medium text-danger">
           Los valores no pueden ser negativos — se quitó el signo &quot;-&quot;.
         </p>
       ) : null}

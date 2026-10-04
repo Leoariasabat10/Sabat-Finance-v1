@@ -92,7 +92,7 @@ export function RefinanciarDialog({ operacionId, saldoPendiente }: { operacionId
             <Label htmlFor="motivo">Motivo (opcional)</Label>
             <Input id="motivo" {...register("motivo")} />
           </div>
-          {error ? <p className="text-[12px] text-danger">{error}</p> : null}
+          {error ? <p className="text-[13px] text-danger">{error}</p> : null}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
               Cancelar

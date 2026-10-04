@@ -2,66 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Tokens oficiales (STYLEGUIDE.md) ─────────────────────────────── */
+/* ── Sistema visual SABAT FINANCE ──────────────────────────────────────────────
+   Misma casa que SABAT Joyería (sabat-joyeria/DESIGN.md): negro de bóveda #0a0a0a,
+   hueso #ece9e2, oro #d5af34 usado como filete, esquinas rectas, tipografía de
+   editorial (Fraunces para títulos y cifras, Inter Tight para la interfaz,
+   Newsreader en cursiva para una frase de apoyo).
+
+   Aquí la herramienta se usa a plena luz del día, así que el modo claro es el "papel"
+   (hueso cálido) y el oscuro es la "bóveda" de la joyería. Los nombres de las variables
+   se conservan para que cada componente existente herede el cambio.
+
+   El color nunca es decoración: el verde es esmeralda (cobrado, al día), el rojo es
+   granate (atrasado), el oro marca lo que toca hoy. Todos pasan WCAG AA (≥ 5:1). */
 :root {
-  --bg: #f8f9fb;
-  --bg-card: #ffffff;
-  --bg-subtle: #f3f4f6;
-  --bg-hover: #f0f2f5;
+  --bg: #f3f0ea;
+  --bg-card: #faf8f4;
+  --bg-subtle: #ebe7df;
+  --bg-hover: #e4dfd5;
 
-  --border: rgba(0, 0, 0, 0.07);
-  --border-md: rgba(0, 0, 0, 0.1);
+  --border: rgba(20, 17, 15, 0.13);
+  --border-md: rgba(20, 17, 15, 0.26);
 
-  --text: #0f172a;
-  --text-2: #475569;
-  /* text-3 auditado (Módulo 13, QA de accesibilidad): #94a3b8 daba 2.5:1 sobre
-     fondo blanco, por debajo del mínimo WCAG AA (4.5:1) para texto normal.
-     #64748b (slate-500) es el siguiente tono de la misma escala que sí pasa. */
-  --text-3: #64748b;
+  --text: #14110f;
+  --text-2: #4d463d;
+  --text-3: #675f54;
 
-  /* Identidad SABAT (retinte 28 sep 2026 — integración con sabat-joyeria).
-     #8a6d1c es un dorado profundo, no el dorado brillante de marca (#d5af34):
-     ese falla WCAG AA como texto sobre blanco (~2.1:1). Este tono da ~4.6:1,
-     manteniendo el carácter "oro" sin repetir el error de contraste que ya
-     se corrigió para --text-3 arriba. */
-  --accent: #8a6d1c;
-  --accent-dark: #6b5416;
-  --accent-light: #f7f0da;
-  --accent-glow: rgba(213, 175, 52, 0.18);
+  --accent: #7d610d; /* oro profundo: texto y filetes sobre papel */
+  --accent-dark: #5f4a0a;
+  --accent-light: rgba(213, 175, 52, 0.18);
+  --accent-glow: rgba(213, 175, 52, 0);
+  --gold: #d5af34; /* oro de marca: rellenos y hover */
 
-  --success: #10b981;
-  --success-bg: #d1fae5;
-  --warning: #f59e0b;
-  --warning-bg: #fef3c7;
-  --danger: #ef4444;
-  --danger-bg: #fee2e2;
-  --info: #6366f1;
-  --chart-grid: rgba(15, 23, 42, 0.08);
-  --surface-highlight: rgba(255, 255, 255, 0.7);
+  --success: #1d6b4b; /* esmeralda */
+  --success-bg: #dcebe3;
+  --warning: #7d610d; /* oro: lo que vence hoy */
+  --warning-bg: #f0e5c3;
+  --danger: #9b2c2c; /* granate */
+  --danger-bg: #f1dcd8;
+  --info: #3f4a5a;
+  --chart-grid: rgba(20, 17, 15, 0.1);
+  --surface-highlight: transparent;
 }
 
 [data-theme="dark"] {
-  --bg: #080e1a;
-  --bg-card: #0f1724;
-  --bg-subtle: #161d2e;
-  --bg-hover: #1e2a3e;
+  --bg: #0a0a0a;
+  --bg-card: #131110;
+  --bg-subtle: #1b1815;
+  --bg-hover: #26211c;
 
-  --border: rgba(255, 255, 255, 0.08);
-  --border-md: rgba(255, 255, 255, 0.14);
+  --border: rgba(236, 233, 226, 0.12);
+  --border-md: rgba(236, 233, 226, 0.24);
 
-  --text: #e6edf3;
-  --text-2: #8b949e;
-  /* Mismo ajuste de accesibilidad que en modo claro — #586170 daba 2.9:1. */
-  --text-3: #7c8794;
+  --text: #ece9e2;
+  --text-2: #b3ada2;
+  --text-3: #8f897f;
 
-  /* Dorado SABAT sobre fondo oscuro: aquí sí puede brillar el dorado real
-     de marca, porque el problema de contraste es específico de fondo claro. */
-  --accent: #e8c84a;
-  --accent-dark: #d5af34;
-  --accent-light: rgba(232, 200, 74, 0.12);
-  --accent-glow: rgba(232, 200, 74, 0.2);
-  --chart-grid: rgba(255, 255, 255, 0.1);
-  --surface-highlight: rgba(255, 255, 255, 0.035);
+  --accent: #d5af34;
+  --accent-dark: #e6c458;
+  --accent-light: rgba(213, 175, 52, 0.14);
+  --accent-glow: rgba(213, 175, 52, 0);
+  --gold: #d5af34;
+
+  --success: #52b88a;
+  --success-bg: rgba(82, 184, 138, 0.14);
+  --warning: #d5af34;
+  --warning-bg: rgba(213, 175, 52, 0.14);
+  --danger: #e07b70;
+  --danger-bg: rgba(224, 123, 112, 0.14);
+  --info: #9aa5b5;
+  --chart-grid: rgba(236, 233, 226, 0.1);
+  --surface-highlight: transparent;
 }
 
 @layer base {
@@ -71,44 +81,39 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    /* en teléfono nada debe empujar el contenido de lado */
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    font-family: var(--font-inter-tight), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
     min-height: 100vh;
-    background-image: radial-gradient(circle at 82% -15%, var(--accent-glow), transparent 28rem);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     text-rendering: optimizeLegibility;
-    transition: background-color 180ms cubic-bezier(0.4, 0, 0.2, 1),
-      color 180ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  /* `font-sans` is emitted as a utility after base styles; keep the native
-     stack authoritative even while Tailwind recompiles its configuration. */
-  body.font-sans {
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif !important;
+    transition: background-color 180ms cubic-bezier(0.23, 1, 0.32, 1), color 180ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   h1,
   h2,
   h3,
   h4 {
-    @apply font-display font-extrabold tracking-[-0.02em];
-    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-weight: 420;
+    letter-spacing: -0.015em;
+    font-variation-settings: "SOFT" 50, "WONK" 0;
   }
-  h1 { letter-spacing: -0.04em; }
-  h2 { letter-spacing: -0.03em; }
+  h1 { letter-spacing: -0.02em; }
 
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
 
-  /* Selección de texto en el color de marca */
   ::selection {
     background: var(--accent-light);
-    color: var(--accent-dark);
+    color: var(--text);
   }
 
-  /* Scrollbar fino y discreto, coherente en claro y oscuro */
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--border-md) transparent;
@@ -122,13 +127,11 @@
   }
   *::-webkit-scrollbar-thumb {
     background: var(--border-md);
-    border-radius: 100px;
   }
   *::-webkit-scrollbar-thumb:hover {
     background: var(--text-3);
   }
 
-  /* Los números de todas las tablas y listas se leen mejor tabulares */
   input[type="date"] {
     color-scheme: light;
   }
@@ -138,23 +141,40 @@
 }
 
 @layer components {
+  /* Tarjeta: papel con filete, sin sombra ni degradado (la casa no usa efectos). */
   .premium-card {
-    background: linear-gradient(145deg, var(--surface-highlight), transparent 55%), var(--bg-card);
+    background: var(--bg-card);
   }
+  /* Cifras: Fraunces con numerales alineados, para que una columna de dinero se lea de un vistazo. */
   .metric-value {
-    letter-spacing: -0.045em;
-    line-height: 1.08;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum", "tnum";
+    letter-spacing: -0.02em;
+    line-height: 1.05;
   }
+  .money {
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: "lnum", "tnum";
+  }
+  /* Rótulo corto de sección: el mismo "label" de la joyería, sin mayúsculas gritando. */
   .eyebrow {
+    font-family: var(--font-inter-tight), system-ui, sans-serif;
+    font-variation-settings: normal;
     color: var(--text-3);
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
   }
-  .hairline-grid {
-    background-image: linear-gradient(to right, var(--chart-grid) 1px, transparent 1px), linear-gradient(to bottom, var(--chart-grid) 1px, transparent 1px);
-    background-size: 26px 26px;
+  /* Filete de oro: la única decoración permitida. */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(to right, var(--gold), var(--gold) 45%, transparent);
+  }
+  .lead-italic {
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-style: italic;
   }
 }
 

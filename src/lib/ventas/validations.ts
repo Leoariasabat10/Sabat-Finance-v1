@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { refinarClienteReferido } from "@/lib/validations/cliente-ref";
 
 /**
  * Regla dura #5 (CLAUDE.md): no hay catálogo de productos — cada ítem de la
@@ -26,10 +27,7 @@ export const ventaSchema = z
   .object({
     clienteId: z.string().uuid().optional(),
     nombreCliente: z.string().min(1, "Escribe el nombre del cliente").max(150),
-    whatsappCliente: z
-      .string()
-      .min(1, "Escribe el WhatsApp del cliente")
-      .regex(/^[0-9+()\s-]{7,20}$/, "Ese número no parece válido"),
+    whatsappCliente: z.string().trim().optional(),
     tipoPago: z.enum(["contado", "credito"]),
     fecha: z.string().min(1, "Elige la fecha"),
     items: z.array(ventaItemSchema).min(1, "Agrega al menos un artículo"),
@@ -39,7 +37,8 @@ export const ventaSchema = z
   .refine((v) => v.tipoPago !== "credito" || (v.numeroCuotas && v.plazoDias), {
     message: "Indica número de cuotas y plazo para la venta a crédito",
     path: ["numeroCuotas"],
-  });
+  })
+  .superRefine(refinarClienteReferido);
 
 export type VentaInput = z.infer<typeof ventaSchema>;
 export type VentaItemInput = z.infer<typeof ventaItemSchema>;

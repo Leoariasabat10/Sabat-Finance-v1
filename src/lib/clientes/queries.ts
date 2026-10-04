@@ -44,8 +44,8 @@ export async function listClientes({
         WHERE deleted_at IS NULL
           AND (nombre ILIKE ${"%" + termino + "%"}
                OR whatsapp ILIKE ${"%" + termino + "%"}
-               OR similarity(nombre, ${termino}) > 0.2)
-        ORDER BY similarity(nombre, ${termino}) DESC, nombre ASC
+               OR extensions.similarity(nombre, ${termino}) > 0.2)
+        ORDER BY extensions.similarity(nombre, ${termino}) DESC, nombre ASC
         LIMIT ${PAGE_SIZE} OFFSET ${skip}
       `,
       prisma.$queryRaw<{ count: bigint }[]>`
@@ -53,7 +53,7 @@ export async function listClientes({
         WHERE deleted_at IS NULL
           AND (nombre ILIKE ${"%" + termino + "%"}
                OR whatsapp ILIKE ${"%" + termino + "%"}
-               OR similarity(nombre, ${termino}) > 0.2)
+               OR extensions.similarity(nombre, ${termino}) > 0.2)
       `,
     ]);
 

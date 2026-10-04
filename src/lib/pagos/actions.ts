@@ -28,6 +28,10 @@ export async function registrarPago(input: PagoInput): Promise<ActionResult<{ id
 
   try {
     const resultado = await prisma.$transaction(async (tx) => {
+      // Bloquea la operación hasta terminar: dos toques seguidos (o dos dispositivos) esperan turno en vez de
+      // leer el mismo saldo y registrar el pago dos veces.
+      await tx.$queryRaw`SELECT id FROM operaciones_credito WHERE id = ${data.operacionCreditoId}::uuid FOR UPDATE`;
+
       const operacion = await tx.operacionCredito.findFirst({
         where: { id: data.operacionCreditoId, deletedAt: null },
         include: { cuotas: { orderBy: { numeroCuota: "asc" } }, cliente: { select: { id: true, nombre: true, whatsapp: true } } },
@@ -44,6 +48,20 @@ export async function registrarPago(input: PagoInput): Promise<ActionResult<{ id
           `El pago (${data.valor.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 })}) supera el saldo pendiente (${saldoPendienteActual.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 })}). Ajusta el valor antes de registrar el pago.`,
         );
       }
+
+      // Mismo pago, misma operación, mismo día, en los últimos 20 segundos: es un doble toque, no un pago nuevo.
+      const duplicado = await tx.pago.findFirst({
+        where: {
+          operacionCreditoId: operacion.id,
+          valor: data.valor,
+          tipoAbono: data.tipoAbono,
+          fechaPago: new Date(`${data.fechaPago}T00:00:00Z`),
+          deletedAt: null,
+          createdAt: { gte: new Date(Date.now() - 20_000) },
+        },
+        select: { id: true },
+      });
+      if (duplicado) throw new Error("Este pago ya quedó registrado hace un momento. Revisa el historial antes de repetirlo.");
 
       const config = await tx.configuracion.findUnique({ where: { id: 1 } });
       const ordenAplicacionPago = config?.ordenAplicacionPago ?? "interes_primero";

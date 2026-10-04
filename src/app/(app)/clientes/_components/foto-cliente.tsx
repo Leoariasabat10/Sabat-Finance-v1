@@ -75,7 +75,7 @@ export function FotoCliente({ clienteId, nombre, fotoUrl }: FotoClienteProps) {
       />
 
       {error ? (
-        <p className="absolute top-full mt-1.5 w-40 text-[11px] font-semibold text-danger">
+        <p className="absolute top-full mt-1.5 w-40 text-[13px] font-semibold text-danger">
           {error}
         </p>
       ) : null}

@@ -2,20 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { accionesRapidas } from "@/config/nav";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 /**
- * Botón flotante de acciones rápidas (visión final del producto, sección
- * 1): registrar un pago, prestar o vender son las tareas más frecuentes
- * del día — nunca deberían exigir entrar a un módulo. Vive en todas las
- * pantallas, sobre la barra de navegación móvil.
+ * Atajo a las cuatro acciones del día desde cualquier pantalla. En "Hoy" no aparece: ahí las acciones ya están a la
+ * vista. Rectangular y negro (como el botón principal); el menú se abre y cierra con una transición corta.
  */
 export function QuickActionFab() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setOpen(false), [pathname]);
 
   useEffect(() => {
     if (!open) return;
@@ -33,44 +34,37 @@ export function QuickActionFab() {
     };
   }, [open]);
 
+  if (pathname === "/dashboard") return null;
+
   return (
-    <div
-      ref={ref}
-      className="fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2.5 lg:bottom-6 lg:right-6"
-    >
+    <div ref={ref} className="fixed bottom-[76px] right-4 z-40 flex flex-col items-end gap-2 lg:bottom-6 lg:right-6">
       {open ? (
-        <div className="animate-fade-up flex flex-col items-end gap-2">
+        <ul className="animate-fade-up flex flex-col items-end gap-2">
           {accionesRapidas.map((accion) => (
-            <Link
-              key={accion.href}
-              href={accion.href}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-full border border-[color:var(--border)] bg-card py-2 pl-4 pr-3 text-[13px] font-semibold text-foreground shadow-lg transition-colors duration-premium hover:bg-hover-bg"
-            >
-              {accion.title}
-              <accion.icon className="h-4 w-4 text-accent" aria-hidden />
-            </Link>
+            <li key={accion.href}>
+              <Link
+                href={accion.href}
+                className="flex min-h-11 items-center gap-2.5 border border-[color:var(--border-md)] bg-card px-4 text-[15px] text-foreground shadow-md transition-colors hover:border-[color:var(--gold)]"
+              >
+                <accion.icon className="h-4 w-4 text-accent" aria-hidden />
+                {accion.title}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label={open ? "Cerrar acciones rápidas" : "Acciones rápidas"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-            className={cn(
-              "flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-dark))] text-white shadow-lg transition-transform duration-premium ease-premium",
-              open ? "rotate-45" : "hover:scale-105",
-            )}
-          >
-            {open ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
-          </button>
-        </TooltipTrigger>
-        {open ? null : <TooltipContent side="left">Acciones rápidas</TooltipContent>}
-      </Tooltip>
+      <button
+        type="button"
+        aria-label={open ? "Cerrar acciones rápidas" : "Acciones rápidas"}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "flex h-12 w-12 cursor-pointer items-center justify-center bg-foreground text-background shadow-md transition-[background-color,color,transform] duration-150 ease-premium hover:bg-[color:var(--gold)] hover:text-[#0a0a0a] active:scale-95",
+        )}
+      >
+        {open ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+      </button>
     </div>
   );
 }

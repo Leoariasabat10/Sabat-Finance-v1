@@ -56,7 +56,7 @@ export function EliminarClienteDialog({
             y puede recuperarse — nunca se borra de verdad de la base de datos.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {error ? <p className="text-[12px] text-danger">{error}</p> : null}
+        {error ? <p className="text-[13px] text-danger">{error}</p> : null}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction onClick={confirmar} disabled={isPending}>

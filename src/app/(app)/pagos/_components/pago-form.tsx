@@ -104,9 +104,9 @@ export function PagoForm({
       <div>
         <Label htmlFor="valor">Valor recibido *</Label>
         <MoneyInput id="valor" autoFocus aria-invalid={!!errors.valor || excedeSaldo} {...register("valor", { setValueAs: limpiarMoneda })} />
-        {errors.valor ? <p className="mt-1.5 text-[12px] text-danger">{errors.valor.message}</p> : null}
+        {errors.valor ? <p className="mt-1.5 text-[13px] text-danger">{errors.valor.message}</p> : null}
         {!errors.valor && excedeSaldo ? (
-          <p className="mt-1.5 text-[12px] font-semibold text-danger">
+          <p className="mt-1.5 text-[13px] font-semibold text-danger">
             El pago no puede superar el saldo pendiente ({formatearMoneda(saldoPendiente)}). Ajusta el valor.
           </p>
         ) : null}
@@ -134,7 +134,7 @@ export function PagoForm({
       <div>
         <Label htmlFor="tipoAbono">Tipo de abono</Label>
         <Select id="tipoAbono" {...register("tipoAbono")}>
-          <option value="cuota_completa">Pago normal (interés primero, luego capital)</option>
+          <option value="cuota_completa">Pago normal</option>
           <option value="abono_capital">Abono solo a capital</option>
           <option value="abono_interes">Abono solo a intereses</option>
         </Select>
@@ -146,7 +146,7 @@ export function PagoForm({
       </div>
 
       {serverError ? (
-        <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger">
+        <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[13px] font-semibold text-danger">
           {serverError}
         </div>
       ) : null}

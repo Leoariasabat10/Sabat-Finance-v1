@@ -24,7 +24,7 @@ export function EmptyState({
       )}
     >
       {icon ? <div className="mb-3 flex items-center justify-center">{icon}</div> : null}
-      <h3 className="font-sans text-base font-bold text-foreground">{title}</h3>
+      <h3 className="font-sans text-base font-medium text-foreground">{title}</h3>
       {description ? (
         <p className="mt-1.5 max-w-sm text-[13px] text-faint">{description}</p>
       ) : null}

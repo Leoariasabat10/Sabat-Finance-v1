@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { hoyFecha } from "@/lib/fecha";
 
 export async function getResumenReportes() {
   const [prestamos, ventas] = await Promise.all([
@@ -16,8 +17,7 @@ export async function getResumenReportes() {
     }),
   ]);
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  const hoy = hoyFecha();
 
   const financiero = {
     capitalPrestadoHistorico: prestamos.reduce((a, p) => a + Number(p.montoCapital), 0),

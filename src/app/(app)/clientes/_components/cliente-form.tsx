@@ -80,7 +80,7 @@ export function ClienteForm({ clienteId, defaultValues }: ClienteFormProps) {
               {...register("nombre")}
             />
             {errors.nombre ? (
-              <p className="mt-1.5 text-[12px] text-danger">{errors.nombre.message}</p>
+              <p className="mt-1.5 text-[13px] text-danger">{errors.nombre.message}</p>
             ) : null}
           </div>
 
@@ -95,7 +95,7 @@ export function ClienteForm({ clienteId, defaultValues }: ClienteFormProps) {
               {...register("whatsapp")}
             />
             {errors.whatsapp ? (
-              <p className="mt-1.5 text-[12px] text-danger">{errors.whatsapp.message}</p>
+              <p className="mt-1.5 text-[13px] text-danger">{errors.whatsapp.message}</p>
             ) : null}
           </div>
         </CardContent>
@@ -137,7 +137,7 @@ export function ClienteForm({ clienteId, defaultValues }: ClienteFormProps) {
       {serverError ? (
         <div
           role="alert"
-          className="rounded-sm bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger"
+          className="rounded-sm bg-danger-bg px-3 py-2.5 text-[13px] font-semibold text-danger"
         >
           {serverError}
         </div>

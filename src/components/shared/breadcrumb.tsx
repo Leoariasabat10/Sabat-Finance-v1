@@ -14,7 +14,7 @@ export interface BreadcrumbItem {
  */
 export function Breadcrumb({ items, className }: { items: BreadcrumbItem[]; className?: string }) {
   return (
-    <nav aria-label="Ruta de navegación" className={cn("mb-2 flex items-center gap-1.5 text-[12.5px] text-faint", className)}>
+    <nav aria-label="Ruta de navegación" className={cn("mb-2 flex items-center gap-1.5 text-[13px] text-faint", className)}>
       {items.map((item, i) => {
         const esUltimo = i === items.length - 1;
         return (

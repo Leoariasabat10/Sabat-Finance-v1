@@ -1,3 +1,5 @@
+import { hoyIso } from "./fecha";
+
 const formateadorCOP = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",
@@ -30,8 +32,9 @@ export function formatearFecha(fecha: string | Date): string {
   return formateadorFecha.format(d);
 }
 
+// La fecha de "hoy" es la de Bogotá, no la del servidor (UTC): ver lib/fecha.ts.
 export function fechaHoyIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return hoyIso();
 }
 
 export function diasEntre(desde: string | Date, hasta: string | Date): number {

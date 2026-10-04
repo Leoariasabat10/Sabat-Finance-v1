@@ -50,12 +50,12 @@ export function CobrarView({ cobrar, cartera, eventos }: CobrarViewProps) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="inline-flex w-fit rounded-full border border-[color:var(--border)] bg-card p-1">
+        <div className="inline-flex w-fit border border-[color:var(--border)] bg-card p-1">
           <button
             type="button"
             onClick={() => setVista("lista")}
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors duration-premium",
+              "inline-flex cursor-pointer items-center gap-1.5 px-4 py-1.5 text-[13px] font-semibold transition-colors duration-premium",
               vista === "lista" ? "bg-accent text-white" : "text-muted hover:text-foreground",
             )}
           >
@@ -65,7 +65,7 @@ export function CobrarView({ cobrar, cartera, eventos }: CobrarViewProps) {
             type="button"
             onClick={() => setVista("calendario")}
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors duration-premium",
+              "inline-flex cursor-pointer items-center gap-1.5 px-4 py-1.5 text-[13px] font-semibold transition-colors duration-premium",
               vista === "calendario" ? "bg-accent text-white" : "text-muted hover:text-foreground",
             )}
           >
@@ -79,7 +79,7 @@ export function CobrarView({ cobrar, cartera, eventos }: CobrarViewProps) {
             onClick={() => setAgruparPorBarrio((v) => !v)}
             aria-pressed={agruparPorBarrio}
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors duration-premium",
+              "inline-flex cursor-pointer items-center gap-1.5 border px-3.5 py-1.5 text-[13px] font-semibold transition-colors duration-premium",
               agruparPorBarrio
                 ? "border-accent bg-accent-light text-accent-dark"
                 : "border-[color:var(--border)] bg-card text-muted hover:text-foreground",
@@ -108,12 +108,12 @@ export function CobrarView({ cobrar, cartera, eventos }: CobrarViewProps) {
 
 function CobroRow({ c }: { c: CobroItem }) {
   return (
-    <Card className="flex flex-wrap items-center justify-between gap-3 p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="flex flex-wrap items-center justify-between gap-3 p-4 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
       <div className="flex items-center gap-3">
         <OrigenIcon origen={c.origen} className="h-5 w-5" />
         <div>
-          <p className="font-bold text-foreground">{c.clienteNombre}</p>
-          <p className="text-[12.5px] text-muted">
+          <p className="font-medium text-foreground">{c.clienteNombre}</p>
+          <p className="text-[13px] text-muted">
             {c.producto ? `${c.producto} · ` : ""}
             {c.clienteWhatsapp}
           </p>
@@ -121,10 +121,10 @@ function CobroRow({ c }: { c: CobroItem }) {
       </div>
       <div className="flex items-center gap-3">
         <div className="text-right">
-          <p className="font-mono font-bold tabular-nums">{formatearMoneda(c.saldoCuota)}</p>
+          <p className="money font-medium tabular-nums">{formatearMoneda(c.saldoCuota)}</p>
           {badgeSemaforo(c.semaforo, c.diasAtraso)}
           {c.montoMora > 0 ? (
-            <p className="mt-0.5 text-[11px] font-semibold text-danger">+ {formatearMoneda(c.montoMora)} mora</p>
+            <p className="mt-0.5 text-[13px] font-semibold text-danger">+ {formatearMoneda(c.montoMora)} mora</p>
           ) : null}
         </div>
         <BotonWhatsApp
@@ -188,7 +188,7 @@ function VistaLista({
           ) : agruparPorBarrio ? (
             gruposPorBarrio.map(([barrio, items]) => (
               <section key={barrio}>
-                <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-foreground">
+                <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
                   <MapPin className="h-3.5 w-3.5 text-faint" aria-hidden /> {barrio}
                 </h2>
                 <StaggerList className="flex flex-col gap-2.5">
@@ -209,7 +209,7 @@ function VistaLista({
               .filter((s) => s.data.length > 0)
               .map((seccion) => (
                 <section key={seccion.titulo}>
-                  <h2 className="mb-2.5 flex items-center gap-2 text-sm font-bold text-foreground">
+                  <h2 className="mb-2.5 flex items-center gap-2 text-sm font-medium text-foreground">
                     <span className={cn("h-2 w-2 rounded-full", seccion.dot)} aria-hidden />
                     {seccion.titulo}
                   </h2>
@@ -226,22 +226,22 @@ function VistaLista({
 
           {restoCartera.length > 0 ? (
             <section>
-              <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-foreground">
+              <h2 className="mb-2.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <ClipboardList className="h-4 w-4 text-faint" aria-hidden /> Resto de la cartera activa
               </h2>
               <StaggerList className="flex flex-col gap-2">
                 {restoCartera.map((c) => (
                   <StaggerItem key={c.id}>
                     <Link href={c.origen === "prestamo" ? `/prestamos/${c.id}` : "/ventas"}>
-                      <Card className="flex items-center justify-between gap-3 p-3.5 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+                      <Card className="flex items-center justify-between gap-3 p-3.5 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
                         <div className="flex items-center gap-2.5">
                           <OrigenIcon origen={c.origen} />
                           <div>
                             <p className="text-[13px] font-semibold text-foreground">{c.clienteNombre}</p>
-                            <p className="text-[11.5px] text-muted">vence {formatearFecha(c.fechaVencimiento)}</p>
+                            <p className="text-[13px] text-muted">vence {formatearFecha(c.fechaVencimiento)}</p>
                           </div>
                         </div>
-                        <span className="font-mono text-[13px] font-bold tabular-nums">{formatearMoneda(c.saldoPendiente)}</span>
+                        <span className="money text-[13px] font-medium tabular-nums">{formatearMoneda(c.saldoPendiente)}</span>
                       </Card>
                     </Link>
                   </StaggerItem>
@@ -290,10 +290,10 @@ function VistaCalendario({ eventos }: { eventos: EventoAgenda[] }) {
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_320px]">
       <Card className="p-4">
-        <p className="mb-3 text-[13px] font-bold text-foreground">
+        <p className="mb-3 text-[13px] font-medium text-foreground">
           {primerDiaMes.toLocaleDateString("es-CO", { month: "long", year: "numeric" })}
         </p>
-        <div className="grid grid-cols-7 gap-1.5 text-center text-[10.5px] font-bold uppercase text-faint">
+        <div className="grid grid-cols-7 gap-1.5 text-center text-[13px] font-medium uppercase text-faint">
           {["D", "L", "M", "X", "J", "V", "S"].map((d) => (
             <span key={d}>{d}</span>
           ))}
@@ -310,7 +310,7 @@ function VistaCalendario({ eventos }: { eventos: EventoAgenda[] }) {
                 type="button"
                 onClick={() => setDiaSeleccionado(clave)}
                 className={cn(
-                  "flex aspect-square cursor-pointer flex-col items-center justify-center gap-0.5 rounded-md text-[12px] font-semibold transition-colors duration-premium",
+                  "flex aspect-square cursor-pointer flex-col items-center justify-center gap-0.5 rounded-md text-[13px] font-semibold transition-colors duration-premium",
                   seleccionado
                     ? "bg-accent text-white"
                     : esHoy
@@ -329,24 +329,24 @@ function VistaCalendario({ eventos }: { eventos: EventoAgenda[] }) {
             );
           })}
         </div>
-        <p className="mt-3 text-[11px] text-faint">Datos disponibles: próximos 30 días.</p>
+        <p className="mt-3 text-[13px] text-faint">Datos disponibles: próximos 30 días.</p>
       </Card>
 
       <Card className="p-4">
-        <p className="mb-3 text-[13px] font-bold text-foreground">{formatearFecha(diaSeleccionado)}</p>
+        <p className="mb-3 text-[13px] font-medium text-foreground">{formatearFecha(diaSeleccionado)}</p>
         {eventosDelDia.length === 0 ? (
-          <p className="text-[12.5px] text-muted">Sin eventos este día.</p>
+          <p className="text-[13px] text-muted">Sin eventos este día.</p>
         ) : (
           <StaggerList className="flex flex-col gap-2">
             {eventosDelDia.map((e, i) =>
               e.href ? (
                 <StaggerItem key={i}>
                   <Link href={e.href}>
-                    <div className="flex items-center gap-2 rounded-md border border-[color:var(--border)] p-2.5 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="flex items-center gap-2 rounded-md border border-[color:var(--border)] p-2.5 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
                       {e.origen ? <OrigenIcon origen={e.origen} /> : null}
                       <div>
-                        <p className="text-[12.5px] font-semibold text-foreground">{e.titulo}</p>
-                        <p className="text-[11.5px] text-muted">{e.subtitulo}</p>
+                        <p className="text-[13px] font-semibold text-foreground">{e.titulo}</p>
+                        <p className="text-[13px] text-muted">{e.subtitulo}</p>
                       </div>
                     </div>
                   </Link>
@@ -354,8 +354,8 @@ function VistaCalendario({ eventos }: { eventos: EventoAgenda[] }) {
               ) : (
                 <StaggerItem key={i}>
                   <div className="rounded-md border border-[color:var(--border)] p-2.5">
-                    <p className="text-[12.5px] font-semibold text-foreground">{e.titulo}</p>
-                    <p className="text-[11.5px] text-muted">{e.subtitulo}</p>
+                    <p className="text-[13px] font-semibold text-foreground">{e.titulo}</p>
+                    <p className="text-[13px] text-muted">{e.subtitulo}</p>
                   </div>
                 </StaggerItem>
               ),

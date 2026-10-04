@@ -34,31 +34,31 @@ export default async function Page() {
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 flex items-center gap-1.5 text-sm font-bold"><Landmark className="h-4 w-4 text-accent" aria-hidden /> Financiero</h3>
+          <h3 className="mb-3 flex items-center gap-1.5 text-sm font-medium"><Landmark className="h-4 w-4 text-accent" aria-hidden /> Préstamos</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div>
-              <p className="text-[11px] font-semibold text-muted">Capital prestado (histórico)</p>
-              <p className="text-lg font-bold">{formatearMoneda(financiero.capitalPrestadoHistorico)}</p>
+              <p className="text-[13px] font-semibold text-muted">Capital prestado (histórico)</p>
+              <p className="text-lg font-medium">{formatearMoneda(financiero.capitalPrestadoHistorico)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Interés esperado</p>
-              <p className="text-lg font-bold">{formatearMoneda(financiero.interesGanadoEsperado)}</p>
+              <p className="text-[13px] font-semibold text-muted">Interés esperado</p>
+              <p className="text-lg font-medium">{formatearMoneda(financiero.interesGanadoEsperado)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Saldo activo por cobrar</p>
-              <p className="text-lg font-bold">{formatearMoneda(financiero.saldoPendienteActivo)}</p>
+              <p className="text-[13px] font-semibold text-muted">Saldo activo por cobrar</p>
+              <p className="text-lg font-medium">{formatearMoneda(financiero.saldoPendienteActivo)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Saldo vencido</p>
-              <p className="text-lg font-bold text-danger">{formatearMoneda(financiero.saldoVencido)}</p>
+              <p className="text-[13px] font-semibold text-muted">Saldo vencido</p>
+              <p className="text-lg font-medium text-danger">{formatearMoneda(financiero.saldoVencido)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Préstamos activos</p>
-              <p className="text-lg font-bold">{financiero.prestamosActivos}</p>
+              <p className="text-[13px] font-semibold text-muted">Préstamos activos</p>
+              <p className="text-lg font-medium">{financiero.prestamosActivos}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Préstamos pagados (paz y salvo)</p>
-              <p className="text-lg font-bold">{financiero.prestamosPagados}</p>
+              <p className="text-[13px] font-semibold text-muted">Préstamos pagados (paz y salvo)</p>
+              <p className="text-lg font-medium">{financiero.prestamosPagados}</p>
             </div>
           </div>
         </CardContent>
@@ -66,23 +66,23 @@ export default async function Page() {
 
       <Card>
         <CardContent>
-          <h3 className="mb-3 flex items-center gap-1.5 text-sm font-bold"><ShoppingBag className="h-4 w-4 text-success" aria-hidden /> Comercial</h3>
+          <h3 className="mb-3 flex items-center gap-1.5 text-sm font-medium"><ShoppingBag className="h-4 w-4 text-success" aria-hidden /> Mercancía</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
-              <p className="text-[11px] font-semibold text-muted">Total vendido (histórico)</p>
-              <p className="text-lg font-bold">{formatearMoneda(comercial.totalVendidoHistorico)}</p>
+              <p className="text-[13px] font-semibold text-muted">Total vendido (histórico)</p>
+              <p className="text-lg font-medium">{formatearMoneda(comercial.totalVendidoHistorico)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Utilidad histórica</p>
-              <p className="text-lg font-bold text-success">{formatearMoneda(comercial.utilidadHistorica)}</p>
+              <p className="text-[13px] font-semibold text-muted">Utilidad histórica</p>
+              <p className="text-lg font-medium text-success">{formatearMoneda(comercial.utilidadHistorica)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Ventas de contado</p>
-              <p className="text-lg font-bold">{comercial.ventasContado}</p>
+              <p className="text-[13px] font-semibold text-muted">Ventas de contado</p>
+              <p className="text-lg font-medium">{comercial.ventasContado}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Ventas a crédito</p>
-              <p className="text-lg font-bold">{comercial.ventasCredito}</p>
+              <p className="text-[13px] font-semibold text-muted">Ventas a crédito</p>
+              <p className="text-lg font-medium">{comercial.ventasCredito}</p>
             </div>
           </div>
         </CardContent>

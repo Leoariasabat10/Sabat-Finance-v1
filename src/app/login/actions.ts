@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
+import { destinoSeguro, esAdministrador } from "@/lib/auth/acceso";
 
 export type LoginState = { error: string | null };
 
@@ -15,13 +16,19 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
   }
 
   const supabase = await getSupabaseServer();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: "Correo o contraseña incorrectos." };
   }
 
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  // Una cuenta válida que no es de administrador no entra (el registro abierto de Supabase no da acceso).
+  if (!esAdministrador(data.user)) {
+    await supabase.auth.signOut();
+    return { error: "Esta cuenta no tiene acceso al área administrativa." };
+  }
+
+  redirect(destinoSeguro(next));
 }
 
 /** Sitio público de la marca. Al cerrar sesión, el administrador vuelve ahí

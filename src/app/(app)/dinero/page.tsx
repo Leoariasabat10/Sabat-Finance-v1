@@ -56,8 +56,8 @@ export default async function Page() {
       <PageHeader title="Mi dinero" subtitle="Dónde está cada peso de tu capital" actions={<MovimientoForm />} />
 
       <Card className="p-5">
-        <p className="mb-1 text-[11px] font-semibold text-muted">Capital total</p>
-        <p className="mb-4 font-mono text-2xl font-bold tabular-nums">{formatearMoneda(posicion.capitalTotal)}</p>
+        <p className="mb-1 text-[13px] font-semibold text-muted">Capital total</p>
+        <p className="mb-4 money text-2xl font-medium tabular-nums">{formatearMoneda(posicion.capitalTotal)}</p>
 
         {posicion.capitalTotal > 0 ? (
           <div className="mb-3 flex h-3 w-full overflow-hidden rounded-full bg-hover-bg">
@@ -66,7 +66,7 @@ export default async function Page() {
             {segmento(pctDisponible, "bg-success")}
           </div>
         ) : (
-          <p className="mb-3 text-[12.5px] text-muted">
+          <p className="mb-3 text-[13px] text-muted">
             Configura el capital inicial del negocio en Configuración para ver esta barra.
           </p>
         )}
@@ -75,25 +75,25 @@ export default async function Page() {
           <div>
             <div className="mb-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-accent" />
-              <p className="flex items-center gap-1 text-[11px] font-semibold text-muted"><Landmark className="h-3 w-3" aria-hidden /> Prestado</p>
+              <p className="flex items-center gap-1 text-[13px] font-semibold text-muted"><Landmark className="h-3 w-3" aria-hidden /> Prestado</p>
             </div>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(posicion.capitalPrestado)}</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(posicion.capitalPrestado)}</p>
           </div>
           <div>
             <div className="mb-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-warning" />
-              <p className="flex items-center gap-1 text-[11px] font-semibold text-muted"><ShoppingBag className="h-3 w-3" aria-hidden /> Invertido en mercancía</p>
+              <p className="flex items-center gap-1 text-[13px] font-semibold text-muted"><ShoppingBag className="h-3 w-3" aria-hidden /> Invertido en mercancía</p>
             </div>
-            <p className="font-mono text-lg font-bold tabular-nums">{formatearMoneda(posicion.capitalInvertidoMercancia)}</p>
+            <p className="money text-lg font-medium tabular-nums">{formatearMoneda(posicion.capitalInvertidoMercancia)}</p>
           </div>
           <div>
             <div className="mb-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-success" />
-              <p className="flex items-center gap-1 text-[11px] font-semibold text-muted"><Wallet className="h-3 w-3" aria-hidden /> Disponible para prestar</p>
+              <p className="flex items-center gap-1 text-[13px] font-semibold text-muted"><Wallet className="h-3 w-3" aria-hidden /> Disponible para prestar</p>
             </div>
             {posicion.capitalTotal > 0 ? (
               <p
-                className={`font-mono text-lg font-bold tabular-nums ${posicion.capitalDisponible < 0 ? "text-danger" : ""}`}
+                className={`money text-lg font-medium tabular-nums ${posicion.capitalDisponible < 0 ? "text-danger" : ""}`}
               >
                 {formatearMoneda(posicion.capitalDisponible)}
               </p>
@@ -103,19 +103,19 @@ export default async function Page() {
               // prestar?" hasta que alguien cargara el capital inicial en
               // Configuración — fricción real encontrada simulando un día de
               // uso. Ahora usamos la caja real como aproximación honesta.
-              <p className="font-mono text-lg font-bold tabular-nums text-faint">
+              <p className="money text-lg font-medium tabular-nums text-faint">
                 ≈ {formatearMoneda(saldoCaja)}
               </p>
             )}
           </div>
         </div>
 
-        <p className="mt-4 flex items-start gap-1.5 border-t border-[color:var(--border)] pt-3 text-[12.5px] font-semibold text-foreground">
+        <p className="mt-4 flex items-start gap-1.5 border-t border-[color:var(--border)] pt-3 text-[13px] font-semibold text-foreground">
           <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" aria-hidden /> {cupoSeguro.mensaje}
         </p>
 
         {posicion.capitalTotal > 0 && variacionPct !== null ? (
-          <p className="mt-2 text-[12.5px] text-muted">
+          <p className="mt-2 text-[13px] text-muted">
             Hace 7 días tenías {formatearMoneda(variacion.disponible.hace7Dias ?? 0)} disponibles —{" "}
             <span className={variacionPct >= 0 ? "font-semibold text-success" : "font-semibold text-danger"}>
               {variacionPct >= 0 ? "+" : ""}
@@ -149,7 +149,7 @@ export default async function Page() {
               indicatorClassName="bg-warning"
             />
           ) : null}
-          <p className="mt-3 flex items-start gap-1.5 text-[12px] font-semibold text-accent">
+          <p className="mt-3 flex items-start gap-1.5 text-[13px] font-semibold text-accent">
             <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             {
               simularRecuperarCapital({
@@ -163,14 +163,14 @@ export default async function Page() {
           <StaggerList className="mt-3 flex flex-col gap-1.5">
             {posicion.clientesRetenidos.slice(0, 5).map((c) => (
               <StaggerItem key={c.operacionId}>
-                <div className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[12.5px] transition-colors duration-premium hover:bg-hover-bg">
+                <div className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors duration-premium hover:bg-hover-bg">
                   <Link href={`/prestamos/${c.operacionId}`} className="min-w-0 flex-1 transition-colors hover:text-accent">
                     <span className="font-semibold text-foreground">
                       {c.clienteNombre} ·{" "}
                       {c.antiguedadDias !== null ? `${Math.floor(c.antiguedadDias / 30)} meses` : "patrón de pago, sin fecha confirmada"}
                     </span>
                   </Link>
-                  <span className="font-mono tabular-nums">{formatearMoneda(c.montoCapital)}</span>
+                  <span className="money tabular-nums">{formatearMoneda(c.montoCapital)}</span>
                   <BotonWhatsApp
                     numero={c.clienteWhatsapp}
                     mensaje={`Hola ${c.clienteNombre}.\nQuiero conversar contigo sobre el préstamo de ${formatearMoneda(c.montoCapital)} — llevas un tiempo pagando solo intereses. ¿Podemos acordar una devolución de capital?`}
@@ -185,22 +185,22 @@ export default async function Page() {
       <Card>
         <CardContent>
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-bold">Movimientos de caja</h3>
-            <span className="text-[12px] text-muted">Saldo en efectivo: {formatearMoneda(saldoCaja)}</span>
+            <h3 className="text-sm font-medium">Movimientos de caja</h3>
+            <span className="text-[13px] text-muted">Saldo en efectivo: {formatearMoneda(saldoCaja)}</span>
           </div>
           <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div>
-              <p className="text-[11px] font-semibold text-muted">Ingresos de hoy</p>
-              <p className="font-mono text-[15px] font-bold tabular-nums text-success">{formatearMoneda(resumenHoy.ingresos)}</p>
+              <p className="text-[13px] font-semibold text-muted">Ingresos de hoy</p>
+              <p className="money text-[15px] font-medium tabular-nums text-success">{formatearMoneda(resumenHoy.ingresos)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Egresos de hoy</p>
-              <p className="font-mono text-[15px] font-bold tabular-nums text-danger">{formatearMoneda(resumenHoy.egresos)}</p>
+              <p className="text-[13px] font-semibold text-muted">Egresos de hoy</p>
+              <p className="money text-[15px] font-medium tabular-nums text-danger">{formatearMoneda(resumenHoy.egresos)}</p>
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-muted">Neto de hoy</p>
+              <p className="text-[13px] font-semibold text-muted">Neto de hoy</p>
               <p
-                className={`font-mono text-[15px] font-bold tabular-nums ${
+                className={`money text-[15px] font-medium tabular-nums ${
                   resumenHoy.neto < 0 ? "text-danger" : resumenHoy.neto > 0 ? "text-success" : ""
                 }`}
               >
@@ -218,14 +218,14 @@ export default async function Page() {
                   <div className="flex items-center justify-between py-2.5 text-[13px] transition-colors duration-premium hover:bg-hover-bg">
                     <div>
                       <p className="font-semibold">{m.descripcion ?? m.categoria ?? "Movimiento"}</p>
-                      <p className="text-[11.5px] text-muted">{formatearFecha(m.fecha)}</p>
+                      <p className="text-[13px] text-muted">{formatearFecha(m.fecha)}</p>
                     </div>
                     <div className="text-right">
-                      <p className={m.tipo === "ingreso" ? "font-bold text-success" : "font-bold text-danger"}>
+                      <p className={m.tipo === "ingreso" ? "font-medium text-success" : "font-medium text-danger"}>
                         {m.tipo === "ingreso" ? "+" : "−"}
                         {formatearMoneda(m.monto)}
                       </p>
-                      <p className="text-[11px] text-muted">saldo {formatearMoneda(m.saldoResultante)}</p>
+                      <p className="text-[13px] text-muted">saldo {formatearMoneda(m.saldoResultante)}</p>
                     </div>
                     <Badge variant={m.tipo === "ingreso" ? "success" : "danger"}>{m.tipo}</Badge>
                   </div>

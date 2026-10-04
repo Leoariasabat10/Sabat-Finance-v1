@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { hoyIso } from "@/lib/fecha";
 
 function csvEscape(valor: string | number): string {
   const texto = String(valor);
@@ -43,7 +44,7 @@ export async function GET() {
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="cartera-${new Date().toISOString().slice(0, 10)}.csv"`,
+      "Content-Disposition": `attachment; filename="cartera-${hoyIso()}.csv"`,
     },
   });
 }

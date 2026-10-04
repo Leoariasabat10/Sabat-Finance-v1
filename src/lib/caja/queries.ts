@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { obtenerSaldoActual } from "./motor";
+import { hoyFecha } from "@/lib/fecha";
 
 export async function getSaldoActual(): Promise<number> {
   return obtenerSaldoActual(prisma);
@@ -33,13 +34,10 @@ export async function listMovimientos(limite = 100): Promise<MovimientoListItem[
 
 /** Resumen del día (equivalente a un arqueo rápido): ingresos, egresos y neto de hoy. */
 export async function getResumenHoy() {
-  const inicio = new Date();
-  inicio.setHours(0, 0, 0, 0);
-  const fin = new Date();
-  fin.setHours(23, 59, 59, 999);
+  const hoy = hoyFecha();
 
   const movimientos = await prisma.movimientoCaja.findMany({
-    where: { fecha: { gte: inicio, lte: fin } },
+    where: { fecha: hoy },
   });
 
   const ingresos = movimientos.filter((m) => m.tipo === "ingreso").reduce((a, m) => a + Number(m.monto), 0);

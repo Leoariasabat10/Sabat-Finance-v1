@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { hoyFecha } from "@/lib/fecha";
 
 /**
  * Datos de identificación de la operación antes de registrar un pago
@@ -17,8 +18,7 @@ export async function getOperacionParaPago(id: string) {
   });
   if (!operacion) return null;
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  const hoy = hoyFecha();
   const proximaCuota = operacion.cuotas[0] ?? null;
   const diasAtraso =
     proximaCuota && proximaCuota.fechaVencimiento < hoy
@@ -54,8 +54,7 @@ export interface CarteraItem {
 
 /** Cartera unificada (regla dura #7): préstamos y ventas a crédito juntos, siempre distinguibles por `origen`. */
 export async function listCartera(): Promise<CarteraItem[]> {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  const hoy = hoyFecha();
 
   const operaciones = await prisma.operacionCredito.findMany({
     where: { deletedAt: null, estado: { in: ["activo", "vencido"] }, cliente: { deletedAt: null } },

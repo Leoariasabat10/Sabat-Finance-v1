@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { hoyFecha } from "@/lib/fecha";
 
 /**
  * Motor de métricas de comportamiento del cliente — usado tanto por el
@@ -64,7 +65,7 @@ export interface OperacionRetenida {
 export function evaluarOperacionRetenida(o: OperacionConDetalle): OperacionRetenida | null {
   if (o.origen !== "prestamo" || (o.estado !== "activo" && o.estado !== "vencido")) return null;
 
-  const hoy = new Date();
+  const hoy = hoyFecha();
   const montoCapital = Number(o.montoCapital);
   const saldoPendiente = Number(o.saldoPendienteCalc);
   const saldoCasiIntacto = saldoPendiente >= montoCapital * TOLERANCIA_SIN_ABONO;
@@ -115,7 +116,7 @@ export function evaluarOperacionRetenida(o: OperacionConDetalle): OperacionReten
 export interface MetricasCliente {
   prestadoHistorico: number;
   pagadoHistorico: number;
-  /** Suma de saldo pendiente 🏦+🛍 — para desglose real ver saldoActualPrestamo/saldoActualVenta. */
+  /** Suma de saldo pendiente de préstamos + mercancía — para desglose real ver saldoActualPrestamo/saldoActualVenta. */
   saldoActual: number;
   /** Saldo pendiente solo de préstamos (Financiero, origen='prestamo'). */
   saldoActualPrestamo: number;
@@ -153,7 +154,7 @@ export function calcularMetricasCliente(
   const activos = operaciones.filter((o) => o.estado === "activo" || o.estado === "vencido");
   const activosPrestamo = activos.filter((o) => o.origen === "prestamo");
   const activosVenta = activos.filter((o) => o.origen === "venta");
-  const hoy = new Date();
+  const hoy = hoyFecha();
 
   const prestadoHistorico = prestamos.reduce((a, o) => a + Number(o.montoCapital), 0);
   const pagadoHistorico = operaciones

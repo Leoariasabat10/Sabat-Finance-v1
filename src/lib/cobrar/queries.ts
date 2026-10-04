@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { calcularMora } from "@/lib/calculos";
+import { hoyFecha } from "@/lib/fecha";
 
 export type SemaforoCobro = "vencido" | "hoy" | "proximo";
 
@@ -34,8 +35,7 @@ export interface CobroItem {
  * diario del negocio.
  */
 export async function listCobrar(diasAlerta = 3): Promise<CobroItem[]> {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  const hoy = hoyFecha();
 
   const [config, operaciones] = await Promise.all([
     prisma.configuracion.findUnique({ where: { id: 1 } }),

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { hoyFecha, sumarDias } from "@/lib/fecha";
 
 export interface EventoAgenda {
   fecha: Date;
@@ -16,10 +17,8 @@ export interface EventoAgenda {
  * pudiera desincronizarse.
  */
 export async function listAgenda(dias = 30): Promise<EventoAgenda[]> {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const limite = new Date(hoy);
-  limite.setDate(limite.getDate() + dias);
+  const hoy = hoyFecha();
+  const limite = sumarDias(hoy, dias);
 
   const [cuotas, eventos] = await Promise.all([
     prisma.cuota.findMany({

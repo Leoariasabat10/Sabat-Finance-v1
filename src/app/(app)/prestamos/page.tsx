@@ -55,18 +55,18 @@ export default async function Page() {
           {prestamos.map((p) => (
             <StaggerItem key={p.id}>
               <Link href={`/prestamos/${p.id}`}>
-                <Card className="p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+                <Card className="p-4 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <Landmark className="h-5 w-5 shrink-0 text-accent" aria-hidden />
                       <div>
-                        <p className="font-bold text-foreground">{p.clienteNombre}</p>
-                        <p className="text-[12.5px] text-muted">{p.clienteWhatsapp}</p>
+                        <p className="font-medium text-foreground">{p.clienteNombre}</p>
+                        <p className="text-[13px] text-muted">{p.clienteWhatsapp}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-foreground">{formatearMoneda(p.saldoPendiente)}</p>
-                      <p className="text-[12px] text-muted">vence {formatearFecha(p.fechaVencimiento)}</p>
+                      <p className="font-medium text-foreground">{formatearMoneda(p.saldoPendiente)}</p>
+                      <p className="text-[13px] text-muted">vence {formatearFecha(p.fechaVencimiento)}</p>
                     </div>
                     {badgeEstado(p.estado, p.diasAtraso)}
                   </div>

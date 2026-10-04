@@ -3,65 +3,49 @@
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn, type LoginState } from "./actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { destinoSeguro } from "@/lib/auth/acceso";
 
 const initialState: LoginState = { error: null };
 
+const campo =
+  "min-h-12 w-full border border-[#ece9e2]/25 bg-transparent px-4 text-[17px] text-[#ece9e2] outline-none transition-colors placeholder:text-[#ece9e2]/35 focus-visible:border-[#d5af34] focus-visible:ring-1 focus-visible:ring-[#d5af34]";
+
 export default function LoginForm() {
   const params = useSearchParams();
-  const next = params.get("next") ?? "/dashboard";
+  const next = destinoSeguro(params.get("next"));
   const [state, formAction, pending] = useActionState(signIn, initialState);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       <input type="hidden" name="next" value={next} />
 
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-white/70">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="email" className="text-[15px] text-[#ece9e2]/75">
           Correo
-        </Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autoComplete="username"
-          autoFocus
-          placeholder="admin@sabatjoyeria.com"
-          className="border-white/15 bg-white/[0.04] text-white placeholder:text-white/25 focus-visible:ring-[#d5af34]"
-        />
+        </label>
+        <input id="email" name="email" type="email" required autoComplete="username" autoFocus placeholder="tu@correo.com" className={campo} />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-white/70">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="password" className="text-[15px] text-[#ece9e2]/75">
           Contraseña
-        </Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          required
-          autoComplete="current-password"
-          placeholder="••••••••"
-          className="border-white/15 bg-white/[0.04] text-white placeholder:text-white/25 focus-visible:ring-[#d5af34]"
-        />
+        </label>
+        <input id="password" name="password" type="password" required autoComplete="current-password" className={campo} />
       </div>
 
-      {state.error && (
-        <p role="alert" className="text-[13px] text-red-400">
+      {state.error ? (
+        <p role="alert" className="text-[15px] text-[#e07b70]">
           {state.error}
         </p>
-      )}
+      ) : null}
 
-      <Button
+      <button
         type="submit"
         disabled={pending}
-        className="w-full border-none bg-[#d5af34] py-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-black hover:bg-[#e8c84a]"
+        className="min-h-12 cursor-pointer border border-[#d5af34] bg-transparent px-8 text-[16px] font-medium text-[#d5af34] transition-[background-color,color,transform] duration-150 ease-premium hover:bg-[#d5af34] hover:text-[#0a0a0a] focus-visible:bg-[#d5af34] focus-visible:text-[#0a0a0a] focus-visible:outline-none active:scale-[0.98] disabled:opacity-60"
       >
         {pending ? "Verificando…" : "Entrar"}
-      </Button>
+      </button>
     </form>
   );
 }

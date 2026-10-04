@@ -5,19 +5,23 @@ import { usePathname } from "next/navigation";
 import { navPrimaria } from "@/config/nav";
 import { cn } from "@/lib/utils";
 
+const ALIAS: Record<string, string[]> = {
+  "/creditos": ["/prestamos", "/cartera"],
+  "/cobrar": ["/pagos"],
+  "/configuracion": ["/dinero", "/caja", "/reportes", "/auditoria", "/whatsapp", "/calendario", "/notificaciones"],
+};
+
 /**
- * Barra de navegación inferior (visión final del producto, sección 1):
- * las cuatro preguntas del negocio, siempre a un toque en el celular — el
- * patrón que ya reconoce cualquiera que use apps de pagos. Reemplaza a la
- * navegación por hamburguesa como forma principal de moverse en mobile.
+ * Barra inferior del teléfono: los seis destinos siempre a un toque, sin menú escondido. Cada destino mide al
+ * menos 44 px de alto y respeta el borde inferior de los iPhone (safe-area). El activo lleva el filete de oro.
  */
 export function MobileTabBar() {
   const pathname = usePathname();
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => [href, ...(ALIAS[href] ?? [])].some((r) => pathname === r || pathname.startsWith(`${r}/`));
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-[color:var(--border)] bg-card/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-[color:var(--border-md)] bg-card pb-[max(env(safe-area-inset-bottom),6px)] lg:hidden"
       aria-label="Navegación principal"
     >
       {navPrimaria.map((item) => {
@@ -28,12 +32,13 @@ export function MobileTabBar() {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1.5 text-[10.5px] font-semibold transition-colors duration-premium",
-              active ? "text-accent" : "text-faint",
+              "relative flex min-h-[56px] flex-col items-center justify-center gap-1 pt-1 text-[12px] transition-colors duration-150",
+              active ? "font-medium text-foreground" : "text-faint",
             )}
           >
-            <item.icon className="h-[19px] w-[19px]" aria-hidden />
-            <span>{item.title}</span>
+            {active ? <span aria-hidden className="absolute inset-x-3 top-0 h-[2px] bg-[color:var(--gold)]" /> : null}
+            <item.icon className="h-5 w-5" aria-hidden />
+            <span>{item.shortTitle ?? item.title}</span>
           </Link>
         );
       })}

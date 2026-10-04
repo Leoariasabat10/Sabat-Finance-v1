@@ -88,6 +88,8 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
 
   useEffect(() => {
     const nombre = valores.nombreCliente;
+    // Si cambia el nombre después de elegir a alguien de la lista, ya no es ese cliente: se suelta su id.
+    if (valores.clienteId && nombre !== clienteSeleccionadoRef.current) setValue("clienteId", undefined);
     if (!nombre || nombre.length < 2 || nombre === clienteSeleccionadoRef.current) {
       setSugerencias([]);
       return;
@@ -102,6 +104,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
   const seleccionarCliente = (c: ClienteSugerido) => {
     clienteSeleccionadoRef.current = c.nombre;
     setValue("nombreCliente", c.nombre, { shouldValidate: true });
+    setValue("clienteId", c.id);
     setValue("whatsappCliente", c.whatsapp, { shouldValidate: true });
     setSugerencias([]);
     setMostrarSugerencias(false);
@@ -143,7 +146,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
         toast.error(resultado.error);
         return;
       }
-      toast.success("Préstamo creado");
+      toast.success("Préstamo registrado");
       router.push(`/prestamos/${resultado.data.id}`);
       router.refresh();
     });
@@ -180,7 +183,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 }}
               />
               {errors.nombreCliente ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.nombreCliente.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.nombreCliente.message}</p>
               ) : null}
               {mostrarSugerencias && sugerencias.length > 0 ? (
                 <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-[color:var(--border)] bg-card shadow-lg">
@@ -201,7 +204,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
               ) : null}
             </div>
             <div>
-              <Label htmlFor="whatsappCliente">WhatsApp *</Label>
+              <Label htmlFor="whatsappCliente">WhatsApp (solo si el cliente es nuevo)</Label>
               <Input
                 id="whatsappCliente"
                 placeholder="3001234567"
@@ -210,9 +213,9 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 {...register("whatsappCliente")}
               />
               {errors.whatsappCliente ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.whatsappCliente.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.whatsappCliente.message}</p>
               ) : null}
-              <p className="mt-1 text-[11px] text-muted">
+              <p className="mt-1 text-[13px] text-muted">
                 Si ya existe un cliente con este WhatsApp, se usa el mismo — no se duplica.
               </p>
             </div>
@@ -230,7 +233,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 {...register("montoCapital", { setValueAs: limpiarMoneda })}
               />
               {errors.montoCapital ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.montoCapital.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.montoCapital.message}</p>
               ) : null}
             </div>
             <div>
@@ -251,7 +254,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 <option value="quincenal">Quincenal</option>
                 <option value="personalizado">Personalizado</option>
               </Select>
-              <p className="mt-1 text-[11px] text-muted">Cómo se calcula el interés (ej. &quot;10% mensual&quot;).</p>
+              <p className="mt-1 text-[13px] text-muted">Cómo se calcula el interés (ej. &quot;10% mensual&quot;).</p>
             </div>
             <div>
               <Label htmlFor="tasaInteres">Tasa de interés (%) *</Label>
@@ -266,7 +269,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 })}
               />
               {errors.tasaInteres ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.tasaInteres.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.tasaInteres.message}</p>
               ) : null}
             </div>
 
@@ -293,7 +296,7 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 {...register("plazoDias")}
               />
               {errors.plazoDias ? (
-                <p className="mt-1.5 text-[12px] text-danger">{errors.plazoDias.message}</p>
+                <p className="mt-1.5 text-[13px] text-danger">{errors.plazoDias.message}</p>
               ) : null}
             </div>
             <div>
@@ -304,13 +307,13 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
                 <option value="quincenal">Cuotas quincenales</option>
                 <option value="mensual">Cuotas mensuales</option>
               </Select>
-              <p className="mt-1 text-[11px] text-muted">Cada cuánto te va a pagar el cliente.</p>
+              <p className="mt-1 text-[13px] text-muted">Cada cuánto te va a pagar el cliente.</p>
             </div>
           </CardContent>
         </Card>
 
         {serverError ? (
-          <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger">
+          <div role="alert" className="rounded-sm bg-danger-bg px-3 py-2.5 text-[13px] font-semibold text-danger">
             {serverError}
           </div>
         ) : null}
@@ -328,28 +331,28 @@ export function PrestamoForm({ tasaDefecto = 10 }: { tasaDefecto?: number }) {
       <div>
         <Card className="sticky top-4">
           <CardContent className="flex flex-col gap-3">
-            <h3 className="text-sm font-bold text-foreground">Simulación en vivo</h3>
+            <h3 className="text-sm font-medium text-foreground">Simulación en vivo</h3>
             {simulacion ? (
               <>
                 <div className="flex justify-between text-[13px]">
                   <span className="text-muted">Interés total</span>
-                  <span className="font-mono font-bold tabular-nums">{formatearMoneda(simulacion.interes.interesTotal)}</span>
+                  <span className="money font-medium tabular-nums">{formatearMoneda(simulacion.interes.interesTotal)}</span>
                 </div>
                 <div className="flex justify-between text-[13px]">
                   <span className="text-muted">Total a pagar</span>
-                  <span className="font-mono font-bold tabular-nums text-accent">{formatearMoneda(simulacion.interes.totalAPagar)}</span>
+                  <span className="money font-medium tabular-nums text-accent">{formatearMoneda(simulacion.interes.totalAPagar)}</span>
                 </div>
                 <div className="mt-2 border-t border-[color:var(--border)] pt-3">
-                  <p className="mb-2 text-[12px] font-semibold text-muted">
+                  <p className="mb-2 text-[13px] font-semibold text-muted">
                     Calendario de cuotas ({simulacion.cuotas.length})
                   </p>
                   <ul className="flex flex-col gap-1.5">
                     {simulacion.cuotas.map((c) => (
-                      <li key={c.numeroCuota} className="flex justify-between text-[12.5px]">
+                      <li key={c.numeroCuota} className="flex justify-between text-[13px]">
                         <span className="text-muted">
                           #{c.numeroCuota} · {formatearFecha(c.fechaVencimiento)}
                         </span>
-                        <span className="font-mono font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
+                        <span className="money font-semibold tabular-nums">{formatearMoneda(c.total)}</span>
                       </li>
                     ))}
                   </ul>

@@ -1,46 +1,55 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Suspense } from "react";
 import LoginForm from "./login-form";
 
 export const metadata: Metadata = {
-  title: "Iniciar sesión — Sabat Finance",
+  title: "Iniciar sesión · Sabat Finance",
   robots: { index: false, follow: false },
 };
 
-export default function LoginPage() {
-  return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0a0a0a] px-6">
-      {/* Mismo lenguaje visual que sabat-joyeria: negro absoluto + glow esmeralda */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(29,107,77,0.22), transparent 70%)",
-        }}
-      />
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabat-joyeria.vercel.app";
 
-      <div className="relative w-full max-w-[380px]">
-        <div className="mb-10 flex flex-col items-center text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/sabat-logo-mark.png"
-            alt="SABAT"
-            className="h-14 w-auto opacity-95"
-          />
-          <p className="v-ui mt-5 text-[10px] uppercase tracking-[0.32em] text-[#8a6d1c]">
-            Acceso privado
+const AVISOS: Record<string, string> = {
+  "no-autorizado": "Esa cuenta no tiene acceso al área administrativa.",
+  servicio: "No pudimos verificar tu sesión. Intenta de nuevo en un momento.",
+};
+
+/**
+ * La puerta de la parte administrativa de la casa: la misma sala negra de SABAT Joyería, con el logo en oro, un título
+ * en Fraunces y el botón de contorno dorado que se rellena al pasar. Sin brillos ni degradados.
+ */
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
+  const aviso = error ? AVISOS[error] : undefined;
+
+  return (
+    <main className="flex min-h-screen flex-col justify-center bg-[#0a0a0a] px-6 py-12 text-[#ece9e2] sm:px-16">
+      <div className="mx-auto w-full max-w-[420px] sm:mx-0 sm:max-w-[440px]">
+        <Image src="/sabat-logo-mark.png" alt="SABAT" width={556} height={188} priority className="h-auto w-[170px]" />
+
+        <h1 className="mt-14 text-[40px] leading-[1.05] sm:text-[48px]">Área administrativa</h1>
+        <p className="lead-italic mt-3 text-[19px] text-[#ece9e2]/65">Las finanzas de la casa SABAT.</p>
+        <div className="gold-rule mt-6 w-32" aria-hidden />
+
+        {aviso ? (
+          <p role="status" className="mt-8 border border-[#d5af34]/40 px-4 py-3 text-[15px] text-[#ece9e2]">
+            {aviso}
           </p>
-          <p className="mt-2 font-serif text-lg italic text-white/50">Sabat Finance</p>
+        ) : null}
+
+        <div className="mt-10">
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
         </div>
 
-        <Suspense fallback={null}>
-          <LoginForm />
-        </Suspense>
-
-        <p className="mt-10 text-center text-[11px] text-white/25">
-          Uso exclusivo de administradores de SABAT.
-        </p>
+        <a
+          href={SITE_URL}
+          className="mt-10 inline-block min-h-11 py-2.5 text-[15px] text-[#ece9e2]/60 underline-offset-4 transition-colors hover:text-[#ece9e2] hover:underline"
+        >
+          Volver a la joyería
+        </a>
       </div>
     </main>
   );

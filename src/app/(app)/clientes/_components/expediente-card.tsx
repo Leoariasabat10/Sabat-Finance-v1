@@ -10,10 +10,10 @@ const CONFIANZA_TEXTO = { alta: "Confianza alta", media: "Confianza media — fe
 const formatoMoneda = new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
 const TONO_BORDE: Record<ExpedienteFinanciero["recomendacion"]["tono"], string> = {
-  success: "border-l-success",
-  warning: "border-l-warning",
-  danger: "border-l-danger",
-  info: "border-l-accent",
+  success: "bg-success-bg/50",
+  warning: "bg-warning-bg/60",
+  danger: "bg-danger-bg/50",
+  info: "bg-accent-light",
 };
 
 const TONO_BOTON: Record<ExpedienteFinanciero["recomendacion"]["tono"], string> = {
@@ -68,7 +68,7 @@ export function ExpedienteCard({
   const { recomendacion } = expediente;
 
   return (
-    <Card className={`border-l-4 p-5 ${TONO_BORDE[recomendacion.tono]}`}>
+    <Card className={`p-5 ${TONO_BORDE[recomendacion.tono]}`}>
       {expediente.etiquetas.length > 0 ? (
         <div className="mb-4 flex flex-wrap gap-1.5">
           {expediente.etiquetas.map((e) => {
@@ -85,41 +85,41 @@ export function ExpedienteCard({
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div>
-          <p className="text-[11px] font-semibold text-muted">Prestado históricamente</p>
-          <p className="font-mono text-[15px] font-bold tabular-nums">{formatoMoneda.format(expediente.prestadoHistorico)}</p>
+          <p className="text-[13px] font-semibold text-muted">Prestado históricamente</p>
+          <p className="money text-[15px] font-medium tabular-nums">{formatoMoneda.format(expediente.prestadoHistorico)}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Pagado históricamente</p>
-          <p className="font-mono text-[15px] font-bold tabular-nums">{formatoMoneda.format(expediente.pagadoHistorico)}</p>
+          <p className="text-[13px] font-semibold text-muted">Pagado históricamente</p>
+          <p className="money text-[15px] font-medium tabular-nums">{formatoMoneda.format(expediente.pagadoHistorico)}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Debe hoy</p>
-          <p className={`font-mono text-[15px] font-bold tabular-nums ${expediente.saldoActual > 0 ? "text-accent" : ""}`}>
+          <p className="text-[13px] font-semibold text-muted">Debe hoy</p>
+          <p className={`money text-[15px] font-medium tabular-nums ${expediente.saldoActual > 0 ? "text-accent" : ""}`}>
             {formatoMoneda.format(expediente.saldoActual)}
           </p>
           {expediente.saldoActualPrestamo > 0 && expediente.saldoActualVenta > 0 ? (
-            <p className="mt-0.5 text-[10.5px] text-muted">
-              🏦 {formatoMoneda.format(expediente.saldoActualPrestamo)} · 🛍 {formatoMoneda.format(expediente.saldoActualVenta)}
+            <p className="mt-0.5 text-[13px] text-muted">
+              Préstamo {formatoMoneda.format(expediente.saldoActualPrestamo)} · Mercancía {formatoMoneda.format(expediente.saldoActualVenta)}
             </p>
           ) : null}
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Puntualidad</p>
-          <p className="font-mono text-[15px] font-bold tabular-nums">
+          <p className="text-[13px] font-semibold text-muted">Puntualidad</p>
+          <p className="money text-[15px] font-medium tabular-nums">
             {expediente.puntualidadPct === null ? "—" : `${expediente.puntualidadPct}%`}
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Interés generado (préstamos)</p>
-          <p className="font-mono text-[15px] font-bold tabular-nums text-success">{formatoMoneda.format(expediente.utilidadGenerada)}</p>
+          <p className="text-[13px] font-semibold text-muted">Interés generado (préstamos)</p>
+          <p className="money text-[15px] font-medium tabular-nums text-success">{formatoMoneda.format(expediente.utilidadGenerada)}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Cliente desde</p>
-          <p className="text-[15px] font-bold">{expediente.antiguedadTexto ?? "—"}</p>
+          <p className="text-[13px] font-semibold text-muted">Cliente desde</p>
+          <p className="text-[15px] font-medium">{expediente.antiguedadTexto ?? "—"}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold text-muted">Refinanciaciones</p>
-          <p className="text-[15px] font-bold">{expediente.vecesRefinanciado}</p>
+          <p className="text-[13px] font-semibold text-muted">Refinanciaciones</p>
+          <p className="text-[15px] font-medium">{expediente.vecesRefinanciado}</p>
         </div>
       </div>
 
@@ -127,7 +127,7 @@ export function ExpedienteCard({
         <div>
           <p className="text-[13.5px] text-foreground">{recomendacion.texto}</p>
           {recomendacion.confianza && recomendacion.confianza !== "alta" ? (
-            <p className="mt-1 inline-flex items-center gap-1 text-[11.5px] font-semibold text-muted">
+            <p className="mt-1 inline-flex items-center gap-1 text-[13px] font-semibold text-muted">
               <Info className="h-3 w-3 shrink-0 text-accent" aria-hidden /> {CONFIANZA_TEXTO[recomendacion.confianza]}
             </p>
           ) : null}
@@ -135,7 +135,7 @@ export function ExpedienteCard({
         {recomendacion.boton ? (
           <Link
             href={recomendacion.boton.href}
-            className={`shrink-0 rounded-full px-4 py-2 text-[12.5px] font-semibold transition-opacity duration-premium ${TONO_BOTON[recomendacion.tono]}`}
+            className={`shrink-0 px-4 py-2 text-[13px] font-semibold transition-opacity duration-premium ${TONO_BOTON[recomendacion.tono]}`}
           >
             {recomendacion.boton.texto}
           </Link>

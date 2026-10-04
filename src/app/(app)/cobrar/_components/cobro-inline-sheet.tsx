@@ -49,12 +49,12 @@ export function CobroInlineSheet({ item }: { item: CobroItem }) {
           {item.producto ? <p className="mb-1 text-muted">{item.producto}</p> : null}
           <p className="flex items-baseline justify-between gap-3">
             <span className="text-muted">Cuota de hoy</span>
-            <span className="font-mono text-base font-bold tabular-nums">{formatearMoneda(item.saldoCuota)}</span>
+            <span className="money text-base font-medium tabular-nums">{formatearMoneda(item.saldoCuota)}</span>
           </p>
           {item.saldoOperacion !== item.saldoCuota ? (
-            <p className="mt-1 flex items-baseline justify-between gap-3 text-[12px] text-faint">
+            <p className="mt-1 flex items-baseline justify-between gap-3 text-[13px] text-faint">
               <span>Saldo total de la operación</span>
-              <span className="font-mono tabular-nums">{formatearMoneda(item.saldoOperacion)}</span>
+              <span className="money tabular-nums">{formatearMoneda(item.saldoOperacion)}</span>
             </p>
           ) : null}
         </div>

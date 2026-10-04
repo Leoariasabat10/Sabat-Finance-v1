@@ -113,7 +113,7 @@ export function EtiquetasCliente({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-pill border-[1.5px] border-dashed border-[color:var(--border-md)] px-2.5 py-1 text-[11px] font-bold text-faint transition-colors duration-premium hover:border-accent hover:text-accent-dark"
+          className="inline-flex cursor-pointer items-center gap-1 rounded-pill border border-dashed border-[color:var(--border-md)] px-2.5 py-1 text-[13px] font-medium text-faint transition-colors duration-premium hover:border-accent hover:text-accent-dark"
         >
           <Plus className="h-3 w-3" />
           Etiqueta
@@ -173,7 +173,7 @@ export function EtiquetasCliente({
                 />
               ))}
             </div>
-            {error ? <p className="text-[12px] text-danger">{error}</p> : null}
+            {error ? <p className="text-[13px] text-danger">{error}</p> : null}
           </div>
 
           <DialogFooter>

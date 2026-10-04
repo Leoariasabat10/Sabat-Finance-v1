@@ -23,7 +23,7 @@ export function Paginacion({ pagina, totalPaginas, buildHref }: PaginacionProps)
         href={buildHref(anterior)}
         aria-disabled={pagina === 1}
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-md border-[1.5px] border-[color:var(--border)] text-foreground transition-colors duration-premium hover:bg-hover-bg",
+          "flex h-9 w-9 items-center justify-center rounded-md border border-[color:var(--border)] text-foreground transition-colors duration-premium hover:bg-hover-bg",
           pagina === 1 && "pointer-events-none opacity-40",
         )}
       >
@@ -36,7 +36,7 @@ export function Paginacion({ pagina, totalPaginas, buildHref }: PaginacionProps)
         href={buildHref(siguiente)}
         aria-disabled={pagina === totalPaginas}
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-md border-[1.5px] border-[color:var(--border)] text-foreground transition-colors duration-premium hover:bg-hover-bg",
+          "flex h-9 w-9 items-center justify-center rounded-md border border-[color:var(--border)] text-foreground transition-colors duration-premium hover:bg-hover-bg",
           pagina === totalPaginas && "pointer-events-none opacity-40",
         )}
       >

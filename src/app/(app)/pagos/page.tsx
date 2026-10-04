@@ -30,12 +30,12 @@ export default async function Page() {
         <StaggerList className="flex flex-col gap-2.5">
           {cartera.map((c) => (
             <StaggerItem key={c.id}>
-              <Card className="flex items-center justify-between gap-3 p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+              <Card className="flex items-center justify-between gap-3 p-4 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
                 <div className="flex items-center gap-3">
                   <OrigenIcon origen={c.origen} className="h-5 w-5" />
                   <div>
-                    <p className="font-bold text-foreground">{c.clienteNombre}</p>
-                    <p className="text-[12.5px] text-muted">
+                    <p className="font-medium text-foreground">{c.clienteNombre}</p>
+                    <p className="text-[13px] text-muted">
                       {formatearMoneda(c.saldoPendiente)} · vence {formatearFecha(c.fechaVencimiento)}
                     </p>
                   </div>

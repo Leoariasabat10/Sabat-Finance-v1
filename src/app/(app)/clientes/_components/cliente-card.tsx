@@ -15,7 +15,7 @@ function iniciales(nombre: string): string {
 
 export function ClienteCard({ cliente }: { cliente: ClienteListItem }) {
   return (
-    <Card className="flex items-center gap-3.5 p-4 transition-all duration-premium ease-premium hover:-translate-y-0.5 hover:shadow-md">
+    <Card className="flex items-center gap-3.5 p-4 transition-all duration-premium ease-premium hover:border-[color:var(--gold)]">
       <Link href={`/clientes/${cliente.id}`} className="flex min-w-0 flex-1 items-center gap-3.5">
         <Avatar className="h-11 w-11">
           <AvatarImage src={cliente.fotoUrl ?? undefined} alt={cliente.nombre} />
@@ -23,10 +23,10 @@ export function ClienteCard({ cliente }: { cliente: ClienteListItem }) {
         </Avatar>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate font-sans text-[14px] font-bold text-foreground">
+          <p className="truncate font-sans text-[14px] font-medium text-foreground">
             {cliente.nombre}
           </p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12.5px] text-muted">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-muted">
             <span className="inline-flex items-center gap-1">
               <MessageCircle className="h-3.5 w-3.5" />
               {cliente.whatsapp}

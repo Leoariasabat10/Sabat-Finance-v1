@@ -1,24 +1,21 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { esAdministrador } from "@/lib/auth/acceso";
 
 /**
- * Guardia de acceso de Sabat Finance (integración con Sabat Joyería,
- * 28 sep 2026).
+ * Guardia de acceso de Sabat Finance. Todo lo que no sea /login (o assets públicos) exige, ANTES de que la petición
+ * llegue a cualquier página o Route Handler:
+ *   1. una sesión de Supabase Auth verificada contra el servidor (`getUser()`, no solo la cookie), y
+ *   2. que esa cuenta sea de administrador (ver lib/auth/acceso.ts: el registro abierto de Supabase no debe dar acceso).
+ * Un visitante sin sesión que escriba /dashboard va a /login y nunca recibe el HTML de la página protegida.
  *
- * Antes: la app no verificaba sesión en ningún lado ("uso privado, un solo
- * computador" — ver historial de commits). Eso significaba que cualquier
- * persona con la URL de producción podía abrir /dashboard, /clientes,
- * /prestamos, etc. directamente, sin ningún control del servidor.
- *
- * Ahora: todo lo que no sea /login (o assets públicos) exige una sesión de
- * Supabase Auth verificada aquí, en el servidor, antes de que la petición
- * llegue a cualquier página o Route Handler. Un usuario no autenticado que
- * escriba /dashboard es redirigido a /login — nunca ve el HTML de la página
- * protegida (a diferencia de un guard solo en el cliente, que sí la
- * descarga y luego la oculta con JS).
+ * Si Supabase no contesta en 4 s, se trata como "sin sesión" (va a /login con un aviso) en lugar de dejar la
+ * petición colgada hasta que Vercel la corte a los 25 s (pasó en producción: 10 timeouts).
  */
 
-const PUBLIC_PATHS = ["/login"];
+// "/dev-preview" (datos ficticios para revisar el diseño) solo existe fuera de producción; en producción la ruta da 404.
+const PUBLIC_PATHS = process.env.NODE_ENV === "production" ? ["/login"] : ["/login", "/dev-preview"];
+const ESPERA_MAXIMA_MS = 4000;
 
 function isPublicPath(pathname: string) {
   return (
@@ -29,49 +26,65 @@ function isPublicPath(pathname: string) {
   );
 }
 
+function aLogin(request: NextRequest, motivo?: "no-autorizado" | "servicio") {
+  const url = request.nextUrl.clone();
+  url.pathname = "/login";
+  url.search = "";
+  if (motivo) url.searchParams.set("error", motivo);
+  else url.searchParams.set("next", request.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
-        },
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
       },
     },
-  );
+  });
 
-  // IMPORTANTE: getUser() (no getSession()) — revalida el token contra el
-  // servidor de Supabase Auth en cada request, no confía en la cookie sin
-  // más. Es la verificación server-side real que pide la auditoría.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Sin cookie de sesión no hace falta preguntarle nada a Supabase.
+  const hayCookieDeSesion = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
 
-  const { pathname } = request.nextUrl;
-
-  if (!user && !isPublicPath(pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
+  if (hayCookieDeSesion) {
+    try {
+      const resultado = await Promise.race([
+        supabase.auth.getUser(),
+        new Promise<never>((_, rechazar) => setTimeout(() => rechazar(new Error("timeout")), ESPERA_MAXIMA_MS)),
+      ]);
+      user = resultado.data.user;
+    } catch {
+      if (isPublicPath(pathname)) return response;
+      return aLogin(request, "servicio");
+    }
   }
 
-  if (user && pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
+  if (isPublicPath(pathname)) {
+    if (user && esAdministrador(user) && pathname === "/login") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
+
+  if (!user) return aLogin(request);
+
+  if (!esAdministrador(user)) {
+    // Cuenta válida pero sin permiso (p. ej. alguien que se registró solo): se cierra su sesión y se explica.
+    await supabase.auth.signOut();
+    return aLogin(request, "no-autorizado");
   }
 
   return response;

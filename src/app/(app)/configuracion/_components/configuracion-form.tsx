@@ -48,7 +48,7 @@ export function ConfiguracionForm({ valoresIniciales }: { valoresIniciales: Conf
             <Building2 className="h-4 w-4 text-accent" aria-hidden />
             Negocio
           </CardTitle>
-          <p className="mt-1 text-[12.5px] text-muted">Los datos que identifican tu negocio en la aplicación.</p>
+          <p className="mt-1 text-[13px] text-muted">Los datos que identifican tu negocio en la aplicación.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -68,7 +68,7 @@ export function ConfiguracionForm({ valoresIniciales }: { valoresIniciales: Conf
             <CircleDollarSign className="h-4 w-4 text-accent" aria-hidden />
             Reglas financieras
           </CardTitle>
-          <p className="mt-1 text-[12.5px] text-muted">Valores usados como punto de partida en tus nuevos préstamos.</p>
+          <p className="mt-1 text-[13px] text-muted">Valores usados como punto de partida en tus nuevos préstamos.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -95,7 +95,7 @@ export function ConfiguracionForm({ valoresIniciales }: { valoresIniciales: Conf
           <div>
             <Label htmlFor="tasaMoraDefecto">Tasa de mora por defecto</Label>
             <Input id="tasaMoraDefecto" type="number" step="0.1" min={0} {...register("tasaMoraDefecto")} />
-            <p className="mt-1 text-[11px] text-muted">
+            <p className="mt-1 text-[13px] text-muted">
               Se muestra como referencia junto a los clientes atrasados en Cobrar — no se cobra sola, tú decides si la incluyes al registrar el pago.
             </p>
           </div>
@@ -113,7 +113,7 @@ export function ConfiguracionForm({ valoresIniciales }: { valoresIniciales: Conf
             />
           </div>
           <div>
-            <Label htmlFor="capitalInicial" className="flex items-center gap-1.5"><Wallet className="h-3.5 w-3.5 text-faint" aria-hidden />Capital inicial de caja</Label>
+            <Label htmlFor="capitalInicial" className="flex items-center gap-1.5"><Wallet className="h-3.5 w-3.5 text-faint" aria-hidden />Dinero con el que empezó el negocio</Label>
             <MoneyInput id="capitalInicial" placeholder="0" {...register("capitalInicial", { setValueAs: limpiarMoneda })} />
           </div>
         </CardContent>
@@ -124,8 +124,8 @@ export function ConfiguracionForm({ valoresIniciales }: { valoresIniciales: Conf
           role="alert"
           className={
             mensaje.tipo === "ok"
-              ? "rounded-sm bg-success-bg px-3 py-2.5 text-[12.5px] font-semibold text-success"
-              : "rounded-sm bg-danger-bg px-3 py-2.5 text-[12.5px] font-semibold text-danger"
+              ? "rounded-sm bg-success-bg px-3 py-2.5 text-[13px] font-semibold text-success"
+              : "rounded-sm bg-danger-bg px-3 py-2.5 text-[13px] font-semibold text-danger"
           }
         >
           {mensaje.texto}

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { hoyFecha } from "@/lib/fecha";
 
 export interface PrestamoListItem {
   id: string;
@@ -13,8 +14,7 @@ export interface PrestamoListItem {
 
 /** Listado de préstamos (origen='prestamo'), regla dura #7: nunca mezclar con ventas. */
 export async function listPrestamos(): Promise<PrestamoListItem[]> {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  const hoy = hoyFecha();
 
   const operaciones = await prisma.operacionCredito.findMany({
     // Si el cliente fue eliminado, su historial de préstamos sale de este

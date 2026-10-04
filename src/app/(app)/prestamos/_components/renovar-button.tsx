@@ -44,7 +44,7 @@ export function RenovarButton({ operacionId }: { operacionId: string }) {
             mantiene igual y el plazo se extiende un período más.
           </DialogDescription>
         </DialogHeader>
-        {error ? <p className="text-[12px] text-danger">{error}</p> : null}
+        {error ? <p className="text-[13px] text-danger">{error}</p> : null}
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
             Cancelar

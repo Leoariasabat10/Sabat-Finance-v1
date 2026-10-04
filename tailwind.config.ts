@@ -34,26 +34,29 @@ const config: Config = {
         strong: "var(--border-md)",
       },
       fontFamily: {
-        // Tipografías nativas: cargan de inmediato y dan un tono sobrio de
-        // software financiero sin bloquear el primer render con fuentes remotas.
-        sans: ["Segoe UI", "Arial", "Helvetica", "sans-serif"],
-        display: ["Segoe UI", "Arial", "Helvetica", "sans-serif"],
+        // Las mismas tres familias de SABAT Joyería (cargadas con next/font en layout.tsx).
+        sans: ["var(--font-inter-tight)", "system-ui", "sans-serif"],
+        display: ["var(--font-fraunces)", "Georgia", "serif"],
+        serif: ["var(--font-newsreader)", "Georgia", "serif"],
         mono: ["Cascadia Mono", "Consolas", "Courier New", "monospace"],
       },
+      // Esquinas rectas, como la joyería. Solo los puntos y avatares son redondos (rounded-full).
       borderRadius: {
-        sm: "8px",
-        md: "12px",
-        lg: "16px",
-        xl: "20px",
-        "2xl": "24px",
-        pill: "100px",
+        none: "0",
+        sm: "0",
+        DEFAULT: "0",
+        md: "0",
+        lg: "0",
+        xl: "0",
+        "2xl": "0",
+        pill: "0",
       },
       boxShadow: {
-        sm: "0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
-        md: "0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04)",
-        lg: "0 8px 32px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.04)",
+        sm: "none",
+        md: "0 10px 28px -14px rgba(20,17,15,.28)",
+        lg: "0 24px 56px -24px rgba(20,17,15,.38)",
       },
-      transitionTimingFunction: { premium: "cubic-bezier(.4,0,.2,1)" },
+      transitionTimingFunction: { premium: "cubic-bezier(0.23,1,0.32,1)" },
       transitionDuration: { premium: "180ms" },
       keyframes: {
         shimmer: {

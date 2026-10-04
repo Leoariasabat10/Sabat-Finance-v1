@@ -137,13 +137,13 @@ export default async function ClienteDetallePage({ params }: PageProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Card>
               <CardContent>
-                <p className="mb-3 flex items-center gap-1.5 text-[12px] font-bold text-muted">
+                <p className="mb-3 flex items-center gap-1.5 text-[13px] font-medium text-muted">
                   <Landmark className="h-3.5 w-3.5 text-accent" aria-hidden /> Financiero — préstamos
                 </p>
                 <p className="font-display text-2xl text-foreground">
                   {formatoMoneda.format(cliente.resumen.saldoPrestamos)}
                 </p>
-                <p className="mt-1 text-[12.5px] text-faint">
+                <p className="mt-1 text-[13px] text-faint">
                   {cliente.resumen.prestamosActivos} préstamo
                   {cliente.resumen.prestamosActivos === 1 ? "" : "s"} activo
                   {cliente.resumen.prestamosActivos === 1 ? "" : "s"}
@@ -152,13 +152,13 @@ export default async function ClienteDetallePage({ params }: PageProps) {
             </Card>
             <Card>
               <CardContent>
-                <p className="mb-3 flex items-center gap-1.5 text-[12px] font-bold text-muted">
+                <p className="mb-3 flex items-center gap-1.5 text-[13px] font-medium text-muted">
                   <ShoppingBag className="h-3.5 w-3.5 text-success" aria-hidden /> Comercial — ventas
                 </p>
                 <p className="font-display text-2xl text-foreground">
                   {formatoMoneda.format(cliente.resumen.saldoVentas)}
                 </p>
-                <p className="mt-1 text-[12.5px] text-faint">
+                <p className="mt-1 text-[13px] text-faint">
                   {cliente.resumen.totalVentas} compra
                   {cliente.resumen.totalVentas === 1 ? "" : "s"} en total
                 </p>
@@ -183,7 +183,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
           {cliente.notas ? (
             <Card>
               <CardContent>
-                <p className="mb-1.5 text-[12px] font-bold text-muted">
+                <p className="mb-1.5 text-[13px] font-medium text-muted">
                   Nota de registro
                 </p>
                 <p className="whitespace-pre-wrap text-[13.5px] text-foreground">
@@ -210,7 +210,7 @@ export default async function ClienteDetallePage({ params }: PageProps) {
                           <strong>{e.titulo}</strong>
                           <span className="text-muted">· {e.detalle}</span>
                         </span>
-                        <span className="text-[11.5px] text-muted">{formatearFecha(e.fecha)}</span>
+                        <span className="text-[13px] text-muted">{formatearFecha(e.fecha)}</span>
                       </div>
                     );
                     return e.href ? (

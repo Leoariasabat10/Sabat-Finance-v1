@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { evaluarOperacionRetenida, INCLUDE_OPERACION_DETALLE, type ConfianzaDato } from "@/lib/clientes/metricas";
+import { hoyFecha, sumarDias } from "@/lib/fecha";
 
 /**
  * La Posición del Negocio (visión final del producto, 26 jul 2026): el eje
@@ -103,8 +104,7 @@ export async function getPosicionActual(): Promise<PosicionDelNegocio> {
  * día simplemente no queda fotografiado.
  */
 export async function capturarSnapshotHoy(posicion: PosicionDelNegocio): Promise<void> {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  const hoy = hoyFecha();
 
   await prisma.capitalSnapshot.upsert({
     where: { fecha: hoy },
@@ -136,9 +136,7 @@ export interface VariacionCapital {
  * liquidez subió/bajó X%" en vez de mostrar solo el número de hoy.
  */
 export async function getVariacionCapital(capitalDisponibleHoy: number): Promise<VariacionCapital> {
-  const hace7Dias = new Date();
-  hace7Dias.setHours(0, 0, 0, 0);
-  hace7Dias.setDate(hace7Dias.getDate() - 7);
+  const hace7Dias = sumarDias(hoyFecha(), -7);
 
   const referencia = await prisma.capitalSnapshot.findFirst({
     where: { fecha: { lte: hace7Dias } },
