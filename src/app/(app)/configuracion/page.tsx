@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/shared/page-header";
 import { prisma } from "@/lib/db";
+import { esDuenoDelSistema } from "@/lib/auth/acceso";
+import { getSupabaseServer } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { ConfiguracionForm } from "./_components/configuracion-form";
 
 export const metadata: Metadata = { title: "Administración · Sabat Finance" };
+
+const SISTEMA = { href: "/sistema", titulo: "Mi sistema", detalle: "Misión del día, Cartagena Reset y tu semana." };
 
 const ENLACES = [
   { href: "/dinero", titulo: "Dinero y caja", detalle: "Cuánto entró, cuánto salió y dónde está el capital." },
@@ -17,6 +21,10 @@ const ENLACES = [
 
 export default async function Page() {
   const config = await prisma.configuracion.findUnique({ where: { id: 1 } });
+  const {
+    data: { user },
+  } = await (await getSupabaseServer()).auth.getUser();
+  const enlaces = esDuenoDelSistema(user) ? [SISTEMA, ...ENLACES] : ENLACES;
 
   const valoresIniciales = {
     nombreNegocio: config?.nombreNegocio ?? "Sabat Finance",
@@ -34,7 +42,7 @@ export default async function Page() {
       <PageHeader title="Administración" subtitle="Dinero inicial, reglas del negocio y acceso." />
 
       <ul className="mb-12 border-t border-[color:var(--border)]">
-        {ENLACES.map((e) => (
+        {enlaces.map((e) => (
           <li key={e.href} className="border-b border-[color:var(--border)]">
             <Link href={e.href} className="flex flex-col gap-0.5 px-1 py-4 transition-colors hover:bg-subtle sm:flex-row sm:items-baseline sm:justify-between">
               <span className="text-[17px] font-medium">{e.titulo}</span>

@@ -26,6 +26,22 @@ export function esAdministrador(user: UsuarioMinimo | null | undefined, adminEma
 }
 
 /**
+ * Mi Sistema es personal: no basta con ser administrador de Finance (también lo es quien lleva el negocio). Solo entra
+ * quien figure en `SISTEMA_EMAILS` (lista separada por comas). Sin esa variable, nadie entra: cerrado por defecto.
+ * No existe forma de otorgarse el acceso desde el navegador; el correo viene de la sesión verificada en el servidor.
+ */
+export function esDuenoDelSistema(user: UsuarioMinimo | null | undefined, correos = process.env.SISTEMA_EMAILS ?? ""): boolean {
+  if (!user) return false;
+  const email = (user.email ?? "").trim().toLowerCase();
+  if (!email) return false;
+  return correos
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+    .includes(email);
+}
+
+/**
  * Solo se acepta redirigir a una ruta interna. `//sitio.com` y `/\sitio.com` los interpreta el navegador como otro
  * sitio (redirección abierta), así que se descartan.
  */

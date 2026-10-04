@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { esAdministrador } from "@/lib/auth/acceso";
+import { esAdministrador, esDuenoDelSistema } from "@/lib/auth/acceso";
 
 /**
  * Guardia de acceso de Sabat Finance. Todo lo que no sea /login (o assets públicos) exige, ANTES de que la petición
@@ -85,6 +85,14 @@ export async function middleware(request: NextRequest) {
     // Cuenta válida pero sin permiso (p. ej. alguien que se registró solo): se cierra su sesión y se explica.
     await supabase.auth.signOut();
     return aLogin(request, "no-autorizado");
+  }
+
+  // Mi Sistema es personal: ser administrador de Finance no basta (ver `esDuenoDelSistema`).
+  if ((pathname === "/sistema" || pathname.startsWith("/sistema/")) && !esDuenoDelSistema(user)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/configuracion";
+    url.search = "";
+    return NextResponse.redirect(url);
   }
 
   return response;

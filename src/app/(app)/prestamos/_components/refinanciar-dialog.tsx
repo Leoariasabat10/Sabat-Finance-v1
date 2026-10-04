@@ -61,7 +61,7 @@ export function RefinanciarDialog({ operacionId, saldoPendiente }: { operacionId
         <DialogHeader>
           <DialogTitle>Refinanciar préstamo</DialogTitle>
           <DialogDescription>
-            El saldo pendiente ({formatearMoneda(saldoPendiente)}) se convierte en el capital de un préstamo nuevo. El original queda cerrado como "Refinanciado".
+            El saldo pendiente ({formatearMoneda(saldoPendiente)}) se convierte en el capital de un préstamo nuevo. El original queda cerrado como &ldquo;Refinanciado&rdquo;.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-3">
