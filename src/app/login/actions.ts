@@ -34,7 +34,7 @@ export async function signIn(_prev: LoginState, formData: FormData): Promise<Log
 
 /** Sitio público de la marca. Al cerrar sesión, el administrador vuelve ahí
  * (no se queda atrapado dentro del back-office). */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabat-joyeria.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabatjoyeria.com";
 
 export async function signOut() {
   const supabase = await getSupabaseServer();

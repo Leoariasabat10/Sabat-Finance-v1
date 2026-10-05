@@ -7,7 +7,7 @@ import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { signOut } from "@/app/login/actions";
 
 /** URL pública de la joyería. Configurable por si cambia el dominio. */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabat-joyeria.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabatjoyeria.com";
 
 /**
  * La barra lateral es la "bóveda" de la casa: siempre negra (como las salas de SABAT Joyería), con el logo en oro y

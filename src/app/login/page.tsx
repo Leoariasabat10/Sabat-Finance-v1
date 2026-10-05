@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabat-joyeria.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sabatjoyeria.com";
 
 const AVISOS: Record<string, string> = {
   "no-autorizado": "Esa cuenta no tiene acceso al área administrativa.",
