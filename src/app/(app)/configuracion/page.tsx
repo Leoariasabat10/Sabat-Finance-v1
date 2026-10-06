@@ -13,6 +13,7 @@ export const metadata: Metadata = { title: "Administración · Sabat Finance" };
 const SISTEMA = { href: "/sistema", titulo: "Mi sistema", detalle: "Misión del día, Cartagena Reset y tu semana." };
 
 const ENLACES = [
+  { href: "/inventario", titulo: "Inventario de esmeraldas", detalle: "Lotes, piedras, joyas y a qué precio mínimo venderlas." },
   { href: "/dinero", titulo: "Dinero y caja", detalle: "Cuánto entró, cuánto salió y dónde está el capital." },
   { href: "/reportes", titulo: "Reportes", detalle: "Ventas, préstamos y cartera; descarga en CSV." },
   { href: "/whatsapp", titulo: "Mensajes de WhatsApp", detalle: "Los textos de recordatorio que se envían a los clientes." },

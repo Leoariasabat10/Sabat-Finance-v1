@@ -231,9 +231,9 @@ model OperacionCredito {
   // nunca se toca — sigue siendo el registro oficial del sistema. Estos tres
   // campos capturan lo que el dueño del negocio sabe por memoria cuando esa
   // fecha no refleja la realidad del préstamo.
-  confianzaFecha        ConfianzaFecha @default(exacta) @map("confianza_fecha")
-  fechaRealAproximada   DateTime?      @map("fecha_real_aproximada") @db.Date
-  contextoHistorico     String?        @map("contexto_historico")
+  confianzaFecha      ConfianzaFecha @default(exacta) @map("confianza_fecha")
+  fechaRealAproximada DateTime?      @map("fecha_real_aproximada") @db.Date
+  contextoHistorico   String?        @map("contexto_historico")
 
   cliente          Cliente            @relation(fields: [clienteId], references: [id], onDelete: Restrict)
   venta            Venta?             @relation(fields: [ventaId], references: [id])
@@ -385,8 +385,8 @@ model Refinanciacion {
 model CapitalSnapshot {
   id                        String   @id @default(uuid()) @db.Uuid
   fecha                     DateTime @unique @db.Date
-  capitalTotal               Decimal  @map("capital_total") @db.Decimal(14, 2)
-  capitalPrestado             Decimal  @map("capital_prestado") @db.Decimal(14, 2)
+  capitalTotal              Decimal  @map("capital_total") @db.Decimal(14, 2)
+  capitalPrestado           Decimal  @map("capital_prestado") @db.Decimal(14, 2)
   capitalInvertidoMercancia Decimal  @map("capital_invertido_mercancia") @db.Decimal(14, 2)
   capitalDisponible         Decimal  @map("capital_disponible") @db.Decimal(14, 2)
   capitalRetenido           Decimal  @default(0) @map("capital_retenido") @db.Decimal(14, 2)
@@ -536,4 +536,104 @@ model WhatsappMensaje {
 
   @@index([clienteId, createdAt])
   @@map("whatsapp_mensajes")
+}
+
+// ── Inventario y costos: compra (lote) → piedra → joya ──────────────
+// Independiente de Venta (regla dura #5: ventas sin catálogo). El costo de la piedra viaja a la joya.
+
+enum EstadoPiedra {
+  disponible
+  en_joya
+  vendida
+}
+
+enum ConceptoCosto {
+  montaje
+  plata
+  cadena
+  mano_obra
+  caja
+  otros
+}
+
+model LoteCompra {
+  id           String    @id @default(uuid()) @db.Uuid
+  codigo       String    @unique
+  nombre       String
+  proveedor    String?
+  fecha        DateTime? @db.Date
+  costoTotal   Decimal   @map("costo_total") @db.Decimal(14, 2)
+  /// Peso que dice el vendedor.
+  ctDeclarados Decimal   @map("ct_declarados") @db.Decimal(10, 3)
+  /// Peso real del lote completo, pesado.
+  ctReal       Decimal?  @map("ct_real") @db.Decimal(10, 3)
+  notas        String?
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  piedras Piedra[]
+
+  @@map("lotes_compra")
+}
+
+model Piedra {
+  id            String       @id @default(uuid()) @db.Uuid
+  codigo        String       @unique
+  loteId        String       @map("lote_id") @db.Uuid
+  forma         String?
+  largoMm       Decimal?     @map("largo_mm") @db.Decimal(6, 2)
+  anchoMm       Decimal?     @map("ancho_mm") @db.Decimal(6, 2)
+  altoMm        Decimal?     @map("alto_mm") @db.Decimal(6, 2)
+  /// Estimado por dimensiones. NO es peso real.
+  ctEstimado    Decimal      @map("ct_estimado") @db.Decimal(10, 3)
+  /// Solo cuando la piedra se pesa individualmente.
+  ctReal        Decimal?     @map("ct_real") @db.Decimal(10, 3)
+  calidad       String?
+  color         String?
+  transparencia String?
+  tratamiento   String?
+  origen        String?
+  notas         String?
+  estado        EstadoPiedra @default(disponible)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt     DateTime?    @map("deleted_at") @db.Timestamptz(6)
+
+  lote LoteCompra @relation(fields: [loteId], references: [id], onDelete: Restrict)
+  joya Joya?
+
+  @@index([loteId])
+  @@map("piedras")
+}
+
+model Joya {
+  id             String    @id @default(uuid()) @db.Uuid
+  nombre         String
+  piedraId       String    @unique @map("piedra_id") @db.Uuid
+  /// Margen objetivo sobre el precio (0.6 = 60%).
+  margenObjetivo Decimal   @default(0.6) @map("margen_objetivo") @db.Decimal(4, 3)
+  /// Prima por calidad, talla, origen, diseño, artesanía y marca sobre el precio mínimo (0.25 = +25%).
+  primaPct       Decimal   @default(0) @map("prima_pct") @db.Decimal(5, 3)
+  /// Precio comercial final; lo decide SABAT.
+  precioSabat    Decimal?  @map("precio_sabat") @db.Decimal(14, 2)
+  vendida        Boolean   @default(false)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  piedra Piedra      @relation(fields: [piedraId], references: [id], onDelete: Restrict)
+  costos JoyaCosto[]
+
+  @@map("joyas")
+}
+
+model JoyaCosto {
+  id       String        @id @default(uuid()) @db.Uuid
+  joyaId   String        @map("joya_id") @db.Uuid
+  concepto ConceptoCosto
+  detalle  String?
+  monto    Decimal       @db.Decimal(14, 2)
+
+  joya Joya @relation(fields: [joyaId], references: [id], onDelete: Cascade)
+
+  @@index([joyaId])
+  @@map("joya_costos")
 }

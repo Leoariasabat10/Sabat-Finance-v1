@@ -1,5 +1,5 @@
 import type { ReactElement, SVGProps } from "react";
-import { Home, Target, Users, Landmark, ShoppingBag, Settings, HandCoins, UserPlus, type LucideIcon } from "lucide-react";
+import { Home, Target, Users, Landmark, ShoppingBag, Settings, Gem, HandCoins, UserPlus, type LucideIcon } from "lucide-react";
 
 /** lucide-react no trae logos de marca (WhatsAppIcon es SVG propio) — unión amplia para admitir ambos como NavItem.icon. */
 export type NavIcon = LucideIcon | ((props: SVGProps<SVGSVGElement>) => ReactElement);
@@ -10,6 +10,8 @@ export interface NavItem {
   shortTitle?: string;
   href: string;
   icon: NavIcon;
+  /** No cabe en la barra inferior del teléfono (6 columnas); se llega por Administración. */
+  soloEscritorio?: boolean;
 }
 
 /**
@@ -24,6 +26,7 @@ export const navPrimaria: NavItem[] = [
   { title: "Créditos", href: "/creditos", icon: Landmark },
   { title: "Cobros", href: "/cobrar", icon: Target },
   { title: "Clientes", href: "/clientes", icon: Users },
+  { title: "Inventario", href: "/inventario", icon: Gem, soloEscritorio: true },
   { title: "Administración", shortTitle: "Admin", href: "/configuracion", icon: Settings },
 ];
 

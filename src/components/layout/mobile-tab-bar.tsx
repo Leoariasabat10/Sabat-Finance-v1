@@ -24,7 +24,7 @@ export function MobileTabBar() {
       className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-[color:var(--border-md)] bg-card pb-[max(env(safe-area-inset-bottom),6px)] lg:hidden"
       aria-label="Navegación principal"
     >
-      {navPrimaria.map((item) => {
+      {navPrimaria.filter((i) => !i.soloEscritorio).map((item) => {
         const active = isActive(item.href);
         return (
           <Link
